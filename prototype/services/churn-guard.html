@@ -347,6 +347,45 @@ td.mono { font-family: 'JetBrains Mono', monospace; }
   from { stroke-dashoffset: 440; }
   to { stroke-dashoffset: var(--target-offset); }
 }
+
+/* ── SIDEBAR NAV ── */
+.body-layout { display: flex; min-height: calc(100vh - 60px); }
+.sidebar { width: 240px; min-width: 240px; background: var(--bg-surface); border-right: 1px solid var(--border); position: sticky; top: 60px; height: calc(100vh - 60px); display: flex; flex-direction: column; z-index: 50; }
+.sidebar-brand { padding: 20px 16px; border-bottom: 1px solid var(--border); }
+.sidebar-brand-name { font-size: 15px; font-weight: 700; color: var(--node2); }
+.sidebar-brand-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: none; background: none; color: var(--text-secondary); font-family: inherit; font-size: 13px; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; text-align: left; width: 100%; border-left: 2px solid transparent; }
+.nav-item:hover { background: rgba(255,107,202,0.05); color: var(--text-primary); }
+.nav-item.active { background: rgba(255,107,202,0.08); color: var(--node2); border-left-color: var(--node2); font-weight: 600; }
+.nav-item-icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-back { display: block; padding: 16px; border-top: 1px solid var(--border); color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: 500; transition: color 0.2s; }
+.sidebar-back:hover { color: var(--node2); }
+.main-content { flex: 1; min-width: 0; }
+.tab-section { display: none; }
+.tab-section.active { display: block; animation: fadeUp 0.3s ease; }
+.tab-inner { padding: 32px; }
+.tab-inner h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.tab-inner .tab-desc { color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th { text-align: left; padding: 10px 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; border-bottom: 1px solid var(--border); background: var(--bg-surface); }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+.data-table tr:hover td { background: rgba(255,107,202,0.03); }
+.tab-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.tab-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.risk-pill { display: inline-block; padding: 3px 10px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 11px; }
+.risk-high { background: var(--risk-high-dim); color: var(--risk-high); }
+.risk-med { background: var(--risk-med-dim); color: var(--risk-med); }
+.risk-low { background: var(--risk-low-dim); color: var(--risk-low); }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.toggle-switch { width: 40px; height: 22px; border-radius: 11px; background: var(--bg-elevated); position: relative; cursor: pointer; border: 1px solid var(--border); }
+.toggle-switch.on { background: rgba(255,107,202,0.3); border-color: var(--node2); }
+.toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--text-muted); top: 2px; left: 2px; transition: all 0.2s; }
+.toggle-switch.on::after { left: 20px; background: var(--node2); }
+.severity-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+.sev-critical { background: rgba(248,113,113,0.15); color: var(--risk-high); }
+.sev-warning { background: rgba(251,191,36,0.15); color: var(--risk-med); }
+.sev-info { background: rgba(0,229,255,0.15); color: #00e5ff; }
 </style>
 </head>
 <body>
@@ -361,6 +400,20 @@ td.mono { font-family: 'JetBrains Mono', monospace; }
   <a href="../index.html" class="back-link">← Dashboard</a>
 </nav>
 
+<div class="body-layout">
+<aside class="sidebar">
+  <div class="sidebar-brand"><div class="sidebar-brand-name">ChurnGuard</div><div class="sidebar-brand-sub">이탈 방지 시스템</div></div>
+  <div class="sidebar-nav">
+    <button class="nav-item active" data-tab="dashboard"><span class="nav-item-icon">&#128202;</span> Dashboard</button>
+    <button class="nav-item" data-tab="risk"><span class="nav-item-icon">&#9888;</span> 리스크 모니터</button>
+    <button class="nav-item" data-tab="retention"><span class="nav-item-icon">&#127919;</span> 리텐션 캠페인</button>
+    <button class="nav-item" data-tab="ltv"><span class="nav-item-icon">&#128200;</span> LTV 분석</button>
+    <button class="nav-item" data-tab="alerts"><span class="nav-item-icon">&#128276;</span> 알림 센터</button>
+  </div>
+  <a href="../index.html" class="sidebar-back">&#8592; Dashboard</a>
+</aside>
+<div class="main-content">
+<section class="tab-section active" id="tab-dashboard">
 <div class="page-content">
 
   <!-- PAGE HEADER -->
@@ -897,22 +950,144 @@ td.mono { font-family: 'JetBrains Mono', monospace; }
   </div><!-- /bot-grid -->
 
 </div><!-- /page-content -->
+</section><!-- /tab-dashboard -->
+
+<section class="tab-section" id="tab-risk">
+<div class="tab-inner">
+<h2>리스크 모니터</h2>
+<p class="tab-desc">고객별 이탈 리스크 상세 모니터링</p>
+<div class="tab-cards-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+  <div class="tab-card" style="text-align:center;border-top:2px solid var(--risk-high)"><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">고위험</div><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--risk-high)">127</div><div style="font-size:11px;color:var(--text-muted)">명</div></div>
+  <div class="tab-card" style="text-align:center;border-top:2px solid var(--risk-med)"><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">중위험</div><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--risk-med)">384</div><div style="font-size:11px;color:var(--text-muted)">명</div></div>
+  <div class="tab-card" style="text-align:center;border-top:2px solid var(--risk-low)"><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">저위험</div><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--risk-low)">1,892</div><div style="font-size:11px;color:var(--text-muted)">명</div></div>
+</div>
+<div style="overflow-x:auto">
+<table class="data-table"><thead><tr><th>ID</th><th>고객명</th><th>리스크</th><th>마지막 구매</th><th>비활성일</th><th>예상 이탈일</th><th>권장 조치</th></tr></thead>
+<tbody>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0042</td><td style="color:var(--text-primary);font-weight:500">김서연</td><td><span class="risk-pill risk-high">95</span></td><td style="font-family:'JetBrains Mono',monospace">2025-12-15</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-high)">83일</td><td style="font-family:'JetBrains Mono',monospace">3월 12일</td><td><span style="font-size:11px;padding:2px 8px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:4px">VIP 쿠폰</span></td></tr>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0187</td><td style="color:var(--text-primary);font-weight:500">이준혁</td><td><span class="risk-pill risk-high">92</span></td><td style="font-family:'JetBrains Mono',monospace">2025-12-28</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-high)">70일</td><td style="font-family:'JetBrains Mono',monospace">3월 15일</td><td><span style="font-size:11px;padding:2px 8px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:4px">전화 상담</span></td></tr>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0305</td><td style="color:var(--text-primary);font-weight:500">박민지</td><td><span class="risk-pill risk-high">88</span></td><td style="font-family:'JetBrains Mono',monospace">2026-01-05</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-high)">62일</td><td style="font-family:'JetBrains Mono',monospace">3월 18일</td><td><span style="font-size:11px;padding:2px 8px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:4px">이메일</span></td></tr>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0421</td><td style="color:var(--text-primary);font-weight:500">최동현</td><td><span class="risk-pill risk-high">85</span></td><td style="font-family:'JetBrains Mono',monospace">2026-01-10</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-high)">57일</td><td style="font-family:'JetBrains Mono',monospace">3월 20일</td><td><span style="font-size:11px;padding:2px 8px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:4px">할인 쿠폰</span></td></tr>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0098</td><td style="color:var(--text-primary);font-weight:500">정하은</td><td><span class="risk-pill risk-med">72</span></td><td style="font-family:'JetBrains Mono',monospace">2026-01-20</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-med)">47일</td><td style="font-family:'JetBrains Mono',monospace">4월 5일</td><td><span style="font-size:11px;padding:2px 8px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:4px">SMS</span></td></tr>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0563</td><td style="color:var(--text-primary);font-weight:500">강유진</td><td><span class="risk-pill risk-med">68</span></td><td style="font-family:'JetBrains Mono',monospace">2026-01-25</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-med)">42일</td><td style="font-family:'JetBrains Mono',monospace">4월 10일</td><td><span style="font-size:11px;padding:2px 8px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:4px">푸시 알림</span></td></tr>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0234</td><td style="color:var(--text-primary);font-weight:500">윤성민</td><td><span class="risk-pill risk-med">61</span></td><td style="font-family:'JetBrains Mono',monospace">2026-02-01</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-med)">35일</td><td style="font-family:'JetBrains Mono',monospace">4월 15일</td><td><span style="font-size:11px;padding:2px 8px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:4px">이메일</span></td></tr>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0789</td><td style="color:var(--text-primary);font-weight:500">임수빈</td><td><span class="risk-pill risk-med">55</span></td><td style="font-family:'JetBrains Mono',monospace">2026-02-05</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-med)">31일</td><td style="font-family:'JetBrains Mono',monospace">4월 20일</td><td><span style="font-size:11px;padding:2px 8px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:4px">쿠폰</span></td></tr>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0156</td><td style="color:var(--text-primary);font-weight:500">한지우</td><td><span class="risk-pill risk-low">38</span></td><td style="font-family:'JetBrains Mono',monospace">2026-02-15</td><td style="font-family:'JetBrains Mono',monospace">21일</td><td style="font-family:'JetBrains Mono',monospace">-</td><td style="color:var(--text-muted);font-size:11px">모니터링</td></tr>
+<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">C-0678</td><td style="color:var(--text-primary);font-weight:500">송예은</td><td><span class="risk-pill risk-low">25</span></td><td style="font-family:'JetBrains Mono',monospace">2026-02-20</td><td style="font-family:'JetBrains Mono',monospace">16일</td><td style="font-family:'JetBrains Mono',monospace">-</td><td style="color:var(--text-muted);font-size:11px">모니터링</td></tr>
+</tbody></table>
+</div>
+</div>
+</section>
+
+<section class="tab-section" id="tab-retention">
+<div class="tab-inner">
+<h2>리텐션 캠페인</h2>
+<p class="tab-desc">활성 리텐션 캠페인 관리 및 성과 추적</p>
+<div style="overflow-x:auto">
+<table class="data-table"><thead><tr><th>캠페인명</th><th>유형</th><th>대상</th><th>발송</th><th>오픈율</th><th>전환율</th><th>비용</th><th>ROI</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--text-primary);font-weight:500">VIP 30% 할인</td><td><span style="font-size:11px;padding:2px 6px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:3px">쿠폰</span></td><td>VIP 이탈 위험</td><td style="font-family:'JetBrains Mono',monospace">1,240</td><td style="font-family:'JetBrains Mono',monospace">68%</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">32%</td><td style="font-family:'JetBrains Mono',monospace">&#8361;2.4M</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">420%</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">재방문 리마인더</td><td><span style="font-size:11px;padding:2px 6px;background:rgba(96,165,250,0.1);color:#60a5fa;border-radius:3px">이메일</span></td><td>30일 비활성</td><td style="font-family:'JetBrains Mono',monospace">3,890</td><td style="font-family:'JetBrains Mono',monospace">42%</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-med)">15%</td><td style="font-family:'JetBrains Mono',monospace">&#8361;890K</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">280%</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">신상품 알림</td><td><span style="font-size:11px;padding:2px 6px;background:rgba(52,211,153,0.1);color:var(--risk-low);border-radius:3px">푸시</span></td><td>관심 카테고리</td><td style="font-family:'JetBrains Mono',monospace">5,670</td><td style="font-family:'JetBrains Mono',monospace">35%</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-med)">12%</td><td style="font-family:'JetBrains Mono',monospace">&#8361;450K</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">310%</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">생일 축하 쿠폰</td><td><span style="font-size:11px;padding:2px 6px;background:rgba(255,107,202,0.1);color:var(--node2);border-radius:3px">쿠폰</span></td><td>생일 고객</td><td style="font-family:'JetBrains Mono',monospace">420</td><td style="font-family:'JetBrains Mono',monospace">78%</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">45%</td><td style="font-family:'JetBrains Mono',monospace">&#8361;1.2M</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">520%</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">긴급 이탈방지</td><td><span style="font-size:11px;padding:2px 6px;background:rgba(251,191,36,0.1);color:var(--risk-med);border-radius:3px">SMS</span></td><td>리스크 90+</td><td style="font-family:'JetBrains Mono',monospace">89</td><td style="font-family:'JetBrains Mono',monospace">92%</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">28%</td><td style="font-family:'JetBrains Mono',monospace">&#8361;340K</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">380%</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">리뷰 요청</td><td><span style="font-size:11px;padding:2px 6px;background:rgba(96,165,250,0.1);color:#60a5fa;border-radius:3px">이메일</span></td><td>최근 구매자</td><td style="font-family:'JetBrains Mono',monospace">2,340</td><td style="font-family:'JetBrains Mono',monospace">38%</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-med)">18%</td><td style="font-family:'JetBrains Mono',monospace">&#8361;560K</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">250%</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">구독 전환</td><td><span style="font-size:11px;padding:2px 6px;background:rgba(52,211,153,0.1);color:var(--risk-low);border-radius:3px">푸시</span></td><td>반복 구매자</td><td style="font-family:'JetBrains Mono',monospace">1,120</td><td style="font-family:'JetBrains Mono',monospace">45%</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">22%</td><td style="font-family:'JetBrains Mono',monospace">&#8361;780K</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">340%</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">윈백 캠페인</td><td><span style="font-size:11px;padding:2px 6px;background:rgba(251,191,36,0.1);color:var(--risk-med);border-radius:3px">SMS</span></td><td>60일+ 비활성</td><td style="font-family:'JetBrains Mono',monospace">678</td><td style="font-family:'JetBrains Mono',monospace">55%</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-med)">14%</td><td style="font-family:'JetBrains Mono',monospace">&#8361;420K</td><td style="font-family:'JetBrains Mono',monospace;color:var(--risk-low)">190%</td></tr>
+</tbody></table>
+</div>
+</div>
+</section>
+
+<section class="tab-section" id="tab-ltv">
+<div class="tab-inner">
+<h2>LTV 분석</h2>
+<p class="tab-desc">고객 생애 가치 분석 및 코호트 추적</p>
+<div class="tab-cards-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:24px">
+  <div class="tab-card" style="text-align:center"><div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">VIP</div><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--node2)">&#8361;2.4M</div><div style="font-size:10px;color:var(--text-muted)">평균 LTV</div></div>
+  <div class="tab-card" style="text-align:center"><div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Gold</div><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--risk-med)">&#8361;980K</div><div style="font-size:10px;color:var(--text-muted)">평균 LTV</div></div>
+  <div class="tab-card" style="text-align:center"><div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Silver</div><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text-secondary)">&#8361;420K</div><div style="font-size:10px;color:var(--text-muted)">평균 LTV</div></div>
+  <div class="tab-card" style="text-align:center"><div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">Bronze</div><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text-muted)">&#8361;180K</div><div style="font-size:10px;color:var(--text-muted)">평균 LTV</div></div>
+  <div class="tab-card" style="text-align:center"><div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">신규</div><div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text-muted)">&#8361;45K</div><div style="font-size:10px;color:var(--text-muted)">평균 LTV</div></div>
+</div>
+<div class="tab-card" style="margin-bottom:24px">
+<div style="font-weight:700;margin-bottom:16px">코호트 분석 (분기별)</div>
+<table class="data-table"><thead><tr><th>코호트</th><th>고객수</th><th>평균 LTV</th><th>유지율</th><th>재구매율</th><th>추이</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:500">Q1 2025</td><td style="font-family:'JetBrains Mono',monospace">2,340</td><td style="font-family:'JetBrains Mono',monospace;color:var(--node2)">&#8361;890K</td><td style="font-family:'JetBrains Mono',monospace">72%</td><td style="font-family:'JetBrains Mono',monospace">45%</td><td style="color:var(--risk-low)">&#9650; 8%</td></tr>
+<tr><td style="font-weight:500">Q2 2025</td><td style="font-family:'JetBrains Mono',monospace">3,120</td><td style="font-family:'JetBrains Mono',monospace;color:var(--node2)">&#8361;720K</td><td style="font-family:'JetBrains Mono',monospace">68%</td><td style="font-family:'JetBrains Mono',monospace">42%</td><td style="color:var(--risk-low)">&#9650; 5%</td></tr>
+<tr><td style="font-weight:500">Q3 2025</td><td style="font-family:'JetBrains Mono',monospace">4,560</td><td style="font-family:'JetBrains Mono',monospace;color:var(--node2)">&#8361;580K</td><td style="font-family:'JetBrains Mono',monospace">65%</td><td style="font-family:'JetBrains Mono',monospace">38%</td><td style="color:var(--risk-med)">&#8594; 0%</td></tr>
+<tr><td style="font-weight:500">Q4 2025</td><td style="font-family:'JetBrains Mono',monospace">5,890</td><td style="font-family:'JetBrains Mono',monospace;color:var(--node2)">&#8361;340K</td><td style="font-family:'JetBrains Mono',monospace">71%</td><td style="font-family:'JetBrains Mono',monospace">40%</td><td style="color:var(--risk-low)">&#9650; 12%</td></tr>
+<tr><td style="font-weight:500">Q1 2026</td><td style="font-family:'JetBrains Mono',monospace">3,210</td><td style="font-family:'JetBrains Mono',monospace;color:var(--node2)">&#8361;120K</td><td style="font-family:'JetBrains Mono',monospace">78%</td><td style="font-family:'JetBrains Mono',monospace">35%</td><td style="color:var(--risk-low)">&#9650; 15%</td></tr>
+</tbody></table>
+</div>
+<div class="tab-card">
+<div style="font-weight:700;margin-bottom:16px">Top 10 최고 LTV 고객</div>
+<table class="data-table"><thead><tr><th>#</th><th>고객명</th><th>등급</th><th>LTV</th><th>구매 횟수</th><th>가입일</th></tr></thead>
+<tbody>
+<tr><td>1</td><td style="color:var(--text-primary);font-weight:500">김태영</td><td style="color:var(--node2)">VIP</td><td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--node2)">&#8361;8.2M</td><td style="font-family:'JetBrains Mono',monospace">142</td><td style="font-family:'JetBrains Mono',monospace">2024-03</td></tr>
+<tr><td>2</td><td style="color:var(--text-primary);font-weight:500">이소현</td><td style="color:var(--node2)">VIP</td><td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--node2)">&#8361;6.8M</td><td style="font-family:'JetBrains Mono',monospace">118</td><td style="font-family:'JetBrains Mono',monospace">2024-05</td></tr>
+<tr><td>3</td><td style="color:var(--text-primary);font-weight:500">박승우</td><td style="color:var(--node2)">VIP</td><td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--node2)">&#8361;5.4M</td><td style="font-family:'JetBrains Mono',monospace">96</td><td style="font-family:'JetBrains Mono',monospace">2024-01</td></tr>
+<tr><td>4</td><td style="color:var(--text-primary);font-weight:500">정다은</td><td style="color:var(--node2)">VIP</td><td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--node2)">&#8361;4.9M</td><td style="font-family:'JetBrains Mono',monospace">87</td><td style="font-family:'JetBrains Mono',monospace">2024-07</td></tr>
+<tr><td>5</td><td style="color:var(--text-primary);font-weight:500">최재민</td><td style="color:var(--risk-med)">Gold</td><td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--node2)">&#8361;3.6M</td><td style="font-family:'JetBrains Mono',monospace">72</td><td style="font-family:'JetBrains Mono',monospace">2024-09</td></tr>
+</tbody></table>
+</div>
+</div>
+</section>
+
+<section class="tab-section" id="tab-alerts">
+<div class="tab-inner">
+<h2>알림 센터</h2>
+<p class="tab-desc">이탈 알림 설정 및 최근 알림 이력</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+  <div class="tab-card">
+    <div style="font-weight:700;margin-bottom:16px">알림 설정</div>
+    <div class="toggle-row"><div><div style="font-weight:500;font-size:13px">이탈 리스크 80+ 알림</div><div style="font-size:11px;color:var(--text-muted)">고위험 고객 즉시 알림</div></div><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="toggle-row"><div><div style="font-weight:500;font-size:13px">30일 비활성 알림</div><div style="font-size:11px;color:var(--text-muted)">30일 이상 비활성 고객 알림</div></div><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="toggle-row"><div><div style="font-weight:500;font-size:13px">LTV 하락 알림</div><div style="font-size:11px;color:var(--text-muted)">LTV 20% 이상 하락 시 알림</div></div><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="toggle-row"><div><div style="font-weight:500;font-size:13px">캠페인 성과 알림</div><div style="font-size:11px;color:var(--text-muted)">캠페인 전환율 변동 알림</div></div><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+    <div style="margin-top:16px;font-weight:700;font-size:13px;margin-bottom:8px">알림 채널</div>
+    <div class="toggle-row"><div style="font-size:13px">이메일</div><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="toggle-row"><div style="font-size:13px">슬랙</div><div class="toggle-switch on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="toggle-row" style="border-bottom:none"><div style="font-size:13px">SMS</div><div class="toggle-switch" onclick="this.classList.toggle('on')"></div></div>
+  </div>
+  <div class="tab-card">
+    <div style="font-weight:700;margin-bottom:16px">최근 알림</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span class="severity-badge sev-critical">긴급</span><div style="flex:1"><div style="font-size:12px;color:var(--text-primary)">김서연(C-0042) 이탈 리스크 95 도달</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">10분 전 · 자동 VIP 쿠폰 발송됨</div></div></div>
+      <div style="display:flex;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span class="severity-badge sev-critical">긴급</span><div style="flex:1"><div style="font-size:12px;color:var(--text-primary)">이준혁(C-0187) 70일 비활성</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">25분 전 · 전화 상담 예약됨</div></div></div>
+      <div style="display:flex;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span class="severity-badge sev-warning">주의</span><div style="flex:1"><div style="font-size:12px;color:var(--text-primary)">Gold 세그먼트 LTV 15% 하락 감지</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">1시간 전 · 분석 보고서 생성됨</div></div></div>
+      <div style="display:flex;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span class="severity-badge sev-info">정보</span><div style="flex:1"><div style="font-size:12px;color:var(--text-primary)">VIP 30% 할인 캠페인 전환율 32% 달성</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">2시간 전</div></div></div>
+      <div style="display:flex;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span class="severity-badge sev-warning">주의</span><div style="flex:1"><div style="font-size:12px;color:var(--text-primary)">박민지(C-0305) 이탈 리스크 88 도달</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">3시간 전 · 이메일 발송됨</div></div></div>
+      <div style="display:flex;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span class="severity-badge sev-info">정보</span><div style="flex:1"><div style="font-size:12px;color:var(--text-primary)">주간 이탈 방지 리포트 생성 완료</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">5시간 전</div></div></div>
+      <div style="display:flex;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span class="severity-badge sev-critical">긴급</span><div style="flex:1"><div style="font-size:12px;color:var(--text-primary)">최동현(C-0421) 리스크 급상승 +12</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">6시간 전 · 할인 쿠폰 자동 발송</div></div></div>
+      <div style="display:flex;gap:10px"><span class="severity-badge sev-info">정보</span><div style="flex:1"><div style="font-size:12px;color:var(--text-primary)">신규 고객 320명 모니터링 시작</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">8시간 전</div></div></div>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+</div><!-- /main-content -->
+</div><!-- /body-layout -->
 </div><!-- /app -->
 
 <script>
-// Animate gauge arc on load
+// Tab switching
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// Gauge animation
 const arc = document.querySelector('.gauge-svg path:nth-child(5)');
 if (arc) {
   arc.style.transition = 'stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1) 0.5s';
 }
-
-// Table row hover highlight for risk pills
-document.querySelectorAll('tbody tr').forEach(row => {
-  row.addEventListener('click', () => {
-    document.querySelectorAll('tbody tr').forEach(r => r.style.background = '');
-    row.style.background = 'rgba(255,107,202,0.05)';
-  });
-});
 </script>
 </body>
 </html>

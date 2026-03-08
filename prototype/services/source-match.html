@@ -831,6 +831,38 @@ body::after {
 }
 
 .btn-secondary:hover { border-color: var(--border-light); color: var(--text-primary); }
+
+/* ── SIDEBAR NAV ── */
+.body-layout { display: flex; min-height: calc(100vh - 60px); }
+.sidebar { width: 240px; min-width: 240px; background: var(--bg-surface); border-right: 1px solid var(--border); position: sticky; top: 60px; height: calc(100vh - 60px); display: flex; flex-direction: column; z-index: 50; }
+.sidebar-brand { padding: 20px 16px; border-bottom: 1px solid var(--border); }
+.sidebar-brand-name { font-size: 15px; font-weight: 700; color: var(--node1); }
+.sidebar-brand-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: none; background: none; color: var(--text-secondary); font-family: inherit; font-size: 13px; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; text-align: left; width: 100%; border-left: 2px solid transparent; }
+.nav-item:hover { background: rgba(0,229,255,0.05); color: var(--text-primary); }
+.nav-item.active { background: rgba(0,229,255,0.08); color: var(--node1); border-left-color: var(--node1); font-weight: 600; }
+.nav-item-icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-back { display: block; padding: 16px; border-top: 1px solid var(--border); color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: 500; transition: color 0.2s; }
+.sidebar-back:hover { color: var(--node1); }
+.main-content { flex: 1; min-width: 0; }
+.tab-section { display: none; }
+.tab-section.active { display: block; animation: fadeUp 0.3s ease; }
+.tab-inner { padding: 32px; }
+.tab-inner h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.tab-inner .tab-desc { color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th { text-align: left; padding: 10px 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; border-bottom: 1px solid var(--border); background: var(--bg-surface); position: sticky; top: 0; }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+.data-table tr:hover td { background: rgba(0,229,255,0.03); }
+.tab-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.tab-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.score-pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 11px; }
+.score-high { background: rgba(52,211,153,0.15); color: var(--node4); }
+.score-mid { background: rgba(0,229,255,0.15); color: var(--node1); }
+.score-low { background: rgba(248,113,113,0.15); color: var(--danger); }
+.compare-bar { height: 8px; border-radius: 4px; background: var(--bg-elevated); overflow: hidden; }
+.compare-bar-fill { height: 100%; border-radius: 4px; background: var(--node1); }
 </style>
 </head>
 <body>
@@ -847,6 +879,21 @@ body::after {
       <a href="../index.html" class="back-link">← Dashboard</a>
     </div>
   </header>
+
+  <div class="body-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-brand-name">SourceMatch</div><div class="sidebar-brand-sub">소싱 매칭</div></div>
+    <div class="sidebar-nav">
+      <button class="nav-item active" data-tab="dashboard"><span class="nav-item-icon">&#128202;</span> Dashboard</button>
+      <button class="nav-item" data-tab="search"><span class="nav-item-icon">&#128269;</span> 소싱처 검색</button>
+      <button class="nav-item" data-tab="results"><span class="nav-item-icon">&#127919;</span> 매칭 결과</button>
+      <button class="nav-item" data-tab="suppliers"><span class="nav-item-icon">&#127970;</span> 공급업체 DB</button>
+      <button class="nav-item" data-tab="compare"><span class="nav-item-icon">&#9878;</span> 비교 분석</button>
+    </div>
+    <a href="../index.html" class="sidebar-back">&#8592; Dashboard</a>
+  </aside>
+  <div class="main-content">
+  <section class="tab-section active" id="tab-dashboard">
 
   <!-- PAGE HEADER -->
   <div class="page-header">
@@ -1348,5 +1395,152 @@ body::after {
   </div>
 
 </div>
+</section><!-- /tab-dashboard -->
+
+<section class="tab-section" id="tab-search">
+<div class="tab-inner">
+<h2>소싱처 검색</h2>
+<p class="tab-desc">상품에 맞는 최적의 소싱처를 검색하고 필터링합니다</p>
+<div class="tab-card" style="margin-bottom:24px">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+    <div><label class="sim-label" style="display:block;font-size:12px;color:#4a5568;margin-bottom:6px">상품명</label><input class="sim-input" style="width:100%;padding:10px;background:#0c1018;border:1px solid #1e293b;border-radius:8px;color:#e8edf5;font-size:13px" placeholder="상품명 입력..." /></div>
+    <div><label class="sim-label" style="display:block;font-size:12px;color:#4a5568;margin-bottom:6px">카테고리</label><select class="sim-input" style="width:100%;padding:10px;background:#0c1018;border:1px solid #1e293b;border-radius:8px;color:#e8edf5;font-size:13px"><option>전체</option><option>패션/의류</option><option>뷰티/화장품</option><option>식품</option><option>가전/전자</option><option>생활용품</option></select></div>
+    <div><label class="sim-label" style="display:block;font-size:12px;color:#4a5568;margin-bottom:6px">지역</label><select class="sim-input" style="width:100%;padding:10px;background:#0c1018;border:1px solid #1e293b;border-radius:8px;color:#e8edf5;font-size:13px"><option>전체</option><option>중국</option><option>한국</option><option>베트남</option><option>기타</option></select></div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:end">
+    <div style="flex:1"><label class="sim-label" style="display:block;font-size:12px;color:#4a5568;margin-bottom:6px">단가 범위 (&#8361;)</label><div style="display:flex;gap:8px"><input class="sim-input" style="width:100%;padding:10px;background:#0c1018;border:1px solid #1e293b;border-radius:8px;color:#e8edf5;font-size:13px" placeholder="최소" /><input class="sim-input" style="width:100%;padding:10px;background:#0c1018;border:1px solid #1e293b;border-radius:8px;color:#e8edf5;font-size:13px" placeholder="최대" /></div></div>
+    <div style="flex:1"><label class="sim-label" style="display:block;font-size:12px;color:#4a5568;margin-bottom:6px">MOQ 범위</label><div style="display:flex;gap:8px"><input class="sim-input" style="width:100%;padding:10px;background:#0c1018;border:1px solid #1e293b;border-radius:8px;color:#e8edf5;font-size:13px" placeholder="최소" /><input class="sim-input" style="width:100%;padding:10px;background:#0c1018;border:1px solid #1e293b;border-radius:8px;color:#e8edf5;font-size:13px" placeholder="최대" /></div></div>
+    <button style="padding:10px 24px;background:var(--node1);color:#06080d;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;white-space:nowrap">검색</button>
+  </div>
+</div>
+<div class="tab-cards-grid">
+  <div class="tab-card"><div style="font-weight:700;margin-bottom:4px">&#127464;&#127475; 선전 하이테크 전자</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">중국 · 선전 · 가전/전자</div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>단가</span><span style="color:var(--node1);font-family:'JetBrains Mono',monospace">&#8361;3,200~8,500</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>MOQ</span><span style="font-family:'JetBrains Mono',monospace">100개</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>품질 점수</span><span class="score-pill score-high">92</span></div><div style="display:flex;justify-content:space-between;font-size:12px"><span>응답률</span><span style="font-family:'JetBrains Mono',monospace">94%</span></div></div>
+  <div class="tab-card"><div style="font-weight:700;margin-bottom:4px">&#127472;&#127479; 대구 텍스타일</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">한국 · 대구 · 패션/의류</div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>단가</span><span style="color:var(--node1);font-family:'JetBrains Mono',monospace">&#8361;5,800~15,000</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>MOQ</span><span style="font-family:'JetBrains Mono',monospace">50개</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>품질 점수</span><span class="score-pill score-high">96</span></div><div style="display:flex;justify-content:space-between;font-size:12px"><span>응답률</span><span style="font-family:'JetBrains Mono',monospace">98%</span></div></div>
+  <div class="tab-card"><div style="font-weight:700;margin-bottom:4px">&#127483;&#127475; 호치민 뷰티랩</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">베트남 · 호치민 · 뷰티</div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>단가</span><span style="color:var(--node1);font-family:'JetBrains Mono',monospace">&#8361;1,500~4,200</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>MOQ</span><span style="font-family:'JetBrains Mono',monospace">200개</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>품질 점수</span><span class="score-pill score-mid">78</span></div><div style="display:flex;justify-content:space-between;font-size:12px"><span>응답률</span><span style="font-family:'JetBrains Mono',monospace">85%</span></div></div>
+  <div class="tab-card"><div style="font-weight:700;margin-bottom:4px">&#127464;&#127475; 광저우 리빙</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">중국 · 광저우 · 생활용품</div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>단가</span><span style="color:var(--node1);font-family:'JetBrains Mono',monospace">&#8361;800~3,500</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>MOQ</span><span style="font-family:'JetBrains Mono',monospace">300개</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>품질 점수</span><span class="score-pill score-mid">74</span></div><div style="display:flex;justify-content:space-between;font-size:12px"><span>응답률</span><span style="font-family:'JetBrains Mono',monospace">82%</span></div></div>
+  <div class="tab-card"><div style="font-weight:700;margin-bottom:4px">&#127472;&#127479; 인천 푸드팩</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">한국 · 인천 · 식품</div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>단가</span><span style="color:var(--node1);font-family:'JetBrains Mono',monospace">&#8361;2,000~6,000</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>MOQ</span><span style="font-family:'JetBrains Mono',monospace">100개</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>품질 점수</span><span class="score-pill score-high">94</span></div><div style="display:flex;justify-content:space-between;font-size:12px"><span>응답률</span><span style="font-family:'JetBrains Mono',monospace">96%</span></div></div>
+  <div class="tab-card"><div style="font-weight:700;margin-bottom:4px">&#127464;&#127475; 이우 펫용품</div><div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">중국 · 이우 · 반려동물</div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>단가</span><span style="color:var(--node1);font-family:'JetBrains Mono',monospace">&#8361;1,200~5,800</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>MOQ</span><span style="font-family:'JetBrains Mono',monospace">150개</span></div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span>품질 점수</span><span class="score-pill score-mid">71</span></div><div style="display:flex;justify-content:space-between;font-size:12px"><span>응답률</span><span style="font-family:'JetBrains Mono',monospace">79%</span></div></div>
+</div>
+</div>
+</section>
+
+<section class="tab-section" id="tab-results">
+<div class="tab-inner">
+<h2>매칭 결과</h2>
+<p class="tab-desc">최근 소싱 매칭 이력 및 결과를 확인합니다</p>
+<div style="overflow-x:auto">
+<table class="data-table">
+<thead><tr><th>상품</th><th>매칭 수</th><th>최고 점수</th><th>날짜</th><th>상태</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--text-primary);font-weight:500">프리미엄 견과류 세트</td><td style="font-family:'JetBrains Mono',monospace">8</td><td><span class="score-pill score-high">94</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-07</td><td><span style="color:var(--node4);font-size:11px;font-weight:600">완료</span></td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">미니 공기청정기</td><td style="font-family:'JetBrains Mono',monospace">12</td><td><span class="score-pill score-high">91</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-07</td><td><span style="color:var(--node4);font-size:11px;font-weight:600">완료</span></td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">실리콘 주방매트</td><td style="font-family:'JetBrains Mono',monospace">6</td><td><span class="score-pill score-mid">82</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-06</td><td><span style="color:var(--node4);font-size:11px;font-weight:600">완료</span></td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">LED 무드등</td><td style="font-family:'JetBrains Mono',monospace">15</td><td><span class="score-pill score-high">88</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-06</td><td><span style="color:var(--node1);font-size:11px;font-weight:600">분석중</span></td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">강아지 간식 세트</td><td style="font-family:'JetBrains Mono',monospace">9</td><td><span class="score-pill score-high">90</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-05</td><td><span style="color:var(--node4);font-size:11px;font-weight:600">완료</span></td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">접이식 보조배터리</td><td style="font-family:'JetBrains Mono',monospace">11</td><td><span class="score-pill score-mid">79</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-05</td><td><span style="color:var(--node4);font-size:11px;font-weight:600">완료</span></td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">아로마 디퓨저</td><td style="font-family:'JetBrains Mono',monospace">7</td><td><span class="score-pill score-high">86</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-04</td><td><span style="color:var(--node4);font-size:11px;font-weight:600">완료</span></td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">무선 이어폰 케이스</td><td style="font-family:'JetBrains Mono',monospace">14</td><td><span class="score-pill score-high">93</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-04</td><td><span style="color:var(--text-muted);font-size:11px;font-weight:600">대기</span></td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">텀블러 파우치</td><td style="font-family:'JetBrains Mono',monospace">5</td><td><span class="score-pill score-mid">75</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-03</td><td><span style="color:var(--node4);font-size:11px;font-weight:600">완료</span></td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">스마트 체중계</td><td style="font-family:'JetBrains Mono',monospace">10</td><td><span class="score-pill score-high">87</span></td><td style="font-family:'JetBrains Mono',monospace">2026-03-03</td><td><span style="color:var(--node4);font-size:11px;font-weight:600">완료</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section class="tab-section" id="tab-suppliers">
+<div class="tab-inner">
+<h2>공급업체 DB</h2>
+<p class="tab-desc">등록된 전체 공급업체 데이터베이스</p>
+<div style="display:flex;gap:12px;margin-bottom:20px">
+  <input class="sim-input" style="flex:1;padding:10px;background:#0c1018;border:1px solid #1e293b;border-radius:8px;color:#e8edf5;font-size:13px" placeholder="공급업체 검색..." />
+  <select class="sim-input" style="width:150px;padding:10px;background:#0c1018;border:1px solid #1e293b;border-radius:8px;color:#e8edf5;font-size:13px"><option>전체 지역</option><option>중국</option><option>한국</option><option>베트남</option></select>
+</div>
+<div style="overflow-x:auto">
+<table class="data-table">
+<thead><tr><th>업체명</th><th>지역</th><th>카테고리</th><th>품질</th><th>응답률</th><th>리드타임</th><th>상품수</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--text-primary);font-weight:500">선전 하이테크</td><td>중국</td><td>가전</td><td><span class="score-pill score-high">92</span></td><td>94%</td><td>7일</td><td style="font-family:'JetBrains Mono',monospace">342</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">대구 텍스타일</td><td>한국</td><td>패션</td><td><span class="score-pill score-high">96</span></td><td>98%</td><td>3일</td><td style="font-family:'JetBrains Mono',monospace">189</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">호치민 뷰티랩</td><td>베트남</td><td>뷰티</td><td><span class="score-pill score-mid">78</span></td><td>85%</td><td>12일</td><td style="font-family:'JetBrains Mono',monospace">256</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">광저우 리빙</td><td>중국</td><td>생활</td><td><span class="score-pill score-mid">74</span></td><td>82%</td><td>8일</td><td style="font-family:'JetBrains Mono',monospace">890</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">인천 푸드팩</td><td>한국</td><td>식품</td><td><span class="score-pill score-high">94</span></td><td>96%</td><td>2일</td><td style="font-family:'JetBrains Mono',monospace">145</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">이우 펫용품</td><td>중국</td><td>반려동물</td><td><span class="score-pill score-mid">71</span></td><td>79%</td><td>10일</td><td style="font-family:'JetBrains Mono',monospace">523</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">부산 해산물</td><td>한국</td><td>식품</td><td><span class="score-pill score-high">97</span></td><td>99%</td><td>1일</td><td style="font-family:'JetBrains Mono',monospace">78</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">하노이 가구공방</td><td>베트남</td><td>가구</td><td><span class="score-pill score-mid">80</span></td><td>76%</td><td>15일</td><td style="font-family:'JetBrains Mono',monospace">167</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">닝보 전자부품</td><td>중국</td><td>전자</td><td><span class="score-pill score-high">88</span></td><td>91%</td><td>6일</td><td style="font-family:'JetBrains Mono',monospace">1204</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">서울 코스메틱</td><td>한국</td><td>뷰티</td><td><span class="score-pill score-high">95</span></td><td>97%</td><td>2일</td><td style="font-family:'JetBrains Mono',monospace">234</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">동관 포장재</td><td>중국</td><td>포장</td><td><span class="score-pill score-mid">82</span></td><td>88%</td><td>5일</td><td style="font-family:'JetBrains Mono',monospace">456</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">다낭 수공예</td><td>베트남</td><td>생활</td><td><span class="score-pill score-mid">76</span></td><td>72%</td><td>14일</td><td style="font-family:'JetBrains Mono',monospace">98</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">경기 헬스케어</td><td>한국</td><td>건강</td><td><span class="score-pill score-high">93</span></td><td>95%</td><td>3일</td><td style="font-family:'JetBrains Mono',monospace">312</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">상해 디지털</td><td>중국</td><td>가전</td><td><span class="score-pill score-high">86</span></td><td>90%</td><td>7일</td><td style="font-family:'JetBrains Mono',monospace">678</td></tr>
+<tr><td style="color:var(--text-primary);font-weight:500">충남 농산물</td><td>한국</td><td>식품</td><td><span class="score-pill score-high">98</span></td><td>100%</td><td>1일</td><td style="font-family:'JetBrains Mono',monospace">56</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section class="tab-section" id="tab-compare">
+<div class="tab-inner">
+<h2>비교 분석</h2>
+<p class="tab-desc">공급업체 간 상세 비교 분석</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+  <div class="tab-card">
+    <div style="text-align:center;margin-bottom:16px"><div style="font-size:18px;font-weight:700;color:var(--node1)">선전 하이테크 전자</div><div style="font-size:11px;color:var(--text-muted)">중국 · 선전 · 가전/전자</div></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>가격 경쟁력</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node1)">88/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:88%"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>품질</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node1)">92/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:92%"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>리드타임</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node1)">75/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:75%"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>신뢰도</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node1)">90/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:90%"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>MOQ 유연성</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node1)">70/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:70%"></div></div></div>
+    </div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>평균 단가</span><span style="font-family:'JetBrains Mono',monospace">&#8361;5,200</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>최소 주문량</span><span style="font-family:'JetBrains Mono',monospace">100개</span></div>
+      <div style="display:flex;justify-content:space-between"><span>배송 기간</span><span style="font-family:'JetBrains Mono',monospace">7일</span></div>
+    </div>
+  </div>
+  <div class="tab-card">
+    <div style="text-align:center;margin-bottom:16px"><div style="font-size:18px;font-weight:700;color:var(--node4)">대구 텍스타일</div><div style="font-size:11px;color:var(--text-muted)">한국 · 대구 · 패션/의류</div></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>가격 경쟁력</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node4)">72/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:72%;background:var(--node4)"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>품질</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node4)">96/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:96%;background:var(--node4)"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>리드타임</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node4)">95/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:95%;background:var(--node4)"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>신뢰도</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node4)">98/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:98%;background:var(--node4)"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>MOQ 유연성</span><span style="font-family:'JetBrains Mono',monospace;color:var(--node4)">85/100</span></div><div class="compare-bar"><div class="compare-bar-fill" style="width:85%;background:var(--node4)"></div></div></div>
+    </div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);font-size:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>평균 단가</span><span style="font-family:'JetBrains Mono',monospace">&#8361;9,800</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>최소 주문량</span><span style="font-family:'JetBrains Mono',monospace">50개</span></div>
+      <div style="display:flex;justify-content:space-between"><span>배송 기간</span><span style="font-family:'JetBrains Mono',monospace">3일</span></div>
+    </div>
+  </div>
+</div>
+<div class="tab-card"><div style="font-weight:700;margin-bottom:12px">종합 비교 요약</div>
+<table class="data-table"><thead><tr><th>항목</th><th>선전 하이테크</th><th>대구 텍스타일</th><th>우위</th></tr></thead>
+<tbody>
+<tr><td>가격</td><td style="font-family:'JetBrains Mono',monospace">&#8361;5,200</td><td style="font-family:'JetBrains Mono',monospace">&#8361;9,800</td><td style="color:var(--node1)">선전 하이테크</td></tr>
+<tr><td>품질</td><td style="font-family:'JetBrains Mono',monospace">92점</td><td style="font-family:'JetBrains Mono',monospace">96점</td><td style="color:var(--node4)">대구 텍스타일</td></tr>
+<tr><td>배송</td><td style="font-family:'JetBrains Mono',monospace">7일</td><td style="font-family:'JetBrains Mono',monospace">3일</td><td style="color:var(--node4)">대구 텍스타일</td></tr>
+<tr><td>MOQ</td><td style="font-family:'JetBrains Mono',monospace">100개</td><td style="font-family:'JetBrains Mono',monospace">50개</td><td style="color:var(--node4)">대구 텍스타일</td></tr>
+</tbody></table>
+</div>
+</div>
+</section>
+
+</div><!-- /main-content -->
+</div><!-- /body-layout -->
+
+<script>
+document.querySelectorAll('.nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
 </body>
 </html>

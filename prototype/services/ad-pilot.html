@@ -994,6 +994,183 @@ tbody td { padding: 11px 14px; vertical-align: middle; }
 .btn-secondary:hover { border-color: var(--accent-border); color: var(--accent); }
 </style>
 </head>
+
+/* ═══════════════════════════════════════════
+   SIDEBAR LAYOUT
+   ═══════════════════════════════════════════ */
+.layout-with-sidebar { display: flex; min-height: calc(100vh - 60px); }
+
+.sidebar {
+  width: 240px; flex-shrink: 0;
+  background: #0c1018;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: sticky; top: 60px;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+.sidebar-logo { padding: 20px 16px 16px; border-bottom: 1px solid var(--border); }
+.sidebar-service-name { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+.sidebar-service-name span { color: var(--accent); }
+.sidebar-service-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+.sidebar-nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; color: var(--text-secondary);
+  font-size: 13px; font-weight: 500; transition: all 0.18s;
+  border-left: 3px solid transparent; user-select: none;
+}
+.nav-item:hover { background: rgba(52,211,153,0.06); color: var(--text-primary); }
+.nav-item.active { background: rgba(52,211,153,0.1); color: var(--accent); border-left-color: var(--accent); }
+.nav-item-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+.sidebar-footer { padding: 12px 8px; border-top: 1px solid var(--border); }
+.sidebar-back {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  color: var(--text-muted); font-size: 12px; font-weight: 500;
+  text-decoration: none; transition: all 0.18s;
+}
+.sidebar-back:hover { background: rgba(255,255,255,0.04); color: var(--text-secondary); }
+.main-content { flex: 1; min-width: 0; }
+.tab-section { display: none; padding-bottom: 60px; }
+.tab-section.active { display: block; }
+
+/* ═══ SHARED TAB ELEMENTS ═══ */
+.tab-header {
+  padding: 28px 28px 20px;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+.tab-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+.tab-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+.tab-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+.card-title-sm { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.card-sub-sm { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; }
+
+/* ═══ CAMPAIGN MGMT TAB ═══ */
+.campaign-form-card {
+  margin: 0 28px 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.form-field label { display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.3px; }
+.form-input {
+  width: 100%; padding: 9px 12px;
+  background: var(--bg-elevated); border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm); color: var(--text-primary);
+  font-size: 13px; font-family: 'Outfit', sans-serif;
+  transition: border-color 0.2s;
+}
+.form-input:focus { outline: none; border-color: var(--accent-border); }
+
+/* ═══ REALTIME BID TAB ═══ */
+.bid-feed-wrap {
+  margin: 0 28px 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.bid-row {
+  display: grid; grid-template-columns: 76px 1fr 70px 90px 90px 60px 1fr;
+  gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border);
+  font-size: 12px; align-items: center; transition: background 0.15s;
+}
+.bid-row:hover { background: var(--bg-card-hover); }
+.bid-row:last-child { border-bottom: none; }
+.bid-row.hdr { font-size: 10px; color: var(--text-muted); font-weight: 700; background: var(--bg-elevated); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
+.bid-time { color: var(--text-muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.bid-kw { color: var(--text-primary); font-weight: 500; }
+.bid-plat { font-size: 11px; }
+.bid-old { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.bid-new { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--accent); }
+.bid-up { color: var(--accent); font-size: 11px; font-weight: 700; }
+.bid-down { color: var(--red); font-size: 11px; font-weight: 700; }
+.bid-reason { font-size: 10px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.bid-rules-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  margin: 0 28px 20px;
+}
+.bid-rule-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+}
+.bid-rule-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.bid-rule-row:last-child { border-bottom: none; }
+.bid-rule-label { color: var(--text-secondary); }
+.bid-rule-val { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+/* ═══ BUDGET TAB ═══ */
+.budget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 28px 20px; }
+.budget-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+
+.donut-wrap { display: flex; align-items: center; gap: 20px; }
+.donut-svg { width: 120px; height: 120px; flex-shrink: 0; }
+.donut-legend { flex: 1; }
+.donut-legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; }
+.donut-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.donut-label { color: var(--text-secondary); flex: 1; }
+.donut-pct { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+.budget-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.budget-bar-label { width: 60px; font-size: 11px; color: var(--text-secondary); }
+.budget-bar-track { flex: 1; height: 8px; background: var(--bg-elevated); border-radius: 4px; overflow: hidden; position: relative; }
+.budget-bar-fill { height: 100%; border-radius: 4px; }
+.budget-bar-spend { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; background: var(--accent); opacity: 0.8; }
+.budget-bar-vals { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+
+.realloc-panel {
+  margin: 0 28px 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+}
+.realloc-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.realloc-item:last-child { border-bottom: none; }
+.realloc-from { color: var(--red); font-weight: 600; }
+.realloc-arrow { color: var(--accent); font-size: 16px; }
+.realloc-to { color: var(--accent); font-weight: 600; }
+.realloc-amount { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-primary); margin-left: auto; }
+.realloc-reason { font-size: 10px; color: var(--text-muted); }
+
+/* ═══ AI RECOMMENDATIONS TAB ═══ */
+.ai-rec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 28px 20px; }
+.ai-rec-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px;
+  transition: all 0.2s;
+}
+.ai-rec-card:hover { border-color: var(--border-light); background: var(--bg-card-hover); }
+.ai-rec-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.ai-rec-priority-high { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: rgba(248,113,113,0.15); color: var(--red); }
+.ai-rec-priority-mid { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: rgba(251,191,36,0.15); color: var(--yellow); }
+.ai-rec-priority-low { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: rgba(96,165,250,0.15); color: var(--blue); }
+.ai-rec-cat { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.ai-rec-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.ai-rec-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px; }
+.ai-rec-impact { font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+.ai-conf-bar { height: 4px; background: var(--bg-elevated); border-radius: 2px; margin-bottom: 4px; overflow: hidden; }
+.ai-conf-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), #10b981); }
+.ai-conf-label { font-size: 10px; color: var(--text-muted); display: flex; justify-content: space-between; margin-bottom: 12px; }
+
+.ai-history-card {
+  margin: 0 28px 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+}
+.ai-hist-row { display: grid; grid-template-columns: 100px 1fr 80px 80px 80px; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; }
+.ai-hist-row:last-child { border-bottom: none; }
+.ai-hist-row.hdr { font-size: 10px; color: var(--text-muted); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.ai-model-metrics {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  margin: 0 28px 20px;
+}
+.ai-metric-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.ai-metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+.ai-metric-value { font-size: 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+.ai-metric-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+</style>
+</head>
 <body>
 <div class="app">
 
@@ -1019,6 +1196,46 @@ tbody td { padding: 11px 14px; vertical-align: middle; }
     </div>
   </nav>
 
+  <!-- SIDEBAR + MAIN LAYOUT -->
+  <div class="layout-with-sidebar">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-service-name">Ad<span>Pilot</span></div>
+        <div class="sidebar-service-sub">NODE 4 · AI 광고 자동화</div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-tab="dashboard">
+          <span class="nav-item-icon">📊</span>
+          <span>Dashboard</span>
+        </div>
+        <div class="nav-item" data-tab="campaign-mgmt">
+          <span class="nav-item-icon">📢</span>
+          <span>캠페인 관리</span>
+        </div>
+        <div class="nav-item" data-tab="realtime-bid">
+          <span class="nav-item-icon">⚡</span>
+          <span>실시간 입찰</span>
+        </div>
+        <div class="nav-item" data-tab="budget-alloc">
+          <span class="nav-item-icon">💰</span>
+          <span>예산 배분</span>
+        </div>
+        <div class="nav-item" data-tab="ai-rec">
+          <span class="nav-item-icon">🤖</span>
+          <span>AI 추천</span>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="../index.html" class="sidebar-back">← Dashboard로 돌아가기</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <!-- ═══ TAB: DASHBOARD ═══ -->
+      <div id="tab-dashboard" class="tab-section active">
   <!-- PAGE HEADER -->
   <div class="page-header fade-up">
     <div class="page-header-inner">
@@ -1783,5 +2000,745 @@ window.addEventListener('load', () => {
 });
 </script>
 
+      </div><!-- /tab-dashboard -->
+
+      <!-- ═══ TAB: 캠페인 관리 ═══ -->
+      <div id="tab-campaign-mgmt" class="tab-section">
+        <div class="tab-header">
+          <div>
+            <div class="tab-title">캠페인 관리</div>
+            <div class="tab-subtitle">네이버·카카오·구글·메타 광고 캠페인 일괄 관리 및 성과 추적</div>
+          </div>
+          <div class="tab-actions">
+            <button class="btn btn-secondary">⏸ 선택 일시정지</button>
+            <button class="btn btn-primary">+ 새 캠페인</button>
+          </div>
+        </div>
+
+        <!-- Campaign creation form -->
+        <div class="campaign-form-card">
+          <div class="card-title-sm" style="margin-bottom:14px">새 캠페인 만들기</div>
+          <div class="form-grid">
+            <div class="form-field"><label>캠페인 이름</label><input class="form-input" type="text" placeholder="예: 봄맞이 에어컨 검색광고" value="봄맞이 에어컨 검색광고"></div>
+            <div class="form-field"><label>플랫폼</label><select class="form-input"><option>네이버 성과형 광고</option><option>카카오 모먼트</option><option>구글 Ads</option><option>메타 Ads</option></select></div>
+            <div class="form-field"><label>광고 유형</label><select class="form-input"><option>검색광고</option><option>디스플레이</option><option>쇼핑광고</option><option>동영상</option></select></div>
+            <div class="form-field"><label>일일 예산</label><input class="form-input" type="text" placeholder="₩50,000" value="₩150,000"></div>
+            <div class="form-field"><label>타겟 키워드</label><input class="form-input" type="text" placeholder="에어컨, 벽걸이에어컨, 인버터에어컨" value="에어컨, 벽걸이에어컨, 인버터에어컨"></div>
+            <div class="form-field"><label>일정</label><input class="form-input" type="text" value="2026-03-10 ~ 2026-04-30"></div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn btn-ghost">취소</button>
+            <button class="btn btn-primary">캠페인 생성</button>
+          </div>
+        </div>
+
+        <!-- Campaign table -->
+        <div style="margin:0 28px 20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-size:13px;font-weight:600">진행 중인 캠페인 (12개)</span>
+            <div style="display:flex;gap:8px">
+              <select class="batch-select" style="padding:6px 10px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-sm);color:var(--text-primary);font-size:12px;font-family:'Outfit',sans-serif">
+                <option>전체 플랫폼</option><option>네이버</option><option>카카오</option><option>구글</option><option>메타</option>
+              </select>
+              <select class="batch-select" style="padding:6px 10px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-sm);color:var(--text-primary);font-size:12px;font-family:'Outfit',sans-serif">
+                <option>전체 상태</option><option>활성</option><option>일시정지</option><option>학습중</option><option>종료</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-scroll" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+            <table>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" style="accent-color:var(--accent)"></th>
+                  <th>캠페인명</th>
+                  <th>플랫폼</th>
+                  <th>유형</th>
+                  <th>상태</th>
+                  <th>일 예산</th>
+                  <th>오늘 지출</th>
+                  <th>노출</th>
+                  <th>클릭</th>
+                  <th>CTR</th>
+                  <th>전환</th>
+                  <th>ROAS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">봄맞이 에어컨 검색</span></td>
+                  <td><span class="chip" style="background:rgba(3,199,90,0.15);color:#03c75a;font-size:10px;padding:2px 8px">네이버</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">검색광고</span></td>
+                  <td><span class="chip chip-green" style="font-size:10px;padding:2px 8px">활성</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩150,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩98,400</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">48,291</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">1,847</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">3.82%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">124</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700">487%</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">삼성 버즈3 쇼핑광고</span></td>
+                  <td><span class="chip" style="background:rgba(3,199,90,0.15);color:#03c75a;font-size:10px;padding:2px 8px">네이버</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">쇼핑광고</span></td>
+                  <td><span class="chip chip-green" style="font-size:10px;padding:2px 8px">활성</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩80,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩61,200</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">31,540</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">1,203</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">3.81%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">89</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700">521%</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">다이슨 청소기 디스플레이</span></td>
+                  <td><span class="chip" style="background:rgba(247,230,0,0.15);color:#c8b800;font-size:10px;padding:2px 8px">카카오</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">디스플레이</span></td>
+                  <td><span class="chip chip-green" style="font-size:10px;padding:2px 8px">활성</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩120,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩87,300</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">182,400</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">2,188</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow)">1.20%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">67</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow);font-weight:700">298%</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">LG 그램 노트북 검색</span></td>
+                  <td><span class="chip" style="background:rgba(66,133,244,0.15);color:#4285f4;font-size:10px;padding:2px 8px">구글</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">검색광고</span></td>
+                  <td><span class="chip" style="background:rgba(167,139,250,0.15);color:var(--node3);font-size:10px;padding:2px 8px">학습중</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩200,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-secondary)">₩112,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">24,100</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">892</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-secondary)">3.70%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">41</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-secondary);font-weight:700">312%</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">에어팟 프로 리타겟팅</span></td>
+                  <td><span class="chip" style="background:rgba(24,119,242,0.15);color:#1877f2;font-size:10px;padding:2px 8px">메타</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">디스플레이</span></td>
+                  <td><span class="chip chip-green" style="font-size:10px;padding:2px 8px">활성</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩90,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩73,500</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">95,800</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">1,437</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">1.50%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">98</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700">442%</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">소니 헤드폰 브랜드 검색</span></td>
+                  <td><span class="chip" style="background:rgba(66,133,244,0.15);color:#4285f4;font-size:10px;padding:2px 8px">구글</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">검색광고</span></td>
+                  <td><span class="chip" style="background:rgba(248,113,113,0.15);color:var(--red);font-size:10px;padding:2px 8px">일시정지</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩60,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">₩0</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">필립스 에어프라이어 쇼핑</span></td>
+                  <td><span class="chip" style="background:rgba(3,199,90,0.15);color:#03c75a;font-size:10px;padding:2px 8px">네이버</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">쇼핑광고</span></td>
+                  <td><span class="chip chip-green" style="font-size:10px;padding:2px 8px">활성</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩70,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩54,100</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">27,890</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">1,091</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">3.91%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">78</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700">398%</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">닌텐도 스위치 카카오</span></td>
+                  <td><span class="chip" style="background:rgba(247,230,0,0.15);color:#c8b800;font-size:10px;padding:2px 8px">카카오</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">디스플레이</span></td>
+                  <td><span class="chip chip-green" style="font-size:10px;padding:2px 8px">활성</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩50,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩38,900</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">143,200</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">1,718</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow)">1.20%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">52</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow);font-weight:700">261%</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">발뮤다 토스터 메타</span></td>
+                  <td><span class="chip" style="background:rgba(24,119,242,0.15);color:#1877f2;font-size:10px;padding:2px 8px">메타</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">디스플레이</span></td>
+                  <td><span class="chip chip-green" style="font-size:10px;padding:2px 8px">활성</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩40,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩29,700</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">74,100</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">814</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">1.10%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">44</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700">389%</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">쿠쿠 밥솥 검색광고</span></td>
+                  <td><span class="chip" style="background:rgba(3,199,90,0.15);color:#03c75a;font-size:10px;padding:2px 8px">네이버</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">검색광고</span></td>
+                  <td><span class="chip" style="background:rgba(248,113,113,0.15);color:var(--red);font-size:10px;padding:2px 8px">일시정지</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩30,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">₩0</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">—</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">애플워치 구글 쇼핑</span></td>
+                  <td><span class="chip" style="background:rgba(66,133,244,0.15);color:#4285f4;font-size:10px;padding:2px 8px">구글</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">쇼핑광고</span></td>
+                  <td><span class="chip chip-green" style="font-size:10px;padding:2px 8px">활성</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩100,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩82,400</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">19,800</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">693</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">3.50%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">58</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700">463%</span></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" style="accent-color:var(--accent)"></td>
+                  <td><span style="font-weight:600;font-size:12px">샤오미 로봇청소기 메타</span></td>
+                  <td><span class="chip" style="background:rgba(24,119,242,0.15);color:#1877f2;font-size:10px;padding:2px 8px">메타</span></td>
+                  <td><span style="font-size:11px;color:var(--text-secondary)">디스플레이</span></td>
+                  <td><span class="chip" style="background:rgba(167,139,250,0.15);color:var(--node3);font-size:10px;padding:2px 8px">학습중</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩60,000</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-secondary)">₩31,200</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">52,400</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">576</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-secondary)">1.10%</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">28</span></td>
+                  <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-secondary);font-weight:700">218%</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /tab-campaign-mgmt -->
+
+      <!-- ═══ TAB: 실시간 입찰 ═══ -->
+      <div id="tab-realtime-bid" class="tab-section">
+        <div class="tab-header">
+          <div>
+            <div class="tab-title">실시간 입찰 관리</div>
+            <div class="tab-subtitle">AI 자동 입찰 조정 피드 · 입찰 규칙 및 키워드 포지션 관리</div>
+          </div>
+          <div class="tab-actions">
+            <div class="live-badge" style="font-size:11px"><div class="live-dot"></div>AI 입찰 중</div>
+            <button class="btn btn-secondary">⏸ 자동 입찰 정지</button>
+          </div>
+        </div>
+
+        <!-- Live bid feed -->
+        <div class="bid-feed-wrap" style="margin:0 28px 20px">
+          <div class="bid-row hdr">
+            <span>시각</span><span>키워드</span><span>플랫폼</span><span>이전 입찰가</span><span>변경 입찰가</span><span>변화율</span><span>조정 사유</span>
+          </div>
+          <div class="bid-row"><span class="bid-time">22:14:41</span><span class="bid-kw">에어컨 추천</span><span class="bid-plat" style="color:#03c75a">네이버</span><span class="bid-old">₩1,200</span><span class="bid-new">₩1,450</span><span class="bid-up">+20.8%</span><span class="bid-reason">경쟁 입찰가 상승 — 상위 3위 유지 필요</span></div>
+          <div class="bid-row"><span class="bid-time">22:14:28</span><span class="bid-kw">무선 이어폰</span><span class="bid-plat" style="color:#4285f4">구글</span><span class="bid-old">₩890</span><span class="bid-new">₩780</span><span class="bid-down">-12.4%</span><span class="bid-reason">성과 저하 — CVR 2.1% → 0.9% 하락</span></div>
+          <div class="bid-row"><span class="bid-time">22:14:15</span><span class="bid-kw">삼성 버즈 3</span><span class="bid-plat" style="color:#03c75a">네이버</span><span class="bid-old">₩2,100</span><span class="bid-new">₩2,400</span><span class="bid-up">+14.3%</span><span class="bid-reason">CTR 개선 — 4.2%로 상승, 입찰 강화</span></div>
+          <div class="bid-row"><span class="bid-time">22:14:02</span><span class="bid-kw">로봇청소기</span><span class="bid-plat" style="color:#c8b800">카카오</span><span class="bid-old">₩650</span><span class="bid-new">₩720</span><span class="bid-up">+10.8%</span><span class="bid-reason">예산 재배분 — 카카오 ROAS 개선 추세</span></div>
+          <div class="bid-row"><span class="bid-time">22:13:49</span><span class="bid-kw">공기청정기</span><span class="bid-plat" style="color:#4285f4">구글</span><span class="bid-old">₩1,050</span><span class="bid-new">₩950</span><span class="bid-down">-9.5%</span><span class="bid-reason">예산 한계 접근 — 일 예산 82% 소진</span></div>
+          <div class="bid-row"><span class="bid-time">22:13:33</span><span class="bid-kw">노트북 추천</span><span class="bid-plat" style="color:#03c75a">네이버</span><span class="bid-old">₩3,200</span><span class="bid-new">₩3,500</span><span class="bid-up">+9.4%</span><span class="bid-reason">경쟁 입찰가 변동 — 경쟁사 2위 입찰 ₩3,300</span></div>
+          <div class="bid-row"><span class="bid-time">22:13:18</span><span class="bid-kw">애플워치</span><span class="bid-plat" style="color:#1877f2">메타</span><span class="bid-old">₩480</span><span class="bid-new">₩560</span><span class="bid-up">+16.7%</span><span class="bid-reason">CTR 개선 — 소재 A 클릭률 2.3% 기록</span></div>
+          <div class="bid-row"><span class="bid-time">22:13:04</span><span class="bid-kw">LG 그램</span><span class="bid-plat" style="color:#4285f4">구글</span><span class="bid-old">₩2,800</span><span class="bid-new">₩2,800</span><span style="font-size:11px;color:var(--text-muted)">0%</span><span class="bid-reason">목표 CPA 달성 — 현재 ₩8,200 (목표 ₩8,500)</span></div>
+          <div class="bid-row"><span class="bid-time">22:12:51</span><span class="bid-kw">다이슨 청소기</span><span class="bid-plat" style="color:#c8b800">카카오</span><span class="bid-old">₩820</span><span class="bid-new">₩710</span><span class="bid-down">-13.4%</span><span class="bid-reason">성과 저하 — ROAS 180% 목표 미달</span></div>
+          <div class="bid-row"><span class="bid-time">22:12:37</span><span class="bid-kw">에어팟 프로</span><span class="bid-plat" style="color:#1877f2">메타</span><span class="bid-old">₩390</span><span class="bid-new">₩450</span><span class="bid-up">+15.4%</span><span class="bid-reason">리타겟팅 효율 — 방문자 재전환율 8.7%</span></div>
+          <div class="bid-row"><span class="bid-time">22:12:22</span><span class="bid-kw">밥솥 추천</span><span class="bid-plat" style="color:#03c75a">네이버</span><span class="bid-old">₩740</span><span class="bid-new">₩630</span><span class="bid-down">-14.9%</span><span class="bid-reason">시간대 조정 — 오후 10시 이후 전환율 저조</span></div>
+          <div class="bid-row"><span class="bid-time">22:12:08</span><span class="bid-kw">헤드폰</span><span class="bid-plat" style="color:#4285f4">구글</span><span class="bid-old">₩1,100</span><span class="bid-new">₩1,250</span><span class="bid-up">+13.6%</span><span class="bid-reason">경쟁 입찰가 변동 — 1위 입찰 ₩1,400 확인</span></div>
+          <div class="bid-row"><span class="bid-time">22:11:54</span><span class="bid-kw">토스터</span><span class="bid-plat" style="color:#1877f2">메타</span><span class="bid-old">₩320</span><span class="bid-new">₩380</span><span class="bid-up">+18.8%</span><span class="bid-reason">예산 재배분 — 메타 ROAS 389% 우수</span></div>
+          <div class="bid-row"><span class="bid-time">22:11:39</span><span class="bid-kw">벽걸이 에어컨</span><span class="bid-plat" style="color:#03c75a">네이버</span><span class="bid-old">₩1,600</span><span class="bid-new">₩1,800</span><span class="bid-up">+12.5%</span><span class="bid-reason">시즌 수요 급증 — 검색량 +42% 증가</span></div>
+          <div class="bid-row"><span class="bid-time">22:11:24</span><span class="bid-kw">닌텐도 스위치</span><span class="bid-plat" style="color:#c8b800">카카오</span><span class="bid-old">₩550</span><span class="bid-time">₩490</span><span class="bid-down">-10.9%</span><span class="bid-reason">성과 저하 — CTR 0.8% 미만 지속</span></div>
+          <div class="bid-row"><span class="bid-time">22:11:09</span><span class="bid-kw">태블릿 추천</span><span class="bid-plat" style="color:#4285f4">구글</span><span class="bid-old">₩1,450</span><span class="bid-new">₩1,600</span><span class="bid-up">+10.3%</span><span class="bid-reason">CTR 개선 — 광고 소재 B 효율 2위 기록</span></div>
+          <div class="bid-row"><span class="bid-time">22:10:55</span><span class="bid-kw">공기청정기 추천</span><span class="bid-plat" style="color:#03c75a">네이버</span><span class="bid-old">₩920</span><span class="bid-new">₩1,050</span><span class="bid-up">+14.1%</span><span class="bid-reason">경쟁 입찰가 변동 — 봄철 시즌 수요</span></div>
+          <div class="bid-row"><span class="bid-time">22:10:40</span><span class="bid-kw">샤오미 청소기</span><span class="bid-plat" style="color:#1877f2">메타</span><span class="bid-old">₩290</span><span class="bid-new">₩340</span><span class="bid-up">+17.2%</span><span class="bid-reason">신규 캠페인 학습 완료 — 입찰 최적화 시작</span></div>
+          <div class="bid-row"><span class="bid-time">22:10:25</span><span class="bid-kw">전자레인지</span><span class="bid-plat" style="color:#03c75a">네이버</span><span class="bid-old">₩680</span><span class="bid-new">₩580</span><span class="bid-down">-14.7%</span><span class="bid-reason">예산 재배분 — 고성과 키워드로 이동</span></div>
+          <div class="bid-row"><span class="bid-time">22:10:11</span><span class="bid-kw">소파 추천</span><span class="bid-plat" style="color:#c8b800">카카오</span><span class="bid-old">₩410</span><span class="bid-new">₩460</span><span class="bid-up">+12.2%</span><span class="bid-reason">CTR 개선 — 디스플레이 소재 갱신 효과</span></div>
+        </div>
+
+        <!-- Bid rules -->
+        <div class="bid-rules-grid">
+          <div class="bid-rule-card">
+            <div class="card-title-sm" style="margin-bottom:12px">⚙ 자동 입찰 규칙</div>
+            <div class="bid-rule-row"><span class="bid-rule-label">최소 입찰가 (네이버)</span><span class="bid-rule-val">₩300</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">최대 입찰가 (네이버)</span><span class="bid-rule-val">₩5,000</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">최소 입찰가 (구글)</span><span class="bid-rule-val">₩200</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">최대 입찰가 (구글)</span><span class="bid-rule-val">₩4,000</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">목표 CPA</span><span class="bid-rule-val">₩8,500</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">입찰 전략</span><span class="bid-rule-val">ROAS 극대화</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">입찰 조정 주기</span><span class="bid-rule-val">15분</span></div>
+            <button class="btn btn-secondary" style="width:100%;margin-top:12px;font-size:12px;padding:8px">규칙 수정</button>
+          </div>
+          <div class="bid-rule-card">
+            <div class="card-title-sm" style="margin-bottom:12px">📍 키워드 포지션 현황</div>
+            <div class="bid-rule-row"><span class="bid-rule-label">에어컨 추천</span><span class="bid-rule-val" style="color:var(--accent)">1위</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">삼성 버즈 3</span><span class="bid-rule-val" style="color:var(--accent)">2위</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">노트북 추천</span><span class="bid-rule-val" style="color:var(--accent)">3위</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">무선 이어폰</span><span class="bid-rule-val" style="color:var(--yellow)">5위</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">다이슨 청소기</span><span class="bid-rule-val" style="color:var(--yellow)">7위</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">로봇청소기</span><span class="bid-rule-val" style="color:var(--accent)">2위</span></div>
+            <div class="bid-rule-row"><span class="bid-rule-label">헤드폰</span><span class="bid-rule-val" style="color:var(--yellow)">4위</span></div>
+          </div>
+        </div>
+      </div><!-- /tab-realtime-bid -->
+
+      <!-- ═══ TAB: 예산 배분 ═══ -->
+      <div id="tab-budget-alloc" class="tab-section">
+        <div class="tab-header">
+          <div>
+            <div class="tab-title">예산 배분 대시보드</div>
+            <div class="tab-subtitle">플랫폼별 광고 예산 현황, ROI 비교, AI 최적 배분 제안</div>
+          </div>
+          <div class="tab-actions">
+            <button class="btn btn-secondary">📊 월간 리포트</button>
+            <button class="btn btn-primary">+ 예산 추가</button>
+          </div>
+        </div>
+
+        <div class="budget-grid">
+          <!-- Donut chart -->
+          <div class="budget-card">
+            <div class="card-title-sm">플랫폼별 예산 배분</div>
+            <div class="card-sub-sm">이번 달 총 예산 ₩25,200,000</div>
+            <div class="donut-wrap">
+              <svg class="donut-svg" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#1e293b" stroke-width="18"/>
+                <!-- Naver 55% -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#03c75a" stroke-width="18"
+                  stroke-dasharray="155.5 282.7" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+                <!-- Google 25% -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#4285f4" stroke-width="18"
+                  stroke-dasharray="70.7 282.7" stroke-dashoffset="-155.5" transform="rotate(-90 60 60)"/>
+                <!-- Kakao 12% -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#f7e600" stroke-width="18"
+                  stroke-dasharray="33.9 282.7" stroke-dashoffset="-226.2" transform="rotate(-90 60 60)"/>
+                <!-- Meta 8% -->
+                <circle cx="60" cy="60" r="45" fill="none" stroke="#1877f2" stroke-width="18"
+                  stroke-dasharray="22.6 282.7" stroke-dashoffset="-260.1" transform="rotate(-90 60 60)"/>
+                <text x="60" y="56" text-anchor="middle" fill="#e8edf5" font-size="12" font-weight="800" font-family="'JetBrains Mono',monospace">₩25.2M</text>
+                <text x="60" y="70" text-anchor="middle" fill="#8896ab" font-size="7">이번 달 총 예산</text>
+              </svg>
+              <div class="donut-legend">
+                <div class="donut-legend-item">
+                  <div class="donut-dot" style="background:#03c75a"></div>
+                  <span class="donut-label">네이버</span>
+                  <span class="donut-pct" style="color:#03c75a">55%</span>
+                </div>
+                <div class="donut-legend-item">
+                  <div class="donut-dot" style="background:#4285f4"></div>
+                  <span class="donut-label">구글</span>
+                  <span class="donut-pct" style="color:#4285f4">25%</span>
+                </div>
+                <div class="donut-legend-item">
+                  <div class="donut-dot" style="background:#c8b800"></div>
+                  <span class="donut-label">카카오</span>
+                  <span class="donut-pct" style="color:#c8b800">12%</span>
+                </div>
+                <div class="donut-legend-item">
+                  <div class="donut-dot" style="background:#1877f2"></div>
+                  <span class="donut-label">메타</span>
+                  <span class="donut-pct" style="color:#1877f2">8%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monthly budget vs spend -->
+          <div class="budget-card">
+            <div class="card-title-sm">월간 예산 집행 현황</div>
+            <div class="card-sub-sm">3월 기준 · 8일 경과 / 31일</div>
+            <div style="margin-top:8px">
+              <div class="budget-bar-row">
+                <span class="budget-bar-label" style="color:#03c75a">네이버</span>
+                <div class="budget-bar-track" style="height:20px;border-radius:6px">
+                  <div style="height:100%;width:100%;background:#1a2438;border-radius:6px;position:relative">
+                    <div style="position:absolute;top:0;left:0;height:100%;width:26%;background:#03c75a;border-radius:6px;opacity:0.8"></div>
+                    <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;font-family:'JetBrains Mono',monospace;color:#8896ab">₩3.6M / ₩13.9M</span>
+                  </div>
+                </div>
+              </div>
+              <div class="budget-bar-row">
+                <span class="budget-bar-label" style="color:#4285f4">구글</span>
+                <div class="budget-bar-track" style="height:20px;border-radius:6px">
+                  <div style="height:100%;width:100%;background:#1a2438;border-radius:6px;position:relative">
+                    <div style="position:absolute;top:0;left:0;height:100%;width:30%;background:#4285f4;border-radius:6px;opacity:0.8"></div>
+                    <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;font-family:'JetBrains Mono',monospace;color:#8896ab">₩1.9M / ₩6.3M</span>
+                  </div>
+                </div>
+              </div>
+              <div class="budget-bar-row">
+                <span class="budget-bar-label" style="color:#c8b800">카카오</span>
+                <div class="budget-bar-track" style="height:20px;border-radius:6px">
+                  <div style="height:100%;width:100%;background:#1a2438;border-radius:6px;position:relative">
+                    <div style="position:absolute;top:0;left:0;height:100%;width:22%;background:#c8b800;border-radius:6px;opacity:0.8"></div>
+                    <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;font-family:'JetBrains Mono',monospace;color:#8896ab">₩0.7M / ₩3.0M</span>
+                  </div>
+                </div>
+              </div>
+              <div class="budget-bar-row">
+                <span class="budget-bar-label" style="color:#1877f2">메타</span>
+                <div class="budget-bar-track" style="height:20px;border-radius:6px">
+                  <div style="height:100%;width:100%;background:#1a2438;border-radius:6px;position:relative">
+                    <div style="position:absolute;top:0;left:0;height:100%;width:35%;background:#1877f2;border-radius:6px;opacity:0.8"></div>
+                    <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;font-family:'JetBrains Mono',monospace;color:#8896ab">₩0.7M / ₩2.0M</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+                <span style="color:var(--text-muted)">총 집행액</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent)">₩6,900,000</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:12px">
+                <span style="color:var(--text-muted)">잔여 예산</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--text-primary)">₩18,300,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Platform ROI comparison -->
+        <div style="margin:0 28px 20px">
+          <div class="budget-card">
+            <div class="card-title-sm">플랫폼별 ROI 비교</div>
+            <div class="card-sub-sm" style="margin-bottom:0">이번 달 누적 기준</div>
+            <div class="table-scroll" style="margin-top:14px">
+              <table>
+                <thead>
+                  <tr>
+                    <th>플랫폼</th>
+                    <th>집행 예산</th>
+                    <th>광고 수익</th>
+                    <th>ROAS</th>
+                    <th>CPA</th>
+                    <th>클릭수</th>
+                    <th>전환수</th>
+                    <th>CVR</th>
+                    <th>평가</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span style="color:#03c75a;font-weight:700">네이버</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩3,600,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩18,720,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700">520%</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩7,200</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">8,412</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">500</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">5.94%</span></td>
+                    <td><span class="chip chip-green" style="font-size:10px;padding:2px 8px">최우수</span></td>
+                  </tr>
+                  <tr>
+                    <td><span style="color:#4285f4;font-weight:700">구글</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩1,900,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩7,980,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:700">420%</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩9,500</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">5,281</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">200</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">3.79%</span></td>
+                    <td><span class="chip" style="background:rgba(52,211,153,0.15);color:var(--accent);font-size:10px;padding:2px 8px">우수</span></td>
+                  </tr>
+                  <tr>
+                    <td><span style="color:#1877f2;font-weight:700">메타</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩700,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)">₩2,730,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow);font-weight:700">390%</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩10,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">4,827</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">70</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow)">1.45%</span></td>
+                    <td><span class="chip" style="background:rgba(251,191,36,0.15);color:var(--yellow);font-size:10px;padding:2px 8px">보통</span></td>
+                  </tr>
+                  <tr>
+                    <td><span style="color:#c8b800;font-weight:700">카카오</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩700,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--yellow)">₩1,890,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red);font-weight:700">270%</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">₩14,000</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">3,906</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px">50</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red)">1.28%</span></td>
+                    <td><span class="chip" style="background:rgba(248,113,113,0.15);color:var(--red);font-size:10px;padding:2px 8px">저조</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Budget reallocation suggestions -->
+        <div class="realloc-panel">
+          <div class="card-title-sm" style="margin-bottom:4px">🔀 AI 예산 재배분 제안</div>
+          <div class="card-sub-sm">저성과 채널에서 고성과 채널로 예산 이동 권장</div>
+          <div class="realloc-item">
+            <span class="realloc-from">카카오</span>
+            <span class="realloc-arrow">→</span>
+            <span class="realloc-to">네이버</span>
+            <div style="flex:1">
+              <div style="font-size:12px;color:var(--text-primary);font-weight:500">카카오 ROAS 270% — 네이버 ROAS 520%로 이동</div>
+              <div class="realloc-reason">카카오 CVR 1.28% 저조, 네이버 대비 비효율적</div>
+            </div>
+            <span class="realloc-amount">₩500,000</span>
+            <button class="btn btn-primary" style="padding:5px 12px;font-size:11px">적용</button>
+          </div>
+          <div class="realloc-item">
+            <span class="realloc-from">메타</span>
+            <span class="realloc-arrow">→</span>
+            <span class="realloc-to">구글</span>
+            <div style="flex:1">
+              <div style="font-size:12px;color:var(--text-primary);font-weight:500">메타 ROAS 390% — 구글 ROAS 420% 우위</div>
+              <div class="realloc-reason">구글 쇼핑 전환율 상승 추세, 추가 투자 효율적</div>
+            </div>
+            <span class="realloc-amount">₩200,000</span>
+            <button class="btn btn-primary" style="padding:5px 12px;font-size:11px">적용</button>
+          </div>
+          <div class="realloc-item">
+            <span class="realloc-from">카카오</span>
+            <span class="realloc-arrow">→</span>
+            <span class="realloc-to">네이버 쇼핑</span>
+            <div style="flex:1">
+              <div style="font-size:12px;color:var(--text-primary);font-weight:500">봄 시즌 수요 급증 — 네이버 쇼핑 집중 공략</div>
+              <div class="realloc-reason">에어컨·선풍기 카테고리 검색량 +67% 급증</div>
+            </div>
+            <span class="realloc-amount">₩300,000</span>
+            <button class="btn btn-primary" style="padding:5px 12px;font-size:11px">적용</button>
+          </div>
+        </div>
+      </div><!-- /tab-budget-alloc -->
+
+      <!-- ═══ TAB: AI 추천 ═══ -->
+      <div id="tab-ai-rec" class="tab-section">
+        <div class="tab-header">
+          <div>
+            <div class="tab-title">AI 최적화 추천</div>
+            <div class="tab-subtitle">머신러닝 모델 기반 광고 성과 개선 액션 추천</div>
+          </div>
+          <div class="tab-actions">
+            <div class="ai-badge" style="font-size:11px"><div class="ai-pulse"></div>모델 추론 중</div>
+            <button class="btn btn-primary">✓ 전체 적용</button>
+          </div>
+        </div>
+
+        <!-- Model metrics -->
+        <div class="ai-model-metrics">
+          <div class="ai-metric-card">
+            <div class="ai-metric-label">모델 정확도</div>
+            <div class="ai-metric-value" style="color:var(--accent)">94.7%</div>
+            <div class="ai-metric-sub">↑ +2.1% 지난 주 대비</div>
+          </div>
+          <div class="ai-metric-card">
+            <div class="ai-metric-label">평균 ROAS 개선</div>
+            <div class="ai-metric-value" style="color:var(--accent)">+38%</div>
+            <div class="ai-metric-sub">추천 적용 캠페인 기준</div>
+          </div>
+          <div class="ai-metric-card">
+            <div class="ai-metric-label">대기 중 추천</div>
+            <div class="ai-metric-value" style="color:var(--yellow)">8개</div>
+            <div class="ai-metric-sub">즉시 적용 가능</div>
+          </div>
+          <div class="ai-metric-card">
+            <div class="ai-metric-label">이번 달 적용</div>
+            <div class="ai-metric-value" style="color:var(--accent)">23개</div>
+            <div class="ai-metric-sub">누적 ROAS +127% 기여</div>
+          </div>
+        </div>
+
+        <!-- AI recommendation cards -->
+        <div class="ai-rec-grid">
+          <div class="ai-rec-card">
+            <div class="ai-rec-top">
+              <span class="ai-rec-priority-high">높음</span>
+              <span class="ai-rec-cat">입찰 최적화</span>
+            </div>
+            <div class="ai-rec-title">에어컨 검색 입찰가 20% 인상</div>
+            <div class="ai-rec-desc">봄 시즌 진입으로 에어컨 관련 검색량이 전주 대비 67% 급증했습니다. 현재 입찰가로는 상위 3위 유지가 어렵습니다. 즉시 입찰가를 ₩1,200 → ₩1,450으로 인상할 것을 권장합니다.</div>
+            <div class="ai-rec-impact">예상 ROAS 개선: +34%</div>
+            <div class="ai-conf-bar"><div class="ai-conf-fill" style="width:92%"></div></div>
+            <div class="ai-conf-label"><span>신뢰도</span><span>92%</span></div>
+            <button class="btn btn-primary" style="width:100%;font-size:12px;padding:8px">지금 적용</button>
+          </div>
+
+          <div class="ai-rec-card">
+            <div class="ai-rec-top">
+              <span class="ai-rec-priority-high">높음</span>
+              <span class="ai-rec-cat">예산 최적화</span>
+            </div>
+            <div class="ai-rec-title">카카오 예산 ₩500,000 네이버로 이동</div>
+            <div class="ai-rec-desc">카카오 ROAS가 270%로 목표치(350%)를 지속 하회하고 있습니다. 같은 예산을 네이버 쇼핑에 투자했을 때 기대 ROAS는 480%입니다. 월말까지 ₩1.2M 추가 수익 예상됩니다.</div>
+            <div class="ai-rec-impact">예상 ROAS 개선: +28%</div>
+            <div class="ai-conf-bar"><div class="ai-conf-fill" style="width:88%"></div></div>
+            <div class="ai-conf-label"><span>신뢰도</span><span>88%</span></div>
+            <button class="btn btn-primary" style="width:100%;font-size:12px;padding:8px">지금 적용</button>
+          </div>
+
+          <div class="ai-rec-card">
+            <div class="ai-rec-top">
+              <span class="ai-rec-priority-mid">중간</span>
+              <span class="ai-rec-cat">타겟팅 개선</span>
+            </div>
+            <div class="ai-rec-title">30-44세 여성 타겟 입찰 가중치 +15%</div>
+            <div class="ai-rec-desc">주방가전 카테고리에서 30-44세 여성 세그먼트의 CVR이 7.2%로 전체 평균(3.8%) 대비 90% 높습니다. 해당 세그먼트에 입찰 가중치를 적용하면 효율이 개선됩니다.</div>
+            <div class="ai-rec-impact">예상 ROAS 개선: +19%</div>
+            <div class="ai-conf-bar"><div class="ai-conf-fill" style="width:81%"></div></div>
+            <div class="ai-conf-label"><span>신뢰도</span><span>81%</span></div>
+            <button class="btn btn-primary" style="width:100%;font-size:12px;padding:8px">지금 적용</button>
+          </div>
+
+          <div class="ai-rec-card">
+            <div class="ai-rec-top">
+              <span class="ai-rec-priority-mid">중간</span>
+              <span class="ai-rec-cat">크리에이티브</span>
+            </div>
+            <div class="ai-rec-title">에어팟 광고 소재 B로 교체</div>
+            <div class="ai-rec-desc">현재 에어팟 프로 광고 소재 A의 CTR이 1.2%인 반면, A/B 테스트 중인 소재 B는 2.8%를 기록하고 있습니다. 소재 B의 "음소거 생활" 카피가 타겟층에 더 효과적입니다.</div>
+            <div class="ai-rec-impact">예상 ROAS 개선: +22%</div>
+            <div class="ai-conf-bar"><div class="ai-conf-fill" style="width:85%"></div></div>
+            <div class="ai-conf-label"><span>신뢰도</span><span>85%</span></div>
+            <button class="btn btn-secondary" style="width:100%;font-size:12px;padding:8px">검토 후 적용</button>
+          </div>
+
+          <div class="ai-rec-card">
+            <div class="ai-rec-top">
+              <span class="ai-rec-priority-mid">중간</span>
+              <span class="ai-rec-cat">입찰 최적화</span>
+            </div>
+            <div class="ai-rec-title">야간 시간대 (22시-06시) 입찰 30% 감소</div>
+            <div class="ai-rec-desc">분석 결과 22시 이후 광고 클릭은 발생하지만 전환율이 낮은 시간대(오전 10시-오후 7시의 1/3 수준)입니다. 야간 입찰가를 낮춰 예산을 피크 시간대에 집중 배분하세요.</div>
+            <div class="ai-rec-impact">예상 ROAS 개선: +11%</div>
+            <div class="ai-conf-bar"><div class="ai-conf-fill" style="width:78%"></div></div>
+            <div class="ai-conf-label"><span>신뢰도</span><span>78%</span></div>
+            <button class="btn btn-primary" style="width:100%;font-size:12px;padding:8px">지금 적용</button>
+          </div>
+
+          <div class="ai-rec-card">
+            <div class="ai-rec-top">
+              <span class="ai-rec-priority-low">낮음</span>
+              <span class="ai-rec-cat">타겟팅 개선</span>
+            </div>
+            <div class="ai-rec-title">유사 타겟(Lookalike) 확장 — 상위 1%</div>
+            <div class="ai-rec-desc">기존 전환 고객 데이터를 기반으로 메타에서 유사 타겟을 생성할 수 있습니다. 상위 1% 유사 타겟은 기존 리타겟팅 대비 신규 고객 획득 효율이 높습니다.</div>
+            <div class="ai-rec-impact">예상 ROAS 개선: +15%</div>
+            <div class="ai-conf-bar"><div class="ai-conf-fill" style="width:71%"></div></div>
+            <div class="ai-conf-label"><span>신뢰도</span><span>71%</span></div>
+            <button class="btn btn-secondary" style="width:100%;font-size:12px;padding:8px">검토 후 적용</button>
+          </div>
+
+          <div class="ai-rec-card">
+            <div class="ai-rec-top">
+              <span class="ai-rec-priority-high">높음</span>
+              <span class="ai-rec-cat">크리에이티브</span>
+            </div>
+            <div class="ai-rec-title">LG 그램 광고 키워드 확장 — 롱테일</div>
+            <div class="ai-rec-desc">"LG 그램 16" 외에 "학생 노트북 추천", "가벼운 노트북", "대학생 노트북" 등 롱테일 키워드 추가를 권장합니다. 해당 키워드군의 CPC가 낮고 전환 의도가 높습니다.</div>
+            <div class="ai-rec-impact">예상 ROAS 개선: +25%</div>
+            <div class="ai-conf-bar"><div class="ai-conf-fill" style="width:87%"></div></div>
+            <div class="ai-conf-label"><span>신뢰도</span><span>87%</span></div>
+            <button class="btn btn-primary" style="width:100%;font-size:12px;padding:8px">지금 적용</button>
+          </div>
+
+          <div class="ai-rec-card">
+            <div class="ai-rec-top">
+              <span class="ai-rec-priority-low">낮음</span>
+              <span class="ai-rec-cat">예산 최적화</span>
+            </div>
+            <div class="ai-rec-title">구글 스마트 입찰 전략 — tROAS 전환</div>
+            <div class="ai-rec-desc">현재 수동 CPC 방식에서 구글 tROAS(목표 광고 수익률) 스마트 입찰로 전환을 권장합니다. 학습 기간 2주 후 자동 최적화로 CPA 15-20% 절감이 기대됩니다.</div>
+            <div class="ai-rec-impact">예상 ROAS 개선: +18%</div>
+            <div class="ai-conf-bar"><div class="ai-conf-fill" style="width:74%"></div></div>
+            <div class="ai-conf-label"><span>신뢰도</span><span>74%</span></div>
+            <button class="btn btn-secondary" style="width:100%;font-size:12px;padding:8px">검토 후 적용</button>
+          </div>
+        </div>
+
+        <!-- Applied recommendations history -->
+        <div class="ai-history-card">
+          <div class="card-title-sm" style="margin-bottom:12px">적용된 추천 히스토리</div>
+          <div class="ai-hist-row hdr">
+            <span>적용일</span><span>추천 내용</span><span>카테고리</span><span>ROAS 변화</span><span>상태</span>
+          </div>
+          <div class="ai-hist-row">
+            <span style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">03-07</span>
+            <span style="font-size:12px">소니 헤드폰 입찰가 조정</span>
+            <span style="font-size:11px;color:var(--text-muted)">입찰</span>
+            <span style="font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace">+31%</span>
+            <span class="chip chip-green" style="font-size:10px;padding:2px 8px">효과적</span>
+          </div>
+          <div class="ai-hist-row">
+            <span style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">03-06</span>
+            <span style="font-size:12px">필립스 쇼핑 소재 A→B 교체</span>
+            <span style="font-size:11px;color:var(--text-muted)">크리에이티브</span>
+            <span style="font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace">+22%</span>
+            <span class="chip chip-green" style="font-size:10px;padding:2px 8px">효과적</span>
+          </div>
+          <div class="ai-hist-row">
+            <span style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">03-05</span>
+            <span style="font-size:12px">메타 예산 ₩300K 증액</span>
+            <span style="font-size:11px;color:var(--text-muted)">예산</span>
+            <span style="font-size:11px;color:var(--yellow);font-family:'JetBrains Mono',monospace">+8%</span>
+            <span class="chip" style="background:rgba(251,191,36,0.15);color:var(--yellow);font-size:10px;padding:2px 8px">보통</span>
+          </div>
+          <div class="ai-hist-row">
+            <span style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">03-04</span>
+            <span style="font-size:12px">구글 25-34세 타겟 가중치 +20%</span>
+            <span style="font-size:11px;color:var(--text-muted)">타겟팅</span>
+            <span style="font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace">+41%</span>
+            <span class="chip chip-green" style="font-size:10px;padding:2px 8px">매우 효과적</span>
+          </div>
+          <div class="ai-hist-row">
+            <span style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">03-03</span>
+            <span style="font-size:12px">카카오 주말 입찰 +15% 증가</span>
+            <span style="font-size:11px;color:var(--text-muted)">입찰</span>
+            <span style="font-size:11px;color:var(--red);font-family:'JetBrains Mono',monospace">-3%</span>
+            <span class="chip" style="background:rgba(248,113,113,0.15);color:var(--red);font-size:10px;padding:2px 8px">비효과적</span>
+          </div>
+        </div>
+      </div><!-- /tab-ai-rec -->
+
+    </main>
+  </div><!-- /layout-with-sidebar -->
+</div><!-- /app -->
+
+<script>
+(function() {
+  var navItems = document.querySelectorAll('.nav-item[data-tab]');
+  var tabSections = document.querySelectorAll('.tab-section');
+
+  navItems.forEach(function(item) {
+    item.addEventListener('click', function() {
+      var target = this.getAttribute('data-tab');
+      navItems.forEach(function(n) { n.classList.remove('active'); });
+      tabSections.forEach(function(s) { s.classList.remove('active'); });
+      this.classList.add('active');
+      var section = document.getElementById('tab-' + target);
+      if (section) section.classList.add('active');
+    });
+  });
+})();
+</script>
 </body>
 </html>
