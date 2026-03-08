@@ -1,0 +1,101 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1772969775028,
+  "projectRoot": "/home/bsh/develop/automarket",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {},
+  "hotPaths": [
+    {
+      "path": "docs/00-overview.md",
+      "accessCount": 3,
+      "lastAccessed": 1772970817441,
+      "type": "file"
+    },
+    {
+      "path": "prompt.md",
+      "accessCount": 2,
+      "lastAccessed": 1772969924612,
+      "type": "file"
+    },
+    {
+      "path": "docs/02-architecture.md",
+      "accessCount": 2,
+      "lastAccessed": 1772970817697,
+      "type": "file"
+    },
+    {
+      "path": "docs/01-philosophy.md",
+      "accessCount": 1,
+      "lastAccessed": 1772970775833,
+      "type": "file"
+    },
+    {
+      "path": "docs/03-automation-design.md",
+      "accessCount": 1,
+      "lastAccessed": 1772970820328,
+      "type": "file"
+    },
+    {
+      "path": "docs/04-saas-products.md",
+      "accessCount": 1,
+      "lastAccessed": 1772970963515,
+      "type": "file"
+    },
+    {
+      "path": "docs/05-data-architecture.md",
+      "accessCount": 1,
+      "lastAccessed": 1772971066954,
+      "type": "file"
+    },
+    {
+      "path": "docs/07-risks-and-mitigations.md",
+      "accessCount": 1,
+      "lastAccessed": 1772971112286,
+      "type": "file"
+    },
+    {
+      "path": "docs/06-roadmap.md",
+      "accessCount": 1,
+      "lastAccessed": 1772971123895,
+      "type": "file"
+    },
+    {
+      "path": "docs/08-metrics-and-kpis.md",
+      "accessCount": 1,
+      "lastAccessed": 1772971134683,
+      "type": "file"
+    },
+    {
+      "path": "docs/09-appendix.md",
+      "accessCount": 1,
+      "lastAccessed": 1772971219577,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
