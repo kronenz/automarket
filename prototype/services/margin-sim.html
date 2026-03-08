@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarginSim — 마진 시뮬레이터 | AutoMarket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #06080d;
+  --bg-surface: #0c1018;
+  --bg-card: #111825;
+  --bg-card-hover: #162030;
+  --bg-elevated: #1a2438;
+  --node1: #00e5ff;
+  --node1-dim: #00e5ff22;
+  --node1-glow: #00e5ff55;
+  --node4: #34d399;
+  --node4-dim: #34d39922;
+  --node2: #ff6bca;
+  --node3: #a78bfa;
+  --node3-dim: #a78bfa22;
+  --warn: #f59e0b;
+  --warn-dim: #f59e0b22;
+  --danger: #f87171;
+  --danger-dim: #f8717122;
+  --text-primary: #e8edf5;
+  --text-secondary: #8896ab;
+  --text-muted: #4a5568;
+  --border: #1e293b;
+  --border-light: #2d3b50;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0,229,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -20%;
+  right: -10%;
+  width: 50vw;
+  height: 50vh;
+  background: radial-gradient(ellipse, rgba(52,211,153,0.03), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.app { position: relative; z-index: 1; }
+
+/* ── TOP BAR ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  background: rgba(6,8,13,0.88);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--node1), var(--node3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--bg-deep);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3));
+}
+
+.logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--text-primary); }
+.logo-text span { color: var(--node1); }
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.back-link:hover { color: var(--node1); border-color: rgba(0,229,255,0.3); background: var(--node1-dim); }
+
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+
+.accuracy-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(52,211,153,0.08);
+  border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--node4);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  padding: 40px 32px 32px;
+  border-bottom: 1px solid var(--border);
+  animation: fadeUp 0.5s ease both;
+}
+
+.page-header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.service-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: var(--node1-dim);
+  border: 1px solid rgba(0,229,255,0.25);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--node1);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.page-title { font-size: 36px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 10px; line-height: 1.1; }
+.page-title .accent { color: var(--node4); }
+
+.page-subtitle { font-size: 15px; color: var(--text-secondary); max-width: 520px; line-height: 1.6; }
+
+.page-header-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+
+.phase-badge {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: rgba(52,211,153,0.1);
+  border: 1px solid rgba(52,211,153,0.25);
+  color: var(--node4);
+}
+
+/* ── MAIN GRID ── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 0;
+  min-height: 600px;
+}
+
+.col-left {
+  padding: 32px 24px 32px 32px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.col-right {
+  padding: 32px 32px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── SIMULATOR PANEL ── */
+.sim-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+.sim-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sim-card-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(52,211,153,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.sim-card-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sim-body { padding: 20px; }
+
+/* ── FORM FIELDS ── */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group:last-child { margin-bottom: 0; }
+
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 7px;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 14px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.form-input:focus { border-color: var(--node1); box-shadow: 0 0 0 3px rgba(0,229,255,0.08); }
+
+.form-input-prefix {
+  position: relative;
+}
+
+.prefix-symbol {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.form-input-prefix .form-input { padding-left: 28px; }
+
+/* ── CHANNEL TABS ── */
+.channel-tabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.channel-tab {
+  flex: 1;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-family: inherit;
+  border-right: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.channel-tab:last-child { border-right: none; }
+
+.channel-tab.active {
+  background: rgba(0,229,255,0.1);
+  color: var(--node1);
+}
+
+.channel-tab:not(.active):hover { color: var(--text-secondary); }
+
+/* ── CALCULATED FIELDS ── */
+.calc-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.calc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.calc-row-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calc-row-label .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.calc-row-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.calc-row-value.negative { color: var(--danger); }
+
+.calc-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.net-margin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(52,211,153,0.08);
+  border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 8px;
+  margin-top: 4px;
+}
+
+.net-margin-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--node4);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.net-margin-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--node4);
+  letter-spacing: -0.5px;
+}
+
+.net-margin-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(52,211,153,0.7);
+  margin-left: 4px;
+}
+
+.run-btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: linear-gradient(135deg, var(--node1), rgba(0,229,255,0.7));
+  color: var(--bg-deep);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+  margin-top: 4px;
+}
+
+.run-btn:hover {
+  box-shadow: 0 0 24px rgba(0,229,255,0.3);
+  transform: translateY(-1px);
+}
+
+/* ── WATERFALL CHART ── */
+.waterfall-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.5s 0.15s ease both;
+}
+
+.waterfall-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.waterfall-title {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.waterfall-body {
+  padding: 24px 20px;
+}
+
+.waterfall-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 160px;
+  margin-bottom: 12px;
+}
+
+.wf-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.wf-bar-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.wf-bar-container {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.wf-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.wf-bar-val {
+  position: absolute;
+  top: -20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.wf-connector {
+  position: absolute;
+  bottom: 0;
+  right: -8px;
+  width: 8px;
+  height: 1px;
+  background: var(--border-light);
+  z-index: 1;
+}
+
+.wf-revenue { background: linear-gradient(180deg, #00e5ff, rgba(0,229,255,0.5)); }
+.wf-cost    { background: linear-gradient(180deg, #f87171, rgba(248,113,113,0.5)); }
+.wf-profit  { background: linear-gradient(180deg, #34d399, rgba(52,211,153,0.5)); }
+.wf-neutral { background: linear-gradient(180deg, var(--bg-elevated), var(--border)); }
+
+.waterfall-legend {
+  display: flex;
+  gap: 20px;
+}
+
+.wf-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.wf-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+/* ── SCENARIO COMPARISON ── */
+.scenario-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.5s 0.2s ease both;
+}
+
+.scenario-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.scenario-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+}
+
+.scenario-col {
+  background: var(--bg-card);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+}
+
+.scenario-col.featured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--node1), transparent);
+}
+
+.scenario-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-conservative { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
+.badge-base         { background: rgba(0,229,255,0.1); color: var(--node1); border: 1px solid rgba(0,229,255,0.2); }
+.badge-optimistic   { background: rgba(52,211,153,0.12); color: var(--node4); border: 1px solid rgba(52,211,153,0.2); }
+
+.scenario-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sc-metric-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.sc-metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sc-metric-value.red    { color: var(--danger); }
+.sc-metric-value.cyan   { color: var(--node1); }
+.sc-metric-value.green  { color: var(--node4); }
+
+.sc-margin-bar {
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sc-margin-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* ── BREAKEVEN ── */
+.breakeven-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.5s 0.25s ease both;
+}
+
+.breakeven-body {
+  padding: 20px;
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.be-stat-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.be-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.be-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.be-stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--node1);
+}
+
+.be-divider {
+  width: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.be-chart-col {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.be-chart-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.be-line-chart {
+  position: relative;
+  height: 90px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.be-line-chart svg {
+  width: 100%;
+  height: 100%;
+}
+
+.be-axis-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+/* ── ACCURACY PANEL ── */
+.accuracy-section {
+  padding: 0 32px;
+  margin-bottom: 8px;
+  animation: fadeUp 0.5s 0.28s ease both;
+}
+
+.accuracy-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.accuracy-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.accuracy-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.accuracy-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--node4);
+  letter-spacing: -2px;
+  line-height: 1;
+}
+
+.accuracy-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.accuracy-divider {
+  width: 1px;
+  height: 60px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.accuracy-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.acc-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.acc-bar-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 80px;
+}
+
+.acc-bar-track {
+  flex: 1;
+  height: 5px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.acc-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.acc-bar-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ── BOTTOM STATS ── */
+.bottom-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+  animation: fadeUp 0.5s 0.35s ease both;
+}
+
+.stat-item {
+  background: var(--bg-surface);
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.stat-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--node1); letter-spacing: -0.5px; }
+.stat-desc  { font-size: 12px; color: var(--text-muted); }
+
+/* ── PRICING FOOTER ── */
+.pricing-footer {
+  margin: 0 32px 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  animation: fadeUp 0.5s 0.4s ease both;
+}
+
+.pricing-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.pricing-tiers { display: flex; gap: 12px; }
+
+.pricing-tier {
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  text-align: center;
+  min-width: 110px;
+  transition: all 0.2s;
+}
+
+.pricing-tier:hover { border-color: var(--border-light); }
+.pricing-tier.featured { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.05); }
+
+.tier-name { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.tier-price { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.pricing-tier.featured .tier-price { color: var(--node4); }
+.tier-period { font-size: 11px; color: var(--text-muted); }
+
+.btn-primary {
+  padding: 12px 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--node4);
+  color: var(--bg-deep);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover { box-shadow: 0 0 24px rgba(52,211,153,0.3); transform: translateY(-1px); }
+
+.btn-secondary {
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover { border-color: var(--border-light); color: var(--text-primary); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── MISC ── */
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title-inline {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-badge-inline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--node4);
+  padding: 3px 8px;
+  background: var(--node4-dim);
+  border-radius: 4px;
+  border: 1px solid rgba(52,211,153,0.15);
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Auto<span>Market</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="accuracy-badge">◉ 예측 정확도 92%</div>
+      <a href="../index.html" class="back-link">← Dashboard</a>
+    </div>
+  </header>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-title-group">
+        <div class="service-tag">Node 1 · Opportunity Discovery</div>
+        <h1 class="page-title">Margin<span class="accent">Sim</span></h1>
+        <p class="page-subtitle">판매가·소싱가·채널별 수수료를 입력하면 순마진을 즉시 산출합니다. Conservative / Base / Optimistic 3가지 시나리오로 손익분기점을 자동 계산합니다.</p>
+      </div>
+      <div class="page-header-meta">
+        <span class="phase-badge">◈ P2 · Beta</span>
+        <div style="font-size:13px;color:var(--text-secondary);text-align:right;">
+          월 구독
+          <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-primary);">₩49K — ₩490K</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: SIMULATOR -->
+    <div class="col-left">
+
+      <div class="sim-card">
+        <div class="sim-card-header">
+          <div class="sim-card-icon">🧮</div>
+          <span class="sim-card-title">마진 시뮬레이터</span>
+        </div>
+        <div class="sim-body">
+
+          <!-- Product Name -->
+          <div class="form-group">
+            <label class="form-label">제품명</label>
+            <input class="form-input" type="text" value="미니 가습기 USB타입" style="font-family:'Noto Sans KR',sans-serif;font-size:14px;">
+          </div>
+
+          <!-- Sourcing Cost -->
+          <div class="form-group">
+            <label class="form-label">소싱가 (단가)</label>
+            <div class="form-input-prefix">
+              <span class="prefix-symbol">₩</span>
+              <input class="form-input" type="text" value="2,840">
+            </div>
+          </div>
+
+          <!-- Channel Tabs -->
+          <div class="form-group">
+            <label class="form-label">판매 채널</label>
+            <div class="channel-tabs">
+              <button class="channel-tab active">쿠팡</button>
+              <button class="channel-tab">네이버</button>
+              <button class="channel-tab">11번가</button>
+              <button class="channel-tab">자사몰</button>
+            </div>
+          </div>
+
+          <!-- Selling Price -->
+          <div class="form-group">
+            <label class="form-label">판매가 (소비자가)</label>
+            <div class="form-input-prefix">
+              <span class="prefix-symbol">₩</span>
+              <input class="form-input" type="text" value="12,900">
+            </div>
+          </div>
+
+          <!-- Calculated Fields -->
+          <div class="form-group">
+            <label class="form-label">비용 분석</label>
+            <div class="calc-section">
+              <div class="calc-row">
+                <span class="calc-row-label"><span class="dot" style="background:var(--node1)"></span>매출액</span>
+                <span class="calc-row-value" style="color:var(--node1)">₩12,900</span>
+              </div>
+              <div class="calc-divider"></div>
+              <div class="calc-row">
+                <span class="calc-row-label"><span class="dot" style="background:var(--danger)"></span>소싱 원가</span>
+                <span class="calc-row-value negative">− ₩2,840</span>
+              </div>
+              <div class="calc-row">
+                <span class="calc-row-label"><span class="dot" style="background:var(--danger)"></span>채널 수수료 (10.9%)</span>
+                <span class="calc-row-value negative">− ₩1,406</span>
+              </div>
+              <div class="calc-row">
+                <span class="calc-row-label"><span class="dot" style="background:var(--danger)"></span>물류비 (로켓배송)</span>
+                <span class="calc-row-value negative">− ₩850</span>
+              </div>
+              <div class="calc-row">
+                <span class="calc-row-label"><span class="dot" style="background:var(--danger)"></span>포장재비</span>
+                <span class="calc-row-value negative">− ₩220</span>
+              </div>
+              <div class="calc-row">
+                <span class="calc-row-label"><span class="dot" style="background:var(--warn)"></span>광고비 (ROAS 4.2)</span>
+                <span class="calc-row-value" style="color:var(--warn)">− ₩980</span>
+              </div>
+              <div class="calc-divider"></div>
+            </div>
+            <!-- Net Margin -->
+            <div class="net-margin-row" style="margin-top:12px;">
+              <div class="net-margin-label">
+                ◉ 순마진 (Net)
+              </div>
+              <div>
+                <span class="net-margin-value">₩6,604</span>
+                <span class="net-margin-pct">51.2%</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="run-btn">시뮬레이션 실행 →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: CHARTS + SCENARIOS -->
+    <div class="col-right">
+
+      <!-- Waterfall Chart -->
+      <div class="waterfall-card">
+        <div class="waterfall-header">
+          <div class="waterfall-title">📊 수익 구조 Waterfall</div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);">쿠팡 기준</span>
+        </div>
+        <div class="waterfall-body">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:20px;font-family:'JetBrains Mono',monospace;">
+            판매가 ₩12,900 기준 · 단위: ₩
+          </div>
+          <div class="waterfall-chart" style="align-items:flex-end;padding-top:30px;">
+            <!-- Revenue -->
+            <div class="wf-bar-wrap" style="max-width:72px;">
+              <div class="wf-bar-container" style="height:100%;">
+                <div class="wf-bar wf-revenue" style="height:100%;">
+                  <div class="wf-bar-val" style="color:var(--node1);">12,900</div>
+                  <div class="wf-connector"></div>
+                </div>
+              </div>
+              <div class="wf-bar-label">매출액</div>
+            </div>
+            <!-- Sourcing -->
+            <div class="wf-bar-wrap" style="max-width:72px;">
+              <div class="wf-bar-container" style="height:100%;">
+                <div style="height:calc(100% - 22%);background:transparent;"></div>
+                <div class="wf-bar wf-cost" style="height:22%;">
+                  <div class="wf-bar-val" style="color:var(--danger);">−2,840</div>
+                  <div class="wf-connector"></div>
+                </div>
+              </div>
+              <div class="wf-bar-label">소싱<br>원가</div>
+            </div>
+            <!-- Channel Fee -->
+            <div class="wf-bar-wrap" style="max-width:72px;">
+              <div class="wf-bar-container" style="height:100%;">
+                <div style="height:calc(100% - 33%);background:transparent;"></div>
+                <div class="wf-bar wf-cost" style="height:11%;">
+                  <div class="wf-bar-val" style="color:var(--danger);">−1,406</div>
+                  <div class="wf-connector"></div>
+                </div>
+              </div>
+              <div class="wf-bar-label">채널<br>수수료</div>
+            </div>
+            <!-- Logistics -->
+            <div class="wf-bar-wrap" style="max-width:72px;">
+              <div class="wf-bar-container" style="height:100%;">
+                <div style="height:calc(100% - 40%);background:transparent;"></div>
+                <div class="wf-bar wf-cost" style="height:7%;">
+                  <div class="wf-bar-val" style="color:var(--danger);">−850</div>
+                  <div class="wf-connector"></div>
+                </div>
+              </div>
+              <div class="wf-bar-label">물류비</div>
+            </div>
+            <!-- Packaging -->
+            <div class="wf-bar-wrap" style="max-width:72px;">
+              <div class="wf-bar-container" style="height:100%;">
+                <div style="height:calc(100% - 42%);background:transparent;"></div>
+                <div class="wf-bar wf-cost" style="height:2%;">
+                  <div class="wf-bar-val" style="color:var(--danger);">−220</div>
+                  <div class="wf-connector"></div>
+                </div>
+              </div>
+              <div class="wf-bar-label">포장재</div>
+            </div>
+            <!-- Ad Cost -->
+            <div class="wf-bar-wrap" style="max-width:72px;">
+              <div class="wf-bar-container" style="height:100%;">
+                <div style="height:calc(100% - 50%);background:transparent;"></div>
+                <div class="wf-bar" style="height:8%;background:linear-gradient(180deg,var(--warn),rgba(245,158,11,0.4));border-radius:4px 4px 0 0;">
+                  <div class="wf-bar-val" style="color:var(--warn);">−980</div>
+                  <div class="wf-connector"></div>
+                </div>
+              </div>
+              <div class="wf-bar-label">광고비</div>
+            </div>
+            <!-- Spacer -->
+            <div style="flex:0.3;"></div>
+            <!-- Net Profit -->
+            <div class="wf-bar-wrap" style="max-width:72px;">
+              <div class="wf-bar-container" style="height:100%;">
+                <div class="wf-bar wf-profit" style="height:51%;">
+                  <div class="wf-bar-val" style="color:var(--node4);">6,604</div>
+                </div>
+              </div>
+              <div class="wf-bar-label" style="color:var(--node4);font-weight:700;">순마진</div>
+            </div>
+          </div>
+          <div class="waterfall-legend">
+            <div class="wf-legend-item"><div class="wf-legend-dot" style="background:var(--node1)"></div>매출</div>
+            <div class="wf-legend-item"><div class="wf-legend-dot" style="background:var(--danger)"></div>비용</div>
+            <div class="wf-legend-item"><div class="wf-legend-dot" style="background:var(--warn)"></div>광고</div>
+            <div class="wf-legend-item"><div class="wf-legend-dot" style="background:var(--node4)"></div>순이익</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scenario Comparison -->
+      <div class="scenario-card">
+        <div class="scenario-header">
+          <div class="card-title-inline">
+            <span>🔮</span> 시나리오 비교
+          </div>
+          <span class="card-badge-inline">3 scenarios</span>
+        </div>
+        <div class="scenario-grid">
+
+          <!-- Conservative -->
+          <div class="scenario-col">
+            <span class="scenario-badge badge-conservative">Conservative</span>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">판매가</div>
+              <div class="sc-metric-value red">₩10,900</div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">예상 순마진</div>
+              <div class="sc-metric-value red">₩4,230</div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">마진율</div>
+              <div class="sc-metric-value red">38.8%</div>
+            </div>
+            <div class="sc-margin-bar">
+              <div class="sc-margin-bar-fill" style="width:39%;background:var(--danger);"></div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">월 판매량 가정</div>
+              <div class="sc-metric-value" style="font-size:13px;color:var(--text-secondary);">300개 / 월</div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">월 순이익</div>
+              <div class="sc-metric-value red">₩1,269K</div>
+            </div>
+          </div>
+
+          <!-- Base -->
+          <div class="scenario-col featured">
+            <span class="scenario-badge badge-base">Base</span>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">판매가</div>
+              <div class="sc-metric-value cyan">₩12,900</div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">예상 순마진</div>
+              <div class="sc-metric-value cyan">₩6,604</div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">마진율</div>
+              <div class="sc-metric-value cyan">51.2%</div>
+            </div>
+            <div class="sc-margin-bar">
+              <div class="sc-margin-bar-fill" style="width:51%;background:var(--node1);"></div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">월 판매량 가정</div>
+              <div class="sc-metric-value" style="font-size:13px;color:var(--text-secondary);">600개 / 월</div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">월 순이익</div>
+              <div class="sc-metric-value cyan">₩3,962K</div>
+            </div>
+          </div>
+
+          <!-- Optimistic -->
+          <div class="scenario-col">
+            <span class="scenario-badge badge-optimistic">Optimistic</span>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">판매가</div>
+              <div class="sc-metric-value green">₩15,900</div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">예상 순마진</div>
+              <div class="sc-metric-value green">₩9,220</div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">마진율</div>
+              <div class="sc-metric-value green">58.0%</div>
+            </div>
+            <div class="sc-margin-bar">
+              <div class="sc-margin-bar-fill" style="width:58%;background:var(--node4);"></div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">월 판매량 가정</div>
+              <div class="sc-metric-value" style="font-size:13px;color:var(--text-secondary);">1,000개 / 월</div>
+            </div>
+            <div class="scenario-metric">
+              <div class="sc-metric-label">월 순이익</div>
+              <div class="sc-metric-value green">₩9,220K</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Break-even Calculator -->
+      <div class="breakeven-card">
+        <div class="scenario-header">
+          <div class="card-title-inline"><span>📐</span> 손익분기점 계산기</div>
+          <span style="font-size:11px;color:var(--node1);font-family:'JetBrains Mono',monospace;">BEP Analysis</span>
+        </div>
+        <div class="breakeven-body">
+          <div class="be-stat-col">
+            <div class="be-stat">
+              <div class="be-stat-label">BEP 수량</div>
+              <div class="be-stat-value">43개</div>
+            </div>
+            <div class="be-stat">
+              <div class="be-stat-label">BEP 매출</div>
+              <div class="be-stat-value" style="font-size:16px;">₩554.7K</div>
+            </div>
+            <div class="be-stat">
+              <div class="be-stat-label">고정비 (월)</div>
+              <div class="be-stat-value" style="font-size:15px;color:var(--text-secondary);">₩280K</div>
+            </div>
+          </div>
+          <div class="be-divider"></div>
+          <div class="be-chart-col">
+            <div class="be-chart-label">손익 곡선 (판매수량 기준)</div>
+            <div class="be-line-chart">
+              <svg viewBox="0 0 300 90" preserveAspectRatio="none">
+                <!-- Grid lines -->
+                <line x1="0" y1="45" x2="300" y2="45" stroke="#1e293b" stroke-width="1" stroke-dasharray="4,4"/>
+                <line x1="43" y1="0" x2="43" y2="90" stroke="rgba(0,229,255,0.3)" stroke-width="1" stroke-dasharray="3,3"/>
+                <!-- Cost line (fixed + variable) -->
+                <path d="M0,55 L300,15" stroke="#f87171" stroke-width="1.5" fill="none" opacity="0.8"/>
+                <!-- Revenue line -->
+                <path d="M0,75 L300,5" stroke="#00e5ff" stroke-width="1.5" fill="none" opacity="0.8"/>
+                <!-- Profit area after BEP -->
+                <path d="M43,38 L300,5 L300,15 L43,38 Z" fill="rgba(52,211,153,0.1)"/>
+                <!-- BEP dot -->
+                <circle cx="43" cy="38" r="4" fill="#00e5ff"/>
+                <text x="48" y="34" font-family="JetBrains Mono" font-size="8" fill="#00e5ff">BEP</text>
+                <!-- Labels -->
+                <text x="255" y="12" font-family="JetBrains Mono" font-size="7" fill="#f87171">비용</text>
+                <text x="255" y="28" font-family="JetBrains Mono" font-size="7" fill="#00e5ff">매출</text>
+              </svg>
+            </div>
+            <div class="be-axis-labels">
+              <span>0개</span>
+              <span>100개</span>
+              <span>200개</span>
+              <span>300개</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ACCURACY SECTION -->
+  <div class="accuracy-section">
+    <div class="accuracy-card">
+      <div class="accuracy-main">
+        <div class="accuracy-label">예측 정확도</div>
+        <div class="accuracy-value">92%</div>
+        <div class="accuracy-sub">실 판매 데이터 대비</div>
+      </div>
+      <div class="accuracy-divider"></div>
+      <div class="accuracy-bars">
+        <div class="acc-bar-row">
+          <span class="acc-bar-label">마진율 예측</span>
+          <div class="acc-bar-track"><div class="acc-bar-fill" style="width:95%;background:#34d399;"></div></div>
+          <span class="acc-bar-val" style="color:var(--node4);">95%</span>
+        </div>
+        <div class="acc-bar-row">
+          <span class="acc-bar-label">BEP 예측</span>
+          <div class="acc-bar-track"><div class="acc-bar-fill" style="width:91%;background:#00e5ff;"></div></div>
+          <span class="acc-bar-val" style="color:var(--node1);">91%</span>
+        </div>
+        <div class="acc-bar-row">
+          <span class="acc-bar-label">채널 수수료</span>
+          <div class="acc-bar-track"><div class="acc-bar-fill" style="width:98%;background:#34d399;"></div></div>
+          <span class="acc-bar-val" style="color:var(--node4);">98%</span>
+        </div>
+        <div class="acc-bar-row">
+          <span class="acc-bar-label">광고 ROAS</span>
+          <div class="acc-bar-track"><div class="acc-bar-fill" style="width:84%;background:#f59e0b;"></div></div>
+          <span class="acc-bar-val" style="color:var(--warn);">84%</span>
+        </div>
+      </div>
+      <div class="accuracy-divider"></div>
+      <div style="display:flex;flex-direction:column;gap:10px;padding:0 8px;">
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">누적 시뮬레이션</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--node1);">184,320</div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">검증 데이터셋</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text-secondary);">12,400건</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM STATS -->
+  <div class="bottom-stats" style="margin-top:28px;">
+    <div class="stat-item">
+      <div class="stat-label">Simulations / Day</div>
+      <div class="stat-value">840</div>
+      <div class="stat-desc">일 평균 실행 횟수</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Avg Processing Time</div>
+      <div class="stat-value">0.3s</div>
+      <div class="stat-desc">결과 산출 평균 시간</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Channels Supported</div>
+      <div class="stat-value">12</div>
+      <div class="stat-desc">지원 판매 채널 수</div>
+    </div>
+  </div>
+
+  <!-- PRICING FOOTER -->
+  <div class="pricing-footer">
+    <div>
+      <div class="pricing-label">구독 플랜</div>
+      <div class="pricing-tiers">
+        <div class="pricing-tier">
+          <div class="tier-name">Starter</div>
+          <div class="tier-price">₩49K</div>
+          <div class="tier-period">/ 월</div>
+        </div>
+        <div class="pricing-tier featured">
+          <div class="tier-name">Pro</div>
+          <div class="tier-price">₩179K</div>
+          <div class="tier-period">/ 월</div>
+        </div>
+        <div class="pricing-tier">
+          <div class="tier-name">Scale</div>
+          <div class="tier-price">₩490K</div>
+          <div class="tier-period">/ 월</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-secondary">데모 요청</button>
+      <button class="btn-primary">무료로 시작하기 →</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

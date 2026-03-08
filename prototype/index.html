@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoMarket — AI E-Commerce Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   CSS VARIABLES & RESET
+   ═══════════════════════════════════════════ */
+:root {
+  --bg-deep: #06080d;
+  --bg-surface: #0c1018;
+  --bg-card: #111825;
+  --bg-card-hover: #162030;
+  --bg-elevated: #1a2438;
+
+  --node1: #00e5ff;
+  --node1-dim: #00e5ff33;
+  --node1-glow: #00e5ff55;
+  --node2: #ff6bca;
+  --node2-dim: #ff6bca33;
+  --node2-glow: #ff6bca55;
+  --node3: #a78bfa;
+  --node3-dim: #a78bfa33;
+  --node3-glow: #a78bfa55;
+  --node4: #34d399;
+  --node4-dim: #34d39933;
+  --node4-glow: #34d39955;
+
+  --text-primary: #e8edf5;
+  --text-secondary: #8896ab;
+  --text-muted: #4a5568;
+  --border: #1e293b;
+  --border-light: #2d3b50;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 14px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0,229,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ambient glow blobs */
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 50vw;
+  height: 50vh;
+  background: radial-gradient(ellipse, rgba(0,229,255,0.04), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════ */
+.app {
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════
+   TOP BAR
+   ═══════════════════════════════════════════ */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  background: rgba(6,8,13,0.85);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--node1), var(--node3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--bg-deep);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3));
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.logo-text span {
+  color: var(--node1);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(52,211,153,0.1);
+  border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--node4);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--node4);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+}
+
+.topbar-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.topbar-nav button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.topbar-nav button:hover {
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.topbar-nav button.active {
+  color: var(--node1);
+  background: var(--node1-dim);
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--node2), var(--node4));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.user-avatar:hover { transform: scale(1.1); }
+
+/* ═══════════════════════════════════════════
+   HERO METRICS
+   ═══════════════════════════════════════════ */
+.hero {
+  padding: 40px 32px 0;
+}
+
+.hero-header {
+  margin-bottom: 32px;
+}
+
+.hero-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+
+.hero-header p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.metric-card:nth-child(1)::before { background: linear-gradient(90deg, var(--node1), transparent); }
+.metric-card:nth-child(2)::before { background: linear-gradient(90deg, var(--node2), transparent); }
+.metric-card:nth-child(3)::before { background: linear-gradient(90deg, var(--node4), transparent); }
+.metric-card:nth-child(4)::before { background: linear-gradient(90deg, var(--node3), transparent); }
+.metric-card:nth-child(5)::before { background: linear-gradient(90deg, var(--node1), var(--node2)); }
+
+.metric-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 8px;
+}
+
+.metric-card:nth-child(1) .metric-value { color: var(--node1); }
+.metric-card:nth-child(2) .metric-value { color: var(--node2); }
+.metric-card:nth-child(3) .metric-value { color: var(--node4); }
+.metric-card:nth-child(4) .metric-value { color: var(--node3); }
+.metric-card:nth-child(5) .metric-value { color: var(--text-primary); }
+
+.metric-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.metric-change.up {
+  color: var(--node4);
+  background: rgba(52,211,153,0.1);
+}
+
+.metric-change.down {
+  color: #f87171;
+  background: rgba(248,113,113,0.1);
+}
+
+/* ═══════════════════════════════════════════
+   PIPELINE VISUALIZATION
+   ═══════════════════════════════════════════ */
+.pipeline-section {
+  padding: 0 32px 48px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative;
+}
+
+/* Connection lines between nodes */
+.pipeline::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: linear-gradient(90deg,
+    var(--node1) 0%, var(--node1) 20%,
+    var(--node2) 30%, var(--node2) 45%,
+    var(--node3) 55%, var(--node3) 70%,
+    var(--node4) 80%, var(--node4) 100%
+  );
+  opacity: 0.3;
+  z-index: 0;
+}
+
+.node-column {
+  position: relative;
+  z-index: 1;
+  padding: 0 8px;
+}
+
+.node-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 20px 16px;
+  border-radius: var(--radius-lg);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.node-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  transition: all 0.3s;
+}
+
+.node-column:nth-child(1) .node-header { background: rgba(0,229,255,0.05); }
+.node-column:nth-child(1) .node-header::before { border-color: var(--node1-dim); }
+.node-column:nth-child(1) .node-header:hover { background: rgba(0,229,255,0.1); }
+.node-column:nth-child(2) .node-header { background: rgba(255,107,202,0.05); }
+.node-column:nth-child(2) .node-header::before { border-color: var(--node2-dim); }
+.node-column:nth-child(2) .node-header:hover { background: rgba(255,107,202,0.1); }
+.node-column:nth-child(3) .node-header { background: rgba(167,139,250,0.05); }
+.node-column:nth-child(3) .node-header::before { border-color: var(--node3-dim); }
+.node-column:nth-child(3) .node-header:hover { background: rgba(167,139,250,0.1); }
+.node-column:nth-child(4) .node-header { background: rgba(52,211,153,0.05); }
+.node-column:nth-child(4) .node-header::before { border-color: var(--node4-dim); }
+.node-column:nth-child(4) .node-header:hover { background: rgba(52,211,153,0.1); }
+
+.node-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.node-column:nth-child(1) .node-number { color: var(--node1); }
+.node-column:nth-child(2) .node-number { color: var(--node2); }
+.node-column:nth-child(3) .node-number { color: var(--node3); }
+.node-column:nth-child(4) .node-number { color: var(--node4); }
+
+.node-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.node-name-kr {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.node-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.node-column:nth-child(1) .node-icon { background: var(--node1-dim); }
+.node-column:nth-child(2) .node-icon { background: var(--node2-dim); }
+.node-column:nth-child(3) .node-icon { background: var(--node3-dim); }
+.node-column:nth-child(4) .node-icon { background: var(--node4-dim); }
+
+/* ═══════════════════════════════════════════
+   SERVICE CARDS
+   ═══════════════════════════════════════════ */
+.service-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.service-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.service-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
+.node-column:nth-child(1) .service-card:hover { box-shadow: 0 12px 40px rgba(0,229,255,0.08); }
+.node-column:nth-child(2) .service-card:hover { box-shadow: 0 12px 40px rgba(255,107,202,0.08); }
+.node-column:nth-child(3) .service-card:hover { box-shadow: 0 12px 40px rgba(167,139,250,0.08); }
+.node-column:nth-child(4) .service-card:hover { box-shadow: 0 12px 40px rgba(52,211,153,0.08); }
+
+.service-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.service-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.service-name-kr {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.service-phase {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.phase-1 {
+  background: rgba(52,211,153,0.15);
+  color: var(--node4);
+  border: 1px solid rgba(52,211,153,0.25);
+}
+
+.phase-2 {
+  background: rgba(0,229,255,0.1);
+  color: var(--node1);
+  border: 1px solid rgba(0,229,255,0.2);
+}
+
+.phase-3 {
+  background: rgba(167,139,250,0.1);
+  color: var(--node3);
+  border: 1px solid rgba(167,139,250,0.2);
+}
+
+.phase-4 {
+  background: rgba(255,107,202,0.1);
+  color: var(--node2);
+  border: 1px solid rgba(255,107,202,0.2);
+}
+
+.service-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.service-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.service-metric {
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.service-metric-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.service-metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.service-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.service-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════
+   TRUST ESCALATION SECTION
+   ═══════════════════════════════════════════ */
+.trust-section {
+  padding: 0 32px 48px;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.trust-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.trust-card::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  right: -10%;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  opacity: 0.05;
+}
+
+.trust-card:first-child::after { background: var(--node1); }
+.trust-card:last-child::after { background: var(--node3); }
+
+.trust-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* Automation Bar */
+.auto-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auto-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auto-bar-label {
+  font-size: 12px;
+  font-weight: 500;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.auto-bar-track {
+  flex: 1;
+  height: 28px;
+  background: var(--bg-surface);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.auto-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--bg-deep);
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auto-bar-fill.autopilot { background: linear-gradient(90deg, var(--node1), var(--node4)); }
+.auto-bar-fill.copilot { background: linear-gradient(90deg, var(--node3), var(--node2)); }
+.auto-bar-fill.human { background: linear-gradient(90deg, var(--text-muted), var(--text-secondary)); }
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--node4), var(--node1), var(--node3), var(--node2));
+  border-radius: 1px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timeline-item:last-child { margin-bottom: 0; }
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -21px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid;
+}
+
+.timeline-item:nth-child(1)::before { border-color: var(--node4); background: var(--node4-dim); }
+.timeline-item:nth-child(2)::before { border-color: var(--node1); background: var(--node1-dim); }
+.timeline-item:nth-child(3)::before { border-color: var(--node3); background: var(--node3-dim); }
+.timeline-item:nth-child(4)::before { border-color: var(--node2); background: var(--node2-dim); }
+
+.timeline-phase {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.timeline-item:nth-child(1) .timeline-phase { color: var(--node4); }
+.timeline-item:nth-child(2) .timeline-phase { color: var(--node1); }
+.timeline-item:nth-child(3) .timeline-phase { color: var(--node3); }
+.timeline-item:nth-child(4) .timeline-phase { color: var(--node2); }
+
+.timeline-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.timeline-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.timeline-products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.timeline-product-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.timeline-item:nth-child(1) .timeline-product-tag { background: rgba(52,211,153,0.1); color: var(--node4); }
+.timeline-item:nth-child(2) .timeline-product-tag { background: rgba(0,229,255,0.1); color: var(--node1); }
+.timeline-item:nth-child(3) .timeline-product-tag { background: rgba(167,139,250,0.1); color: var(--node3); }
+.timeline-item:nth-child(4) .timeline-product-tag { background: rgba(255,107,202,0.1); color: var(--node2); }
+
+/* ═══════════════════════════════════════════
+   SERVICE DETAIL PANELS (expandable)
+   ═══════════════════════════════════════════ */
+.detail-sections {
+  padding: 0 32px 60px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.detail-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.detail-card:hover {
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+}
+
+.detail-card-header {
+  padding: 24px 24px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.detail-card-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.detail-card-body {
+  padding: 16px 24px 24px;
+}
+
+.detail-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 2px;
+}
+
+.detail-card-title-kr {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.detail-card-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.detail-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.detail-feature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.detail-feature-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.detail-card-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.detail-stat {
+  background: var(--bg-surface);
+  padding: 12px;
+  text-align: center;
+}
+
+.detail-stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.detail-stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Mockup UI inside detail cards */
+.mockup-ui {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.mockup-table {
+  width: 100%;
+  font-size: 11px;
+}
+
+.mockup-table th {
+  text-align: left;
+  font-weight: 600;
+  padding: 6px 8px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mockup-table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.mockup-table tr:last-child td { border-bottom: none; }
+
+.trend-bar {
+  display: inline-block;
+  height: 4px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.score-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.score-high { background: rgba(52,211,153,0.15); color: var(--node4); }
+.score-mid { background: rgba(0,229,255,0.15); color: var(--node1); }
+.score-low { background: rgba(255,107,202,0.15); color: var(--node2); }
+
+/* Mini chart mockup */
+.mini-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 40px;
+}
+
+.mini-chart-bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  min-width: 4px;
+  transition: height 0.5s;
+}
+
+/* Revenue Model Tags */
+.revenue-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════
+   BOTTOM STATS BAR
+   ═══════════════════════════════════════════ */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: rgba(6,8,13,0.9);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 100;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+.bottom-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.bottom-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.bottom-stat-value {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════ */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-up {
+  animation: fade-up 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.animate-in {
+  animation: fade-in 0.5s ease both;
+}
+
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+.delay-6 { animation-delay: 0.3s; }
+.delay-7 { animation-delay: 0.35s; }
+.delay-8 { animation-delay: 0.4s; }
+.delay-9 { animation-delay: 0.45s; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+@media (max-width: 1200px) {
+  .pipeline { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .pipeline::before { display: none; }
+  .metrics-grid { grid-template-columns: repeat(3, 1fr); }
+  .detail-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .pipeline { grid-template-columns: 1fr; }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .trust-grid { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .hero, .pipeline-section, .trust-section, .detail-sections { padding-left: 16px; padding-right: 16px; }
+}
+
+/* ═══════════════════════════════════════════
+   NODE-COLORED DETAIL CARDS
+   ═══════════════════════════════════════════ */
+.detail-card[data-node="1"] .detail-card-icon { background: var(--node1-dim); }
+.detail-card[data-node="1"] .detail-stat-value { color: var(--node1); }
+.detail-card[data-node="1"] .detail-feature-dot { background: var(--node1); }
+
+.detail-card[data-node="2"] .detail-card-icon { background: var(--node2-dim); }
+.detail-card[data-node="2"] .detail-stat-value { color: var(--node2); }
+.detail-card[data-node="2"] .detail-feature-dot { background: var(--node2); }
+
+.detail-card[data-node="3"] .detail-card-icon { background: var(--node3-dim); }
+.detail-card[data-node="3"] .detail-stat-value { color: var(--node3); }
+.detail-card[data-node="3"] .detail-feature-dot { background: var(--node3); }
+
+.detail-card[data-node="4"] .detail-card-icon { background: var(--node4-dim); }
+.detail-card[data-node="4"] .detail-stat-value { color: var(--node4); }
+.detail-card[data-node="4"] .detail-feature-dot { background: var(--node4); }
+
+/* Padding for bottom bar */
+.app { padding-bottom: 60px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══════════ TOP BAR ══════════ -->
+  <header class="topbar">
+    <div class="logo">
+      <div class="logo-icon">A</div>
+      <div class="logo-text">Auto<span>Market</span></div>
+    </div>
+    <nav class="topbar-nav">
+      <button class="active">Dashboard</button>
+      <button>Services</button>
+      <button>Analytics</button>
+      <button>Automation</button>
+      <button>Settings</button>
+    </nav>
+    <div class="topbar-right">
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>All Systems Nominal</span>
+      </div>
+      <div class="user-avatar">B</div>
+    </div>
+  </header>
+
+  <!-- ══════════ HERO METRICS ══════════ -->
+  <section class="hero">
+    <div class="hero-header animate-up">
+      <h1>Command Center</h1>
+      <p>AI 이커머스 자동화 플랫폼 — 실시간 운영 현황</p>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card animate-up delay-1">
+        <div class="metric-label">Time to Revenue</div>
+        <div class="metric-value">38h</div>
+        <div class="metric-change up">&#9650; 47% faster</div>
+      </div>
+      <div class="metric-card animate-up delay-2">
+        <div class="metric-label">Active Users (MAU)</div>
+        <div class="metric-value">2,847</div>
+        <div class="metric-change up">&#9650; +23%</div>
+      </div>
+      <div class="metric-card animate-up delay-3">
+        <div class="metric-label">Automation Rate</div>
+        <div class="metric-value">64.2%</div>
+        <div class="metric-change up">&#9650; +8.1%</div>
+      </div>
+      <div class="metric-card animate-up delay-4">
+        <div class="metric-label">Monthly Revenue</div>
+        <div class="metric-value">&#8361;38M</div>
+        <div class="metric-change up">&#9650; +31%</div>
+      </div>
+      <div class="metric-card animate-up delay-5">
+        <div class="metric-label">Active Pipelines</div>
+        <div class="metric-value">1,204</div>
+        <div class="metric-change up">&#9650; +156</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ PIPELINE ══════════ -->
+  <section class="pipeline-section">
+    <div class="section-header animate-up delay-3">
+      <div>
+        <div class="section-title">4-Node Pipeline Architecture</div>
+        <div class="section-subtitle">트렌드 감지에서 판매까지 — End-to-End 자동화 파이프라인</div>
+      </div>
+    </div>
+
+    <div class="pipeline">
+
+      <!-- NODE 1: Opportunity Discovery -->
+      <div class="node-column animate-up delay-4">
+        <div class="node-header">
+          <div class="node-icon">&#128269;</div>
+          <div class="node-number">Node 01</div>
+          <div class="node-name">Opportunity Discovery</div>
+          <div class="node-name-kr">기회 발견</div>
+        </div>
+
+        <a href="services/trend-radar.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">TrendRadar</div>
+              <div class="service-name-kr">트렌드 감지 엔진</div>
+            </div>
+            <div class="service-phase phase-1">MVP</div>
+          </div>
+          <div class="service-desc">AI 기반 실시간 트렌드 감지 및 수요 예측. 크롤링 파이프라인으로 시장 기회를 자동 발굴합니다.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Score Accuracy</div>
+              <div class="service-metric-value" style="color: var(--node1)">89.3%</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Trends/Day</div>
+              <div class="service-metric-value" style="color: var(--node1)">2,450</div>
+            </div>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag">Crawling</span>
+            <span class="service-tag">ML Scoring</span>
+            <span class="service-tag">Real-time</span>
+          </div>
+        </div>
+        </a>
+
+        <a href="services/source-match.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">SourceMatch</div>
+              <div class="service-name-kr">소싱 매칭</div>
+            </div>
+            <div class="service-phase phase-3">P3</div>
+          </div>
+          <div class="service-desc">트렌드 상품에 대한 최적 소싱처 자동 매칭. 가격/품질/리드타임 종합 분석.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Match Rate</div>
+              <div class="service-metric-value" style="color: var(--node1)">76%</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Suppliers</div>
+              <div class="service-metric-value" style="color: var(--node1)">8.2K</div>
+            </div>
+          </div>
+        </div>
+        </a>
+
+        <a href="services/margin-sim.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">MarginSim</div>
+              <div class="service-name-kr">마진 시뮬레이션</div>
+            </div>
+            <div class="service-phase phase-2">P2</div>
+          </div>
+          <div class="service-desc">실시간 마진 시뮬레이터. 소싱가/수수료/물류비 기반 수익성 예측.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Sim/Day</div>
+              <div class="service-metric-value" style="color: var(--node1)">840</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Accuracy</div>
+              <div class="service-metric-value" style="color: var(--node1)">92%</div>
+            </div>
+          </div>
+        </div>
+        </a>
+      </div>
+
+      <!-- NODE 2: Customer Intelligence -->
+      <div class="node-column animate-up delay-5">
+        <div class="node-header">
+          <div class="node-icon">&#128101;</div>
+          <div class="node-number">Node 02</div>
+          <div class="node-name">Customer Intelligence</div>
+          <div class="node-name-kr">고객 인텔리전스</div>
+        </div>
+
+        <a href="services/persona-ai.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">PersonaAI</div>
+              <div class="service-name-kr">AI 페르소나 생성</div>
+            </div>
+            <div class="service-phase phase-3">P3</div>
+          </div>
+          <div class="service-desc">구매 데이터 기반 AI 고객 페르소나 자동 생성. 세그먼트별 행동 패턴 분석.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Personas</div>
+              <div class="service-metric-value" style="color: var(--node2)">24</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Segments</div>
+              <div class="service-metric-value" style="color: var(--node2)">156</div>
+            </div>
+          </div>
+        </div>
+        </a>
+
+        <a href="services/brand-forge.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">BrandForge</div>
+              <div class="service-name-kr">브랜드 포지셔닝</div>
+            </div>
+            <div class="service-phase phase-3">P3</div>
+          </div>
+          <div class="service-desc">경쟁 분석 기반 브랜드 포지셔닝 전략 자동 수립. 차별화 포인트 도출.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Brands</div>
+              <div class="service-metric-value" style="color: var(--node2)">89</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Score</div>
+              <div class="service-metric-value" style="color: var(--node2)">8.4</div>
+            </div>
+          </div>
+        </div>
+        </a>
+
+        <a href="services/churn-guard.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">ChurnGuard</div>
+              <div class="service-name-kr">이탈 방지</div>
+            </div>
+            <div class="service-phase phase-4">P4</div>
+          </div>
+          <div class="service-desc">고객 이탈 예측 및 자동 리텐션 캠페인. LTV 기반 우선순위 관리.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Prevention</div>
+              <div class="service-metric-value" style="color: var(--node2)">73%</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">LTV Lift</div>
+              <div class="service-metric-value" style="color: var(--node2)">+28%</div>
+            </div>
+          </div>
+        </div>
+        </a>
+      </div>
+
+      <!-- NODE 3: Content Supply Chain -->
+      <div class="node-column animate-up delay-6">
+        <div class="node-header">
+          <div class="node-icon">&#9998;</div>
+          <div class="node-number">Node 03</div>
+          <div class="node-name">Content Supply Chain</div>
+          <div class="node-name-kr">콘텐츠 공급망</div>
+        </div>
+
+        <a href="services/page-factory.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">PageFactory</div>
+              <div class="service-name-kr">상세페이지 생성기</div>
+            </div>
+            <div class="service-phase phase-1">MVP</div>
+          </div>
+          <div class="service-desc">AI 기반 상품 상세페이지 자동 생성. 채널별 최적화된 페이지를 초 단위로 제작.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Pages/Day</div>
+              <div class="service-metric-value" style="color: var(--node3)">342</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">CVR Lift</div>
+              <div class="service-metric-value" style="color: var(--node3)">+18%</div>
+            </div>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag">LLM</span>
+            <span class="service-tag">Multi-channel</span>
+            <span class="service-tag">A/B Test</span>
+          </div>
+        </div>
+        </a>
+
+        <a href="services/social-spray.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">SocialSpray</div>
+              <div class="service-name-kr">소셜 콘텐츠</div>
+            </div>
+            <div class="service-phase phase-2">P2</div>
+          </div>
+          <div class="service-desc">SNS 채널별 맞춤 콘텐츠 자동 생성 및 스케줄링. 인스타/틱톡/블로그 최적화.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Posts/Day</div>
+              <div class="service-metric-value" style="color: var(--node3)">128</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Engage</div>
+              <div class="service-metric-value" style="color: var(--node3)">4.2%</div>
+            </div>
+          </div>
+        </div>
+        </a>
+
+        <a href="services/review-ops.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">ReviewOps</div>
+              <div class="service-name-kr">리뷰 관리</div>
+            </div>
+            <div class="service-phase phase-1">MVP</div>
+          </div>
+          <div class="service-desc">리뷰/인플루언서 DB 관리 시스템. 캠페인 운영부터 품질 스코어링까지 자동화.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Reviews</div>
+              <div class="service-metric-value" style="color: var(--node3)">12.4K</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Quality</div>
+              <div class="service-metric-value" style="color: var(--node3)">4.6&#9733;</div>
+            </div>
+          </div>
+        </div>
+        </a>
+
+        <a href="services/influ-bridge.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">InfluBridge</div>
+              <div class="service-name-kr">인플루언서 매칭</div>
+            </div>
+            <div class="service-phase phase-3">P3</div>
+          </div>
+          <div class="service-desc">상품-인플루언서 자동 매칭. ROI 기반 최적 협업 제안 및 성과 추적.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Influencers</div>
+              <div class="service-metric-value" style="color: var(--node3)">3.2K</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Match ROI</div>
+              <div class="service-metric-value" style="color: var(--node3)">340%</div>
+            </div>
+          </div>
+        </div>
+        </a>
+      </div>
+
+      <!-- NODE 4: Channel Orchestrator -->
+      <div class="node-column animate-up delay-7">
+        <div class="node-header">
+          <div class="node-icon">&#128640;</div>
+          <div class="node-number">Node 04</div>
+          <div class="node-name">Channel Orchestrator</div>
+          <div class="node-name-kr">채널 오케스트레이터</div>
+        </div>
+
+        <a href="services/channel-sync.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">ChannelSync</div>
+              <div class="service-name-kr">채널 동기화</div>
+            </div>
+            <div class="service-phase phase-3">P3</div>
+          </div>
+          <div class="service-desc">쿠팡/네이버/11번가 등 멀티채널 상품 동기화. 가격/재고/상세페이지 일괄 관리.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">Channels</div>
+              <div class="service-metric-value" style="color: var(--node4)">8</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Sync Rate</div>
+              <div class="service-metric-value" style="color: var(--node4)">99.7%</div>
+            </div>
+          </div>
+        </div>
+        </a>
+
+        <a href="services/ad-pilot.html" class="service-link">
+        <div class="service-card">
+          <div class="service-top">
+            <div>
+              <div class="service-name">AdPilot</div>
+              <div class="service-name-kr">광고 자동화</div>
+            </div>
+            <div class="service-phase phase-2">P2</div>
+          </div>
+          <div class="service-desc">AI 기반 광고 입찰/타겟팅 자동 최적화. ROAS 극대화를 위한 실시간 조정.</div>
+          <div class="service-metrics">
+            <div class="service-metric">
+              <div class="service-metric-label">ROAS</div>
+              <div class="service-metric-value" style="color: var(--node4)">420%</div>
+            </div>
+            <div class="service-metric">
+              <div class="service-metric-label">Ad Spend</div>
+              <div class="service-metric-value" style="color: var(--node4)">&#8361;12M</div>
+            </div>
+          </div>
+          <div class="service-tags">
+            <span class="service-tag">Real-time Bid</span>
+            <span class="service-tag">Auto-optimize</span>
+          </div>
+        </div>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ TRUST & ROADMAP ══════════ -->
+  <section class="trust-section">
+    <div class="section-header animate-up delay-4">
+      <div>
+        <div class="section-title">Automation & Roadmap</div>
+        <div class="section-subtitle">Trust Escalation 모델 기반 자동화 수준 및 실행 로드맵</div>
+      </div>
+    </div>
+
+    <div class="trust-grid">
+      <div class="trust-card animate-up delay-5">
+        <h3>Trust Escalation Model</h3>
+        <div class="auto-bars">
+          <div class="auto-bar-row">
+            <div class="auto-bar-label" style="color: var(--node4)">Autopilot</div>
+            <div class="auto-bar-track">
+              <div class="auto-bar-fill autopilot" style="width: 0%" data-width="60%">60%</div>
+            </div>
+          </div>
+          <div class="auto-bar-row">
+            <div class="auto-bar-label" style="color: var(--node3)">Copilot</div>
+            <div class="auto-bar-track">
+              <div class="auto-bar-fill copilot" style="width: 0%" data-width="25%">25%</div>
+            </div>
+          </div>
+          <div class="auto-bar-row">
+            <div class="auto-bar-label" style="color: var(--text-secondary)">Human</div>
+            <div class="auto-bar-track">
+              <div class="auto-bar-fill human" style="width: 0%" data-width="15%">15%</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 24px; padding: 16px; background: var(--bg-surface); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.7;">
+            <strong style="color: var(--text-primary);">Arbitration Layer</strong><br>
+            노드 간 충돌 해결 시스템. Node 4의 가격 인하 요청과 Node 2의 LTV 보호 요구를 AI가 자동으로 중재합니다.
+          </div>
+        </div>
+      </div>
+
+      <div class="trust-card animate-up delay-6">
+        <h3>Execution Roadmap</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-phase">PHASE 1 — 0~6개월</div>
+            <div class="timeline-title">MVP 런칭</div>
+            <div class="timeline-desc">핵심 3개 제품 출시, 1,000 MAU 달성</div>
+            <div class="timeline-products">
+              <span class="timeline-product-tag">PageFactory</span>
+              <span class="timeline-product-tag">TrendRadar</span>
+              <span class="timeline-product-tag">ReviewOps</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-phase">PHASE 2 — 6~12개월</div>
+            <div class="timeline-title">확장 & 수익화</div>
+            <div class="timeline-desc">5,000 MAU, &#8361;50M MRR 목표</div>
+            <div class="timeline-products">
+              <span class="timeline-product-tag">SocialSpray</span>
+              <span class="timeline-product-tag">MarginSim</span>
+              <span class="timeline-product-tag">AdPilot</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-phase">PHASE 3 — 12~18개월</div>
+            <div class="timeline-title">플랫폼 완성</div>
+            <div class="timeline-desc">전체 노드 연동, Nervous System 구축</div>
+            <div class="timeline-products">
+              <span class="timeline-product-tag">PersonaAI</span>
+              <span class="timeline-product-tag">BrandForge</span>
+              <span class="timeline-product-tag">InfluBridge</span>
+              <span class="timeline-product-tag">ChannelSync</span>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-phase">PHASE 4 — 18~24개월</div>
+            <div class="timeline-title">자율 운영</div>
+            <div class="timeline-desc">50,000 MAU, &#8361;500M MRR, 75%+ 자동화</div>
+            <div class="timeline-products">
+              <span class="timeline-product-tag">ChurnGuard</span>
+              <span class="timeline-product-tag">Full Pipeline</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ SERVICE DETAIL PANELS ══════════ -->
+  <section class="detail-sections">
+    <div class="section-header animate-up delay-4">
+      <div>
+        <div class="section-title">Service Deep Dive — MVP Products</div>
+        <div class="section-subtitle">Phase 1 핵심 제품 상세 대시보드 목업</div>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+
+      <!-- TrendRadar Detail -->
+      <div class="detail-card animate-up delay-5" data-node="1">
+        <div class="detail-card-header">
+          <div>
+            <div class="detail-card-title">TrendRadar</div>
+            <div class="detail-card-title-kr">트렌드 감지 엔진</div>
+          </div>
+          <div class="detail-card-icon">&#128269;</div>
+        </div>
+        <div class="detail-card-body">
+          <div class="detail-card-desc">크롤러 파이프라인 → ML 스코어링 → 기회 랭킹 순으로 자동 처리. 네이버/쿠팡/소셜 트렌드를 실시간으로 추적합니다.</div>
+
+          <div class="mockup-ui">
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px;">LIVE TREND FEED</div>
+            <table class="mockup-table">
+              <tr>
+                <th>Keyword</th>
+                <th>Score</th>
+                <th>Volume</th>
+              </tr>
+              <tr>
+                <td style="color: var(--text-primary); font-weight: 500;">건강 간식 세트</td>
+                <td><span class="score-badge score-high">94</span></td>
+                <td>
+                  <span class="trend-bar" style="width: 60px; background: var(--node1);"></span>
+                </td>
+              </tr>
+              <tr>
+                <td style="color: var(--text-primary); font-weight: 500;">미니 가습기</td>
+                <td><span class="score-badge score-high">88</span></td>
+                <td>
+                  <span class="trend-bar" style="width: 48px; background: var(--node1); opacity: 0.8;"></span>
+                </td>
+              </tr>
+              <tr>
+                <td style="color: var(--text-primary); font-weight: 500;">LED 무드등</td>
+                <td><span class="score-badge score-mid">76</span></td>
+                <td>
+                  <span class="trend-bar" style="width: 36px; background: var(--node1); opacity: 0.6;"></span>
+                </td>
+              </tr>
+              <tr>
+                <td style="color: var(--text-primary); font-weight: 500;">실리콘 주방용품</td>
+                <td><span class="score-badge score-mid">71</span></td>
+                <td>
+                  <span class="trend-bar" style="width: 30px; background: var(--node1); opacity: 0.5;"></span>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="detail-features">
+            <div class="detail-feature"><div class="detail-feature-dot"></div>네이버/쿠팡/소셜 실시간 크롤링</div>
+            <div class="detail-feature"><div class="detail-feature-dot"></div>ML 기반 수요 예측 스코어링</div>
+            <div class="detail-feature"><div class="detail-feature-dot"></div>경쟁 강도 자동 분석</div>
+            <div class="detail-feature"><div class="detail-feature-dot"></div>자동 알림 & 리포트</div>
+          </div>
+
+          <div class="detail-card-stats">
+            <div class="detail-stat">
+              <div class="detail-stat-value">2.4K</div>
+              <div class="detail-stat-label">Trends/Day</div>
+            </div>
+            <div class="detail-stat">
+              <div class="detail-stat-value">89%</div>
+              <div class="detail-stat-label">Accuracy</div>
+            </div>
+            <div class="detail-stat">
+              <div class="detail-stat-value">&lt;3s</div>
+              <div class="detail-stat-label">Latency</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <span class="revenue-tag">&#128176; &#8361;99K~990K/월 구독</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PageFactory Detail -->
+      <div class="detail-card animate-up delay-6" data-node="3">
+        <div class="detail-card-header">
+          <div>
+            <div class="detail-card-title">PageFactory</div>
+            <div class="detail-card-title-kr">AI 상세페이지 생성기</div>
+          </div>
+          <div class="detail-card-icon">&#9998;</div>
+        </div>
+        <div class="detail-card-body">
+          <div class="detail-card-desc">상품 정보 입력 → AI가 채널별 최적화된 상세페이지를 자동 생성. Freemium 모델로 월 5건 무료 제공.</div>
+
+          <div class="mockup-ui">
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px;">PAGE GENERATION QUEUE</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--node4);"></div>
+                  <span style="font-size: 12px; font-weight: 500;">프리미엄 견과류 세트</span>
+                </div>
+                <span style="font-size: 10px; color: var(--node4); font-weight: 600;">Complete</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--node1); animation: pulse-dot 1s infinite;"></div>
+                  <span style="font-size: 12px; font-weight: 500;">미니 공기청정기</span>
+                </div>
+                <span style="font-size: 10px; color: var(--node1); font-weight: 600;">Generating...</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted);"></div>
+                  <span style="font-size: 12px; font-weight: 500;">USB 보온 텀블러</span>
+                </div>
+                <span style="font-size: 10px; color: var(--text-muted); font-weight: 600;">Queued</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-features">
+            <div class="detail-feature"><div class="detail-feature-dot"></div>Claude/GPT 기반 카피라이팅</div>
+            <div class="detail-feature"><div class="detail-feature-dot"></div>채널별 자동 포맷 변환</div>
+            <div class="detail-feature"><div class="detail-feature-dot"></div>A/B 테스트 자동 실행</div>
+            <div class="detail-feature"><div class="detail-feature-dot"></div>SEO 최적화 자동 적용</div>
+          </div>
+
+          <div class="detail-card-stats">
+            <div class="detail-stat">
+              <div class="detail-stat-value">342</div>
+              <div class="detail-stat-label">Pages/Day</div>
+            </div>
+            <div class="detail-stat">
+              <div class="detail-stat-value">+18%</div>
+              <div class="detail-stat-label">CVR Lift</div>
+            </div>
+            <div class="detail-stat">
+              <div class="detail-stat-value">12s</div>
+              <div class="detail-stat-label">Gen Time</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <span class="revenue-tag">&#127873; 5건/월 무료 (Freemium)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ReviewOps Detail -->
+      <div class="detail-card animate-up delay-7" data-node="3">
+        <div class="detail-card-header">
+          <div>
+            <div class="detail-card-title">ReviewOps</div>
+            <div class="detail-card-title-kr">리뷰/인플루언서 관리</div>
+          </div>
+          <div class="detail-card-icon">&#11088;</div>
+        </div>
+        <div class="detail-card-body">
+          <div class="detail-card-desc">리뷰어 DB 구축, 캠페인 자동 운영, 품질 스코어링 통합 관리 시스템. 건당 과금 모델.</div>
+
+          <div class="mockup-ui">
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px;">CAMPAIGN OVERVIEW</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+              <div style="padding: 10px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border); text-align: center;">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--node3);">23</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Active Campaigns</div>
+              </div>
+              <div style="padding: 10px; background: var(--bg-card); border-radius: 6px; border: 1px solid var(--border); text-align: center;">
+                <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--node3);">847</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Reviewers</div>
+              </div>
+            </div>
+            <div class="mini-chart" id="reviewChart"></div>
+          </div>
+
+          <div class="detail-features">
+            <div class="detail-feature"><div class="detail-feature-dot"></div>리뷰어 DB 자동 구축</div>
+            <div class="detail-feature"><div class="detail-feature-dot"></div>캠페인 생성/관리 자동화</div>
+            <div class="detail-feature"><div class="detail-feature-dot"></div>리뷰 품질 AI 스코어링</div>
+            <div class="detail-feature"><div class="detail-feature-dot"></div>성과 리포트 자동 생성</div>
+          </div>
+
+          <div class="detail-card-stats">
+            <div class="detail-stat">
+              <div class="detail-stat-value">12.4K</div>
+              <div class="detail-stat-label">Reviews</div>
+            </div>
+            <div class="detail-stat">
+              <div class="detail-stat-value">4.6&#9733;</div>
+              <div class="detail-stat-label">Avg Quality</div>
+            </div>
+            <div class="detail-stat">
+              <div class="detail-stat-value">73%</div>
+              <div class="detail-stat-label">Reply Rate</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <span class="revenue-tag">&#128184; 캠페인당 과금</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Phase 2 Preview -->
+    <div style="margin-top: 32px;">
+      <div class="section-header animate-up delay-5">
+        <div>
+          <div class="section-title">Phase 2 Preview</div>
+          <div class="section-subtitle">6~12개월 확장 제품 미리보기</div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-card animate-up delay-6" data-node="3">
+          <div class="detail-card-header">
+            <div>
+              <div class="detail-card-title">SocialSpray</div>
+              <div class="detail-card-title-kr">소셜 콘텐츠 자동화</div>
+            </div>
+            <div class="detail-card-icon">&#128242;</div>
+          </div>
+          <div class="detail-card-body">
+            <div class="detail-card-desc">인스타그램, 틱톡, 블로그 등 SNS 채널별 최적화 콘텐츠를 AI로 자동 생성하고 스케줄링합니다.</div>
+            <div class="detail-features">
+              <div class="detail-feature"><div class="detail-feature-dot"></div>채널별 자동 콘텐츠 변환</div>
+              <div class="detail-feature"><div class="detail-feature-dot"></div>최적 게시 시간 AI 추천</div>
+              <div class="detail-feature"><div class="detail-feature-dot"></div>해시태그 자동 최적화</div>
+            </div>
+            <div class="detail-card-stats">
+              <div class="detail-stat">
+                <div class="detail-stat-value">128</div>
+                <div class="detail-stat-label">Posts/Day</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-value">4.2%</div>
+                <div class="detail-stat-label">Engage</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-value">6ch</div>
+                <div class="detail-stat-label">Channels</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card animate-up delay-7" data-node="1">
+          <div class="detail-card-header">
+            <div>
+              <div class="detail-card-title">MarginSim</div>
+              <div class="detail-card-title-kr">마진 시뮬레이터</div>
+            </div>
+            <div class="detail-card-icon">&#128200;</div>
+          </div>
+          <div class="detail-card-body">
+            <div class="detail-card-desc">소싱가, 채널 수수료, 물류비, 광고비를 종합한 실시간 마진 시뮬레이션. 시나리오별 수익성 비교.</div>
+            <div class="detail-features">
+              <div class="detail-feature"><div class="detail-feature-dot"></div>실시간 비용 구조 분석</div>
+              <div class="detail-feature"><div class="detail-feature-dot"></div>시나리오별 수익성 비교</div>
+              <div class="detail-feature"><div class="detail-feature-dot"></div>손익분기점 자동 계산</div>
+            </div>
+            <div class="detail-card-stats">
+              <div class="detail-stat">
+                <div class="detail-stat-value">840</div>
+                <div class="detail-stat-label">Sims/Day</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-value">92%</div>
+                <div class="detail-stat-label">Accuracy</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-value">0.3s</div>
+                <div class="detail-stat-label">Calc Time</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card animate-up delay-8" data-node="4">
+          <div class="detail-card-header">
+            <div>
+              <div class="detail-card-title">AdPilot</div>
+              <div class="detail-card-title-kr">AI 광고 최적화</div>
+            </div>
+            <div class="detail-card-icon">&#127919;</div>
+          </div>
+          <div class="detail-card-body">
+            <div class="detail-card-desc">네이버/카카오/구글 광고 입찰 자동 최적화. ROAS 기반 예산 배분 및 실시간 성과 조정.</div>
+            <div class="detail-features">
+              <div class="detail-feature"><div class="detail-feature-dot"></div>실시간 입찰 자동 조정</div>
+              <div class="detail-feature"><div class="detail-feature-dot"></div>ROAS 기반 예산 배분</div>
+              <div class="detail-feature"><div class="detail-feature-dot"></div>크리에이티브 A/B 테스트</div>
+            </div>
+            <div class="detail-card-stats">
+              <div class="detail-stat">
+                <div class="detail-stat-value">420%</div>
+                <div class="detail-stat-label">Avg ROAS</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-value">-34%</div>
+                <div class="detail-stat-label">CPA</div>
+              </div>
+              <div class="detail-stat">
+                <div class="detail-stat-value">24/7</div>
+                <div class="detail-stat-label">Monitor</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ══════════ BOTTOM BAR ══════════ -->
+<div class="bottom-bar">
+  <div class="bottom-stats">
+    <div class="bottom-stat">
+      <span>UPTIME</span>
+      <span class="bottom-stat-value">99.97%</span>
+    </div>
+    <div class="bottom-stat">
+      <span>API CALLS</span>
+      <span class="bottom-stat-value">1.2M/day</span>
+    </div>
+    <div class="bottom-stat">
+      <span>LATENCY</span>
+      <span class="bottom-stat-value">48ms avg</span>
+    </div>
+    <div class="bottom-stat">
+      <span>NODES</span>
+      <span class="bottom-stat-value" style="color: var(--node4);">4/4 ACTIVE</span>
+    </div>
+  </div>
+  <div class="bottom-right">
+    <span>AutoMarket v0.1.0-alpha</span>
+    <span>|</span>
+    <span>Phase 1 MVP</span>
+  </div>
+</div>
+
+<script>
+// Animate trust escalation bars on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const bars = entry.target.querySelectorAll('.auto-bar-fill');
+      bars.forEach(bar => {
+        bar.style.width = bar.dataset.width;
+      });
+    }
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.trust-card').forEach(card => observer.observe(card));
+
+// Generate mini chart bars for ReviewOps
+const chartContainer = document.getElementById('reviewChart');
+if (chartContainer) {
+  const values = [35, 42, 28, 55, 48, 62, 71, 45, 58, 80, 67, 73, 85, 60, 78, 90, 72, 88, 65, 82];
+  const max = Math.max(...values);
+  values.forEach((v, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'mini-chart-bar';
+    const pct = (v / max) * 100;
+    bar.style.height = pct + '%';
+    bar.style.background = `rgba(167,139,250,${0.3 + (pct / 100) * 0.7})`;
+    bar.style.animationDelay = (i * 0.03) + 's';
+    chartContainer.appendChild(bar);
+  });
+}
+
+// Nav button interaction
+document.querySelectorAll('.topbar-nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.topbar-nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

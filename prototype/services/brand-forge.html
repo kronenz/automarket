@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrandForge — AutoMarket Customer Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #06080d;
+  --bg-surface: #0c1018;
+  --bg-card: #111825;
+  --bg-card-hover: #162030;
+  --bg-elevated: #1a2438;
+  --node2: #ff6bca;
+  --node2-dim: #ff6bca22;
+  --node2-glow: #ff6bca44;
+  --node4: #34d399;
+  --accent-red: #f87171;
+  --accent-amber: #fbbf24;
+  --accent-blue: #60a5fa;
+  --text-primary: #e8edf5;
+  --text-secondary: #8896ab;
+  --text-muted: #4a5568;
+  --border: #1e293b;
+  --border-light: #2d3b50;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; scroll-behavior: smooth; }
+body {
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    linear-gradient(rgba(255,107,202,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,107,202,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; bottom: -20%; left: -10%;
+  width: 50vw; height: 50vh;
+  background: radial-gradient(ellipse, rgba(255,107,202,0.05), transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 64px;
+  background: rgba(6,8,13,0.88);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--node2), #a855f7);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: #fff;
+  position: relative; overflow: hidden;
+}
+.logo-icon::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.25));
+}
+.logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.logo-text span { color: var(--node2); }
+.back-link {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-secondary); text-decoration: none;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.back-link:hover { color: var(--node2); border-color: var(--node2-glow); background: var(--node2-dim); }
+
+/* ── LAYOUT ── */
+.app { position: relative; z-index: 1; }
+.page-content { padding: 36px 32px 60px; max-width: 1600px; margin: 0 auto; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 36px;
+  animation: fadeUp 0.5s ease both;
+}
+.page-header-left { display: flex; align-items: center; gap: 20px; }
+.service-icon {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--node2-dim), rgba(168,85,247,0.15));
+  border: 1px solid var(--node2-glow);
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+}
+.page-title { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+.page-title span { color: var(--node2); }
+.page-desc { color: var(--text-secondary); font-size: 14px; max-width: 500px; line-height: 1.6; }
+.phase-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  padding: 6px 14px; border-radius: 6px; letter-spacing: 1px;
+  background: rgba(167,139,250,0.12); color: #a78bfa;
+  border: 1px solid rgba(167,139,250,0.25);
+}
+
+/* ── STATS ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-bottom: 32px;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 24px;
+  position: relative; overflow: hidden; transition: all 0.3s;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--node2), transparent);
+}
+.stat-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+.stat-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.stat-value { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: var(--node2); letter-spacing: -1px; margin-bottom: 6px; }
+.stat-sub { font-size: 12px; color: var(--text-secondary); }
+
+/* ── SECTION CARD ── */
+.section-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+.section-title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+.section-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  padding: 3px 10px; border-radius: 4px;
+  background: var(--node2-dim); color: var(--node2); border: 1px solid var(--node2-glow);
+}
+
+/* ── MAIN GRID ── */
+.main-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.5s ease 0.2s both;
+}
+.bottom-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.5s ease 0.3s both;
+}
+.full-row {
+  margin-bottom: 24px;
+  animation: fadeUp 0.5s ease 0.25s both;
+}
+
+/* ── POSITIONING MAP ── */
+.map-container { padding: 24px; }
+.map-axes-wrap {
+  position: relative;
+  width: 100%; padding-bottom: 90%;
+  background: var(--bg-surface); border-radius: var(--radius-sm);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.map-inner {
+  position: absolute; inset: 0;
+}
+/* Grid lines */
+.map-inner::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(rgba(255,107,202,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,107,202,0.07) 1px, transparent 1px);
+  background-size: 25% 25%;
+}
+/* Axes */
+.map-axis-x {
+  position: absolute; bottom: 50%; left: 8%; right: 8%;
+  height: 1px; background: rgba(255,107,202,0.3);
+}
+.map-axis-y {
+  position: absolute; left: 50%; top: 8%; bottom: 8%;
+  width: 1px; background: rgba(255,107,202,0.3);
+}
+.axis-label {
+  position: absolute; font-size: 10px; font-weight: 600;
+  color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.ax-bottom { bottom: 6px; right: 10px; }
+.ax-top { top: 6px; right: 10px; }
+.ax-left { left: 6px; top: 48%; writing-mode: vertical-lr; transform: rotate(180deg); }
+.ax-right { right: 6px; top: 45%; }
+.ax-center-x { bottom: calc(50% + 6px); left: 50%; transform: translateX(-50%); }
+.ax-center-y { left: calc(50% + 8px); bottom: 50%; }
+
+/* Brand dots */
+.brand-dot {
+  position: absolute; transform: translate(-50%, -50%);
+  cursor: pointer; z-index: 2;
+}
+.brand-dot-circle {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid currentColor; background: currentColor;
+  opacity: 0.8; transition: all 0.2s;
+  position: relative;
+}
+.brand-dot-circle::after {
+  content: ''; position: absolute; inset: -4px; border-radius: 50%;
+  background: currentColor; opacity: 0.15; transition: all 0.2s;
+}
+.brand-dot:hover .brand-dot-circle { opacity: 1; transform: scale(1.4); }
+.brand-dot:hover .brand-dot-circle::after { inset: -8px; opacity: 0.2; }
+.brand-dot-label {
+  position: absolute; left: 16px; top: -6px;
+  font-size: 10px; font-weight: 600; white-space: nowrap;
+  color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;
+}
+.brand-dot.highlight .brand-dot-circle { width: 16px; height: 16px; }
+.brand-dot.highlight .brand-dot-label { color: var(--text-primary); font-weight: 700; }
+
+/* Quadrant labels */
+.quadrant-label {
+  position: absolute; font-size: 9px; font-weight: 500;
+  color: var(--text-muted); letter-spacing: 0.5px; opacity: 0.6;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── BRAND ANALYSIS CARDS ── */
+.brand-cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; }
+.brand-card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px;
+  transition: all 0.2s; cursor: pointer;
+}
+.brand-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+.brand-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.brand-card-name { font-size: 14px; font-weight: 700; }
+.brand-card-share {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  padding: 2px 8px; border-radius: 4px; background: var(--bg-card);
+  color: var(--text-secondary);
+}
+.diff-score-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.diff-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.diff-bar { flex: 1; height: 4px; background: var(--bg-card); border-radius: 2px; overflow: hidden; }
+.diff-fill { height: 100%; border-radius: 2px; }
+.diff-value { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+
+.sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sw-item { background: var(--bg-card); border-radius: 6px; padding: 8px 10px; }
+.sw-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.sw-text { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+
+/* ── POSITIONING STRATEGY PANEL ── */
+.strategy-list { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+.strategy-item {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.strategy-rank {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--node2-dim); border: 1px solid var(--node2-glow);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  font-weight: 700; color: var(--node2); flex-shrink: 0;
+}
+.strategy-content { flex: 1; }
+.strategy-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.strategy-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px; }
+.confidence-row { display: flex; align-items: center; gap: 8px; }
+.conf-label { font-size: 10px; color: var(--text-muted); }
+.conf-bar { flex: 1; height: 3px; background: var(--bg-card); border-radius: 2px; overflow: hidden; }
+.conf-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--node2), #a855f7); }
+.conf-pct { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--node2); font-weight: 600; }
+
+/* ── RADAR CHART ── */
+.radar-container { padding: 20px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.radar-wrap { position: relative; width: 220px; height: 220px; }
+svg.radar { width: 100%; height: 100%; }
+.radar-axis-label {
+  position: absolute; font-size: 10px; font-weight: 600;
+  color: var(--text-secondary); white-space: nowrap; text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.radar-legend { display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+.radar-leg-item { display: flex; align-items: center; gap: 6px; }
+.radar-leg-dot { width: 8px; height: 8px; border-radius: 2px; }
+.radar-leg-label { font-size: 11px; color: var(--text-secondary); }
+
+/* ── KEYWORD CLOUD ── */
+.keyword-cloud { padding: 20px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.kw-tag {
+  border-radius: 6px; border: 1px solid;
+  transition: all 0.2s; cursor: default;
+  font-weight: 500;
+}
+.kw-tag:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="logo">
+    <div class="logo-icon">A</div>
+    <div class="logo-text">Auto<span>Market</span></div>
+  </div>
+  <a href="../index.html" class="back-link">← Dashboard</a>
+</nav>
+
+<div class="page-content">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="service-icon">⚒️</div>
+      <div>
+        <div class="page-title">Brand<span>Forge</span></div>
+        <div class="page-desc">AI 기반 브랜드 포지셔닝 분석 엔진. 경쟁 브랜드의 시장 위치를 실시간으로 매핑하고 차별화 전략을 자동 생성합니다.</div>
+      </div>
+    </div>
+    <div class="phase-badge">PHASE 3 · BETA</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Brands Analyzed</div>
+      <div class="stat-value">89</div>
+      <div class="stat-sub">카테고리별 경쟁 브랜드 전수 분석</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Diff Score</div>
+      <div class="stat-value">8.4</div>
+      <div class="stat-sub">브랜드 차별화 지수 평균 (10점 만점)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Strategy Reports</div>
+      <div class="stat-value">12<span style="font-size:18px;color:var(--text-secondary);">/wk</span></div>
+      <div class="stat-sub">주간 자동 생성 포지셔닝 전략 보고서</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID: Map + Brand Cards -->
+  <div class="main-grid">
+
+    <!-- POSITIONING MAP -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">브랜드 포지셔닝 맵 · Positioning Map</div>
+        <div class="section-badge">LIVE · 89 BRANDS</div>
+      </div>
+      <div class="map-container">
+        <div class="map-axes-wrap">
+          <div class="map-inner">
+            <!-- Quadrant labels -->
+            <div class="quadrant-label" style="top:10%;left:8%;">LOW PRICE / HIGH QUALITY</div>
+            <div class="quadrant-label" style="top:10%;right:8%;text-align:right;">PREMIUM</div>
+            <div class="quadrant-label" style="bottom:8%;left:8%;">ECONOMY</div>
+            <div class="quadrant-label" style="bottom:8%;right:8%;text-align:right;">HIGH PRICE / LOW QUALITY</div>
+
+            <!-- Axes -->
+            <div class="map-axis-x"></div>
+            <div class="map-axis-y"></div>
+
+            <!-- Axis labels -->
+            <div class="axis-label ax-left">품질 인식 (Quality Perception)</div>
+            <div class="axis-label ax-bottom">가격 HIGH →</div>
+            <div class="axis-label" style="bottom:calc(50% + 8px);left:4%;font-size:9px;">← 가격 LOW</div>
+            <div class="axis-label" style="left:calc(50% + 8px);top:4%;font-size:9px;">품질 HIGH ↑</div>
+            <div class="axis-label" style="left:calc(50% + 8px);bottom:4%;font-size:9px;">품질 LOW ↓</div>
+
+            <!-- Brand dots: left% = price (low-left, high-right), top% = quality (low-bottom=high-top) -->
+            <!-- [OurBrand] Premium + High Quality -->
+            <div class="brand-dot highlight" style="left:72%;top:18%;color:#ff6bca;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">◆ AutoBrand</div>
+            </div>
+            <!-- Competitor A: Mid-High price, High quality -->
+            <div class="brand-dot" style="left:65%;top:25%;color:#60a5fa;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">LuxCore</div>
+            </div>
+            <!-- B: Low price, High quality -->
+            <div class="brand-dot" style="left:22%;top:28%;color:#34d399;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">ValuePro</div>
+            </div>
+            <!-- C: Low price, mid quality -->
+            <div class="brand-dot" style="left:18%;top:55%;color:#a78bfa;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">EcoShop</div>
+            </div>
+            <!-- D: High price, mid quality -->
+            <div class="brand-dot" style="left:78%;top:48%;color:#fbbf24;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">EliteX</div>
+            </div>
+            <!-- E: Mid price, mid quality -->
+            <div class="brand-dot" style="left:48%;top:52%;color:#94a3b8;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">GenStore</div>
+            </div>
+            <!-- F: Low price, low quality -->
+            <div class="brand-dot" style="left:12%;top:72%;color:#f87171;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">BudgetMart</div>
+            </div>
+            <!-- G: Mid-High price, High quality -->
+            <div class="brand-dot" style="left:55%;top:20%;color:#e879f9;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">NeoLux</div>
+            </div>
+            <!-- H: Mid price, high quality -->
+            <div class="brand-dot" style="left:38%;top:30%;color:#2dd4bf;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">SmartVal</div>
+            </div>
+            <!-- I: High price, low quality -->
+            <div class="brand-dot" style="left:82%;top:70%;color:#fb923c;">
+              <div class="brand-dot-circle"></div>
+              <div class="brand-dot-label">OldGuard</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:50%;background:#ff6bca;"></div><span style="font-size:11px;color:var(--text-secondary);">AutoBrand (우리)</span></div>
+          <div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:50%;background:var(--text-muted);"></div><span style="font-size:11px;color:var(--text-secondary);">경쟁 브랜드</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRAND ANALYSIS CARDS -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">경쟁 브랜드 분석 · Competitive Analysis</div>
+        <div class="section-badge">TOP 4</div>
+      </div>
+      <div class="brand-cards-grid">
+
+        <!-- Brand 1: LuxCore -->
+        <div class="brand-card">
+          <div class="brand-card-header">
+            <div>
+              <div class="brand-card-name" style="color:#60a5fa;">LuxCore</div>
+              <div style="font-size:10px;color:var(--text-muted);">프리미엄 패션</div>
+            </div>
+            <div class="brand-card-share">M.S 14.2%</div>
+          </div>
+          <div class="diff-score-row">
+            <div class="diff-label">차별화</div>
+            <div class="diff-bar"><div class="diff-fill" style="width:82%;background:linear-gradient(90deg,#60a5fa,#818cf8);"></div></div>
+            <div class="diff-value" style="color:#60a5fa;">8.2</div>
+          </div>
+          <div class="sw-grid">
+            <div class="sw-item">
+              <div class="sw-label" style="color:#34d399;">강점 Strengths</div>
+              <div class="sw-text">강력한 브랜드 인지도, VIP 멤버십, 독점 콜라보</div>
+            </div>
+            <div class="sw-item">
+              <div class="sw-label" style="color:#f87171;">약점 Weakness</div>
+              <div class="sw-text">높은 가격 진입장벽, MZ 접근성 낮음</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Brand 2: ValuePro -->
+        <div class="brand-card">
+          <div class="brand-card-header">
+            <div>
+              <div class="brand-card-name" style="color:#34d399;">ValuePro</div>
+              <div style="font-size:10px;color:var(--text-muted);">가성비 생활용품</div>
+            </div>
+            <div class="brand-card-share">M.S 21.7%</div>
+          </div>
+          <div class="diff-score-row">
+            <div class="diff-label">차별화</div>
+            <div class="diff-bar"><div class="diff-fill" style="width:68%;background:linear-gradient(90deg,#34d399,#06b6d4);"></div></div>
+            <div class="diff-value" style="color:#34d399;">6.8</div>
+          </div>
+          <div class="sw-grid">
+            <div class="sw-item">
+              <div class="sw-label" style="color:#34d399;">강점</div>
+              <div class="sw-text">높은 가성비, 빠른 배송, 넓은 SKU</div>
+            </div>
+            <div class="sw-item">
+              <div class="sw-label" style="color:#f87171;">약점</div>
+              <div class="sw-text">브랜드 감성 부족, 충성 고객 낮음</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Brand 3: NeoLux -->
+        <div class="brand-card">
+          <div class="brand-card-header">
+            <div>
+              <div class="brand-card-name" style="color:#e879f9;">NeoLux</div>
+              <div style="font-size:10px;color:var(--text-muted);">테크-럭셔리 융합</div>
+            </div>
+            <div class="brand-card-share">M.S 8.9%</div>
+          </div>
+          <div class="diff-score-row">
+            <div class="diff-label">차별화</div>
+            <div class="diff-bar"><div class="diff-fill" style="width:91%;background:linear-gradient(90deg,#e879f9,#f472b6);"></div></div>
+            <div class="diff-value" style="color:#e879f9;">9.1</div>
+          </div>
+          <div class="sw-grid">
+            <div class="sw-item">
+              <div class="sw-label" style="color:#34d399;">강점</div>
+              <div class="sw-text">혁신적 UX, AI 큐레이션, Gen-Z 인기</div>
+            </div>
+            <div class="sw-item">
+              <div class="sw-label" style="color:#f87171;">약점</div>
+              <div class="sw-text">역사 짧음, 신뢰 구축 미완성</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Brand 4: EliteX -->
+        <div class="brand-card">
+          <div class="brand-card-header">
+            <div>
+              <div class="brand-card-name" style="color:#fbbf24;">EliteX</div>
+              <div style="font-size:10px;color:var(--text-muted);">하이엔드 전자기기</div>
+            </div>
+            <div class="brand-card-share">M.S 11.3%</div>
+          </div>
+          <div class="diff-score-row">
+            <div class="diff-label">차별화</div>
+            <div class="diff-bar"><div class="diff-fill" style="width:74%;background:linear-gradient(90deg,#fbbf24,#f97316);"></div></div>
+            <div class="diff-value" style="color:#fbbf24;">7.4</div>
+          </div>
+          <div class="sw-grid">
+            <div class="sw-item">
+              <div class="sw-label" style="color:#34d399;">강점</div>
+              <div class="sw-text">프리미엄 포지셔닝, 충성 팬덤, A/S</div>
+            </div>
+            <div class="sw-item">
+              <div class="sw-label" style="color:#f87171;">약점</div>
+              <div class="sw-text">가격 저항감, 국내 공급망 취약</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL ROW: Strategy Panel -->
+  <div class="full-row">
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">AI 포지셔닝 전략 추천 · Strategy Recommendations</div>
+        <div class="section-badge">GPT-4o POWERED</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;">
+        <div class="strategy-list" style="border-right:1px solid var(--border);">
+          <div class="strategy-item">
+            <div class="strategy-rank">01</div>
+            <div class="strategy-content">
+              <div class="strategy-title">가격-품질 갭 공략</div>
+              <div class="strategy-desc">ValuePro와 LuxCore 사이의 공백 포지션을 점령. "합리적 프리미엄" 메시지로 가성비 세대와 품질 중시 소비자 동시 공략 가능.</div>
+              <div class="confidence-row">
+                <div class="conf-label">신뢰도</div>
+                <div class="conf-bar"><div class="conf-fill" style="width:87%;"></div></div>
+                <div class="conf-pct">87%</div>
+              </div>
+            </div>
+          </div>
+          <div class="strategy-item">
+            <div class="strategy-rank">02</div>
+            <div class="strategy-content">
+              <div class="strategy-title">테크-감성 하이브리드</div>
+              <div class="strategy-desc">NeoLux의 혁신성에 대응하는 AI 큐레이션 도입. 데이터 기반 개인화를 전면에 내세워 디지털 세대 신뢰 확보.</div>
+              <div class="confidence-row">
+                <div class="conf-label">신뢰도</div>
+                <div class="conf-bar"><div class="conf-fill" style="width:79%;"></div></div>
+                <div class="conf-pct">79%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strategy-list" style="border-right:1px solid var(--border);">
+          <div class="strategy-item">
+            <div class="strategy-rank">03</div>
+            <div class="strategy-content">
+              <div class="strategy-title">충성도 생태계 구축</div>
+              <div class="strategy-desc">LuxCore의 VIP 프로그램 대비 열린 멤버십 전략. 구매 빈도·LTV 기반 등급제 도입으로 장기 잔류 인센티브 제공.</div>
+              <div class="confidence-row">
+                <div class="conf-label">신뢰도</div>
+                <div class="conf-bar"><div class="conf-fill" style="width:82%;"></div></div>
+                <div class="conf-pct">82%</div>
+              </div>
+            </div>
+          </div>
+          <div class="strategy-item">
+            <div class="strategy-rank">04</div>
+            <div class="strategy-content">
+              <div class="strategy-title">카테고리 킬러 전략</div>
+              <div class="strategy-desc">뷰티·패션·생활용품 등 고빈도 카테고리에서 압도적 SKU 깊이와 전문성으로 카테고리 내 1위 이미지 선점.</div>
+              <div class="confidence-row">
+                <div class="conf-label">신뢰도</div>
+                <div class="conf-bar"><div class="conf-fill" style="width:71%;"></div></div>
+                <div class="conf-pct">71%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="strategy-list">
+          <div class="strategy-item">
+            <div class="strategy-rank">05</div>
+            <div class="strategy-content">
+              <div class="strategy-title">지속가능성 포지셔닝</div>
+              <div class="strategy-desc">MZ 세대의 친환경 소비 트렌드 선점. ESG 지표 공개 및 친환경 패키징으로 EcoShop과 차별화된 프리미엄 친환경 이미지.</div>
+              <div class="confidence-row">
+                <div class="conf-label">신뢰도</div>
+                <div class="conf-bar"><div class="conf-fill" style="width:68%;"></div></div>
+                <div class="conf-pct">68%</div>
+              </div>
+            </div>
+          </div>
+          <div class="strategy-item">
+            <div class="strategy-rank">06</div>
+            <div class="strategy-content">
+              <div class="strategy-title">로컬-글로벌 하이브리드</div>
+              <div class="strategy-desc">국내 브랜드 정체성을 유지하면서 K-커머스 글로벌 열풍을 활용한 해외 시장 동시 공략. 로컬 신뢰 + 글로벌 확장.</div>
+              <div class="confidence-row">
+                <div class="conf-label">신뢰도</div>
+                <div class="conf-bar"><div class="conf-fill" style="width:60%;"></div></div>
+                <div class="conf-pct">60%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM GRID: Radar + Keywords -->
+  <div class="bottom-grid">
+
+    <!-- RADAR CHART -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">경쟁 레이더 · Competitive Radar</div>
+        <div class="section-badge">5 DIMENSIONS</div>
+      </div>
+      <div class="radar-container">
+        <div class="radar-wrap" style="width:260px;height:260px;">
+          <!-- Axis labels positioned around the pentagon -->
+          <div class="radar-axis-label" style="top:-16px;left:50%;transform:translateX(-50%);">품질인식</div>
+          <div class="radar-axis-label" style="top:22%;right:-36px;">브랜드인지도</div>
+          <div class="radar-axis-label" style="bottom:10%;right:-12px;">고객충성도</div>
+          <div class="radar-axis-label" style="bottom:10%;left:-4px;">혁신성</div>
+          <div class="radar-axis-label" style="top:22%;left:-40px;">가격경쟁력</div>
+
+          <svg viewBox="0 0 200 200" class="radar">
+            <defs>
+              <linearGradient id="radarGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#ff6bca;stop-opacity:0.4"/>
+                <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0.2"/>
+              </linearGradient>
+              <linearGradient id="radarGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.3"/>
+                <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0.1"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Grid pentagons -->
+            <!-- 20% -->
+            <polygon points="100,84 114.7,93.6 109.5,110.7 90.5,110.7 85.3,93.6"
+              fill="none" stroke="rgba(255,107,202,0.1)" stroke-width="1"/>
+            <!-- 40% -->
+            <polygon points="100,68 129.4,87.2 119,121.4 81,121.4 70.6,87.2"
+              fill="none" stroke="rgba(255,107,202,0.1)" stroke-width="1"/>
+            <!-- 60% -->
+            <polygon points="100,52 144.1,80.8 128.5,132.1 71.5,132.1 55.9,80.8"
+              fill="none" stroke="rgba(255,107,202,0.12)" stroke-width="1"/>
+            <!-- 80% -->
+            <polygon points="100,36 158.8,74.4 138,142.8 62,142.8 41.2,74.4"
+              fill="none" stroke="rgba(255,107,202,0.08)" stroke-width="1"/>
+            <!-- 100% -->
+            <polygon points="100,20 173.5,68 147.5,153.5 52.5,153.5 26.5,68"
+              fill="none" stroke="rgba(255,107,202,0.1)" stroke-width="1"/>
+
+            <!-- Axis lines from center -->
+            <line x1="100" y1="100" x2="100" y2="20" stroke="rgba(255,107,202,0.15)" stroke-width="1"/>
+            <line x1="100" y1="100" x2="173.5" y2="68" stroke="rgba(255,107,202,0.15)" stroke-width="1"/>
+            <line x1="100" y1="100" x2="147.5" y2="153.5" stroke="rgba(255,107,202,0.15)" stroke-width="1"/>
+            <line x1="100" y1="100" x2="52.5" y2="153.5" stroke="rgba(255,107,202,0.15)" stroke-width="1"/>
+            <line x1="100" y1="100" x2="26.5" y2="68" stroke="rgba(255,107,202,0.15)" stroke-width="1"/>
+
+            <!-- AutoBrand data (our brand): 품질90 인지도75 충성도82 혁신70 가격65 -->
+            <!-- Scale: 100% = full pentagon vertex -->
+            <!-- 품질 90%: 100, 100-(80*0.9)=28 → (100, 28) -->
+            <!-- 인지도 75%: lerp(100,173.5)*0.75 → 155.1, lerp(100,68)*0.75 → 76 -->
+            <!-- 충성도 82%: lerp(100,147.5)*0.82 → 138.95, lerp(100,153.5)*0.82 → 143.87 -->
+            <!-- 혁신성 70%: lerp(100,52.5)*0.70 → 66.75, lerp(100,153.5)*0.70 → 137.45 -->
+            <!-- 가격경쟁력 65%: lerp(100,26.5)*0.65 → 52.22, lerp(100,68)*0.65 → 79.2 -->
+            <polygon
+              points="100,28 155,76 139,143 67,143 52,79"
+              fill="url(#radarGrad1)"
+              stroke="#ff6bca" stroke-width="1.5"
+              stroke-linejoin="round"/>
+            <circle cx="100" cy="28" r="3" fill="#ff6bca"/>
+            <circle cx="155" cy="76" r="3" fill="#ff6bca"/>
+            <circle cx="139" cy="143" r="3" fill="#ff6bca"/>
+            <circle cx="67" cy="143" r="3" fill="#ff6bca"/>
+            <circle cx="52" cy="79" r="3" fill="#ff6bca"/>
+
+            <!-- LuxCore competitor: 품질85 인지도90 충성도78 혁신55 가격45 -->
+            <polygon
+              points="100,32 161,71 134,148 60,148 44,75"
+              fill="url(#radarGrad2)"
+              stroke="#60a5fa" stroke-width="1" stroke-dasharray="4 3"
+              stroke-linejoin="round"/>
+
+            <!-- NeoLux competitor: 품질70 인지도65 충성도55 혁신95 가격60 -->
+            <polygon
+              points="100,44 151,82 124,142 72,142 48,78"
+              fill="none"
+              stroke="#e879f9" stroke-width="1" stroke-dasharray="2 4"
+              stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="radar-legend">
+          <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#ff6bca;"></div><span class="radar-leg-label">AutoBrand</span></div>
+          <div class="radar-leg-item"><div class="radar-leg-dot" style="background:#60a5fa;border:1px dashed #60a5fa;background:transparent;outline:2px dashed #60a5fa;outline-offset:-1px;"></div><span class="radar-leg-label">LuxCore</span></div>
+          <div class="radar-leg-item"><div class="radar-leg-dot" style="background:transparent;border:1px dashed #e879f9;"></div><span class="radar-leg-label">NeoLux</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEYWORD CLOUD -->
+    <div class="section-card" style="grid-column: span 2;">
+      <div class="section-head">
+        <div class="section-title">브랜드 키워드 연관도 · Keyword Association Cloud</div>
+        <div class="section-badge">NLP EXTRACTED</div>
+      </div>
+      <div class="keyword-cloud">
+        <!-- Size = relevance, color = sentiment/category -->
+        <span class="kw-tag" style="font-size:22px;padding:8px 18px;background:rgba(255,107,202,0.12);border-color:rgba(255,107,202,0.3);color:#ff6bca;">프리미엄</span>
+        <span class="kw-tag" style="font-size:18px;padding:7px 15px;background:rgba(255,107,202,0.08);border-color:rgba(255,107,202,0.2);color:#ff99dc;">신뢰</span>
+        <span class="kw-tag" style="font-size:15px;padding:6px 13px;background:rgba(96,165,250,0.08);border-color:rgba(96,165,250,0.2);color:#60a5fa;">혁신적</span>
+        <span class="kw-tag" style="font-size:20px;padding:8px 16px;background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.2);color:#34d399;">가성비</span>
+        <span class="kw-tag" style="font-size:13px;padding:5px 11px;background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.2);color:#a78bfa;">빠른배송</span>
+        <span class="kw-tag" style="font-size:16px;padding:6px 14px;background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.2);color:#fbbf24;">고품질</span>
+        <span class="kw-tag" style="font-size:12px;padding:5px 10px;background:rgba(255,107,202,0.06);border-color:rgba(255,107,202,0.15);color:#ff99dc;">트렌디</span>
+        <span class="kw-tag" style="font-size:19px;padding:7px 16px;background:rgba(232,121,249,0.08);border-color:rgba(232,121,249,0.2);color:#e879f9;">디자인</span>
+        <span class="kw-tag" style="font-size:11px;padding:4px 10px;background:rgba(100,116,139,0.08);border-color:rgba(100,116,139,0.2);color:#94a3b8;">친환경</span>
+        <span class="kw-tag" style="font-size:17px;padding:7px 14px;background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.25);color:#34d399;">편의성</span>
+        <span class="kw-tag" style="font-size:13px;padding:5px 11px;background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.2);color:#f87171;">가격부담</span>
+        <span class="kw-tag" style="font-size:14px;padding:6px 12px;background:rgba(96,165,250,0.08);border-color:rgba(96,165,250,0.2);color:#60a5fa;">맞춤형</span>
+        <span class="kw-tag" style="font-size:21px;padding:8px 17px;background:rgba(255,107,202,0.1);border-color:rgba(255,107,202,0.25);color:#ff6bca;">K-커머스</span>
+        <span class="kw-tag" style="font-size:12px;padding:5px 10px;background:rgba(167,139,250,0.07);border-color:rgba(167,139,250,0.15);color:#a78bfa;">글로벌</span>
+        <span class="kw-tag" style="font-size:15px;padding:6px 13px;background:rgba(251,191,36,0.07);border-color:rgba(251,191,36,0.18);color:#fbbf24;">한정판</span>
+        <span class="kw-tag" style="font-size:11px;padding:4px 9px;background:rgba(45,212,191,0.07);border-color:rgba(45,212,191,0.18);color:#2dd4bf;">리뷰신뢰</span>
+        <span class="kw-tag" style="font-size:18px;padding:7px 15px;background:rgba(255,107,202,0.08);border-color:rgba(255,107,202,0.2);color:#ff99dc;">충성고객</span>
+        <span class="kw-tag" style="font-size:14px;padding:5px 12px;background:rgba(96,165,250,0.07);border-color:rgba(96,165,250,0.18);color:#60a5fa;">AI추천</span>
+        <span class="kw-tag" style="font-size:12px;padding:5px 10px;background:rgba(248,113,113,0.07);border-color:rgba(248,113,113,0.15);color:#f87171;">반품불편</span>
+        <span class="kw-tag" style="font-size:16px;padding:6px 13px;background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.2);color:#34d399;">구독할인</span>
+        <span class="kw-tag" style="font-size:13px;padding:5px 11px;background:rgba(232,121,249,0.07);border-color:rgba(232,121,249,0.18);color:#e879f9;">콜라보</span>
+        <span class="kw-tag" style="font-size:20px;padding:8px 16px;background:rgba(255,107,202,0.1);border-color:rgba(255,107,202,0.25);color:#ff6bca;">브랜드감성</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-content -->
+</div><!-- /app -->
+</body>
+</html>

@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrendRadar — 트렌드 감지 엔진 | AutoMarket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #06080d;
+  --bg-surface: #0c1018;
+  --bg-card: #111825;
+  --bg-card-hover: #162030;
+  --bg-elevated: #1a2438;
+  --node1: #00e5ff;
+  --node1-dim: #00e5ff22;
+  --node1-glow: #00e5ff55;
+  --node4: #34d399;
+  --node4-dim: #34d39922;
+  --warn: #f59e0b;
+  --warn-dim: #f59e0b22;
+  --danger: #f87171;
+  --danger-dim: #f8717122;
+  --text-primary: #e8edf5;
+  --text-secondary: #8896ab;
+  --text-muted: #4a5568;
+  --border: #1e293b;
+  --border-light: #2d3b50;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { font-size: 14px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0,229,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 50vw;
+  height: 50vh;
+  background: radial-gradient(ellipse, rgba(0,229,255,0.04), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+.app { position: relative; z-index: 1; }
+
+/* ── TOP BAR ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  background: rgba(6,8,13,0.85);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--node1), #a78bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--bg-deep);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3));
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+.logo-text span { color: var(--node1); }
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.back-link:hover {
+  color: var(--node1);
+  border-color: var(--node1-dim);
+  background: var(--node1-dim);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(0,229,255,0.08);
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--node1);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--node1);
+  animation: pulse-cyan 1.5s infinite;
+}
+
+@keyframes pulse-cyan {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,229,255,0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(0,229,255,0); }
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  padding: 40px 32px 32px;
+  border-bottom: 1px solid var(--border);
+  animation: fadeUp 0.5s ease both;
+}
+
+.page-header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.page-title-group { flex: 1; }
+
+.service-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: var(--node1-dim);
+  border: 1px solid rgba(0,229,255,0.25);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--node1);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.service-tag-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--node1);
+}
+
+.page-title {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+
+.page-title .accent { color: var(--node1); }
+
+.page-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.page-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.phase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.phase-mvp {
+  background: rgba(0,229,255,0.12);
+  border: 1px solid rgba(0,229,255,0.3);
+  color: var(--node1);
+}
+
+.pricing-tag {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.pricing-tag strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.5px;
+}
+
+/* ── MAIN CONTENT ── */
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0;
+  min-height: calc(100vh - 64px - 180px);
+}
+
+.content-left {
+  padding: 32px 24px 32px 32px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.content-right {
+  padding: 32px 32px 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── FILTERS ── */
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+.filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-right: 4px;
+}
+
+.filter-select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 32px 8px 12px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896ab' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color 0.2s;
+}
+
+.filter-select:focus { outline: none; border-color: var(--node1); }
+.filter-select:hover { border-color: var(--border-light); }
+
+.filter-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--node1-dim);
+  background: var(--node1-dim);
+  color: var(--node1);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background: rgba(0,229,255,0.15);
+  border-color: rgba(0,229,255,0.4);
+}
+
+.filter-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+.source-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.source-tab {
+  padding: 5px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-muted);
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+.source-tab.active {
+  background: var(--node1);
+  color: var(--bg-deep);
+}
+
+.source-tab:not(.active):hover { color: var(--text-secondary); }
+
+/* ── TREND TABLE ── */
+.section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.5s 0.15s ease both;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--node1-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.card-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  background: var(--bg-surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.trend-table { width: 100%; border-collapse: collapse; }
+
+.trend-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.trend-table th:first-child { padding-left: 20px; }
+.trend-table th:last-child { padding-right: 20px; text-align: center; }
+
+.trend-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(30,41,59,0.5);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.trend-table td:first-child { padding-left: 20px; }
+.trend-table td:last-child { padding-right: 20px; text-align: center; }
+
+.trend-table tr:last-child td { border-bottom: none; }
+
+.trend-table tr {
+  transition: background 0.15s;
+}
+
+.trend-table tr:hover td { background: rgba(0,229,255,0.03); }
+
+.rank-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.rank-num.top3 { color: var(--node1); }
+
+.keyword-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.keyword-text {
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.new-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(245,158,11,0.15);
+  color: var(--warn);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(245,158,11,0.25);
+}
+
+.hot-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(248,113,113,0.15);
+  color: var(--danger);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(248,113,113,0.25);
+}
+
+.category-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cat-health { background: rgba(52,211,153,0.12); color: var(--node4); border: 1px solid rgba(52,211,153,0.2); }
+.cat-home { background: rgba(0,229,255,0.1); color: var(--node1); border: 1px solid rgba(0,229,255,0.2); }
+.cat-kitchen { background: rgba(167,139,250,0.12); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
+.cat-lifestyle { background: rgba(245,158,11,0.12); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+.cat-pet { background: rgba(255,107,202,0.12); color: #ff6bca; border: 1px solid rgba(255,107,202,0.2); }
+.cat-electronics { background: rgba(0,229,255,0.1); color: var(--node1); border: 1px solid rgba(0,229,255,0.2); }
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 28px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.score-high { background: rgba(52,211,153,0.15); color: var(--node4); border: 1px solid rgba(52,211,153,0.25); }
+.score-mid { background: rgba(245,158,11,0.12); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+.score-low { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
+
+.volume-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.volume-bar-track {
+  width: 70px;
+  height: 5px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.volume-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--node1), rgba(0,229,255,0.5));
+}
+
+.volume-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.growth-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.growth-up { color: var(--node4); }
+.growth-down { color: var(--danger); }
+
+.comp-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comp-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.comp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.comp-dot.filled { background: var(--danger); }
+.comp-dot.half { background: var(--warn); }
+.comp-dot.empty { background: var(--bg-elevated); border: 1px solid var(--border); }
+
+.comp-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.action-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--node1-dim);
+  background: var(--node1-dim);
+  color: var(--node1);
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  background: rgba(0,229,255,0.15);
+  border-color: rgba(0,229,255,0.4);
+  box-shadow: 0 0 12px rgba(0,229,255,0.15);
+}
+
+/* ── RIGHT PANEL ── */
+.panel-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+}
+
+.panel-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-icon {
+  font-size: 15px;
+}
+
+.panel-subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── VOLUME CHART ── */
+.volume-chart {
+  padding: 20px 18px;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100px;
+  margin-bottom: 8px;
+}
+
+.chart-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.chart-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--node1), rgba(0,229,255,0.3));
+  min-height: 4px;
+  transition: opacity 0.2s;
+}
+
+.chart-bar.today {
+  background: linear-gradient(180deg, var(--node1), var(--node1-glow));
+  box-shadow: 0 0 8px rgba(0,229,255,0.3);
+}
+
+.chart-bar-wrap:hover .chart-bar { opacity: 0.8; }
+
+.chart-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.chart-legend-item {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.chart-peak {
+  font-size: 12px;
+  color: var(--node1);
+  font-weight: 600;
+}
+
+/* ── PIE BREAKDOWN ── */
+.categories-panel { padding: 20px 18px; }
+
+.category-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.category-row:last-child { margin-bottom: 0; }
+
+.cat-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cat-row-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.cat-row-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-elevated);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cat-row-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.cat-row-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ── BOTTOM STATS ── */
+.bottom-stats {
+  padding: 24px 32px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  animation: fadeUp 0.5s 0.3s ease both;
+}
+
+.stat-item {
+  background: var(--bg-surface);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--node1);
+  letter-spacing: -0.5px;
+}
+
+.stat-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── PRICING SECTION ── */
+.pricing-section {
+  margin: 0 32px 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  animation: fadeUp 0.5s 0.35s ease both;
+}
+
+.pricing-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.pricing-tiers {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pricing-tier {
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  text-align: center;
+  min-width: 120px;
+  transition: all 0.2s;
+}
+
+.pricing-tier:hover {
+  border-color: var(--border-light);
+  background: var(--bg-elevated);
+}
+
+.pricing-tier.featured {
+  border-color: rgba(0,229,255,0.3);
+  background: rgba(0,229,255,0.06);
+}
+
+.tier-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.tier-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.pricing-tier.featured .tier-price { color: var(--node1); }
+
+.tier-period {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.pricing-cta {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-primary {
+  padding: 12px 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--node1);
+  color: var(--bg-deep);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 24px rgba(0,229,255,0.3);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover {
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Auto<span>Market</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE · 갱신 2분 전
+      </div>
+      <a href="../index.html" class="back-link">← Dashboard</a>
+    </div>
+  </header>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-title-group">
+        <div class="service-tag">
+          <div class="service-tag-dot"></div>
+          Node 1 · Opportunity Discovery
+        </div>
+        <h1 class="page-title">Trend<span class="accent">Radar</span></h1>
+        <p class="page-subtitle">실시간 커머스 트렌드를 AI가 감지하고 기회 점수를 산출합니다. 네이버·쿠팡·소셜 전채널 데이터를 통합 분석하여 급등 키워드와 경쟁 공백을 실시간으로 탐지합니다.</p>
+      </div>
+      <div class="page-header-meta">
+        <span class="phase-badge phase-mvp">◈ MVP</span>
+        <div class="pricing-tag">
+          월 구독
+          <strong>₩99K — ₩990K</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- LEFT: TABLE + FILTERS -->
+    <div class="content-left">
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <span class="filter-label">필터</span>
+        <select class="filter-select">
+          <option>전체 카테고리</option>
+          <option>건강/식품</option>
+          <option>가전/전자</option>
+          <option>주방용품</option>
+          <option>반려동물</option>
+          <option>라이프스타일</option>
+        </select>
+        <select class="filter-select">
+          <option>점수 전체</option>
+          <option>80점 이상</option>
+          <option>60-80점</option>
+          <option>60점 미만</option>
+        </select>
+        <select class="filter-select">
+          <option>최근 7일</option>
+          <option>최근 14일</option>
+          <option>최근 30일</option>
+          <option>오늘</option>
+        </select>
+        <div class="filter-divider"></div>
+        <div class="source-tabs">
+          <button class="source-tab active">전체</button>
+          <button class="source-tab">네이버</button>
+          <button class="source-tab">쿠팡</button>
+          <button class="source-tab">소셜</button>
+        </div>
+        <button class="filter-btn">↻ 새로고침</button>
+      </div>
+
+      <!-- Trend Table -->
+      <div class="section-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-title-icon">📡</div>
+            실시간 트렌드 피드
+          </div>
+          <span class="card-count">12 / 248 items</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="trend-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>키워드</th>
+                <th>카테고리</th>
+                <th>기회 점수</th>
+                <th>검색량</th>
+                <th>성장률</th>
+                <th>경쟁 강도</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="rank-num top3">#1</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">건강 간식</span><span class="hot-badge">HOT</span></div></td>
+                <td><span class="category-pill cat-health">건강/식품</span></td>
+                <td><span class="score-badge score-high">94</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:92%"></div></div><span class="volume-text">184K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 38.2%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot half"></div><div class="comp-dot half"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">낮음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num top3">#2</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">미니 가습기</span><span class="new-badge">NEW</span></div></td>
+                <td><span class="category-pill cat-home">홈/리빙</span></td>
+                <td><span class="score-badge score-high">91</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:85%"></div></div><span class="volume-text">162K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 29.7%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot half"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">매우 낮음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num top3">#3</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">LED 무드등</span></div></td>
+                <td><span class="category-pill cat-home">홈/리빙</span></td>
+                <td><span class="score-badge score-high">88</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:78%"></div></div><span class="volume-text">141K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 22.1%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot filled"></div><div class="comp-dot half"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">중간</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">#4</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">실리콘 주방용품</span></div></td>
+                <td><span class="category-pill cat-kitchen">주방</span></td>
+                <td><span class="score-badge score-high">85</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:72%"></div></div><span class="volume-text">128K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 18.4%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot filled"></div><div class="comp-dot filled"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">중간</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">#5</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">접이식 우산</span><span class="new-badge">NEW</span></div></td>
+                <td><span class="category-pill cat-lifestyle">라이프</span></td>
+                <td><span class="score-badge score-high">82</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:66%"></div></div><span class="volume-text">115K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 41.6%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot half"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">낮음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">#6</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">무선 이어폰 케이스</span></div></td>
+                <td><span class="category-pill cat-electronics">전자기기</span></td>
+                <td><span class="score-badge score-mid">76</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:60%"></div></div><span class="volume-text">97K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 14.3%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot filled"></div><div class="comp-dot filled"></div><div class="comp-dot filled"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">높음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">#7</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">반려동물 간식</span><span class="hot-badge">HOT</span></div></td>
+                <td><span class="category-pill cat-pet">반려동물</span></td>
+                <td><span class="score-badge score-high">87</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:76%"></div></div><span class="volume-text">137K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 33.8%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot half"></div><div class="comp-dot half"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">낮음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">#8</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">텀블러 파우치</span></div></td>
+                <td><span class="category-pill cat-lifestyle">라이프</span></td>
+                <td><span class="score-badge score-mid">71</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:52%"></div></div><span class="volume-text">82K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 9.2%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot filled"></div><div class="comp-dot filled"></div><div class="comp-dot half"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">높음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">#9</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">미니 선풍기</span><span class="new-badge">NEW</span></div></td>
+                <td><span class="category-pill cat-electronics">전자기기</span></td>
+                <td><span class="score-badge score-high">83</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:63%"></div></div><span class="volume-text">109K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 52.1%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot half"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">낮음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">#10</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">아로마 디퓨저</span></div></td>
+                <td><span class="category-pill cat-home">홈/리빙</span></td>
+                <td><span class="score-badge score-mid">68</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:47%"></div></div><span class="volume-text">73K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 7.5%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot filled"></div><div class="comp-dot filled"></div><div class="comp-dot filled"></div><div class="comp-dot half"></div><div class="comp-dot empty"></div></div><span class="comp-label">매우 높음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">#11</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">휴대용 칫솔 살균기</span><span class="new-badge">NEW</span></div></td>
+                <td><span class="category-pill cat-health">건강/식품</span></td>
+                <td><span class="score-badge score-high">89</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:55%"></div></div><span class="volume-text">88K</span></div></td>
+                <td><span class="growth-cell growth-up">▲ 67.4%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot half"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">낮음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">#12</span></td>
+                <td><div class="keyword-cell"><span class="keyword-text">스마트 체중계</span></div></td>
+                <td><span class="category-pill cat-health">건강/식품</span></td>
+                <td><span class="score-badge score-mid">74</span></td>
+                <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:44%"></div></div><span class="volume-text">66K</span></div></td>
+                <td><span class="growth-cell growth-down">▼ 3.1%</span></td>
+                <td><div class="comp-bar"><div class="comp-dots"><div class="comp-dot filled"></div><div class="comp-dot filled"></div><div class="comp-dot filled"></div><div class="comp-dot empty"></div><div class="comp-dot empty"></div></div><span class="comp-label">높음</span></div></td>
+                <td><button class="action-btn">분석</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="content-right">
+
+      <!-- Volume Chart -->
+      <div class="panel-card" style="animation-delay:0.1s">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-icon">📈</span>
+            트렌드 볼륨 (최근 14일)
+          </div>
+          <span class="panel-subtitle">daily</span>
+        </div>
+        <div class="volume-chart">
+          <div class="chart-bars">
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:45%"></div><span class="chart-label">2/22</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:52%"></div><span class="chart-label">23</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:48%"></div><span class="chart-label">24</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:61%"></div><span class="chart-label">25</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:58%"></div><span class="chart-label">26</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:70%"></div><span class="chart-label">27</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:65%"></div><span class="chart-label">28</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:74%"></div><span class="chart-label">3/1</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:68%"></div><span class="chart-label">2</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:80%"></div><span class="chart-label">3</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:77%"></div><span class="chart-label">4</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:85%"></div><span class="chart-label">5</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar" style="height:90%"></div><span class="chart-label">6</span></div>
+            <div class="chart-bar-wrap"><div class="chart-bar today" style="height:100%"></div><span class="chart-label" style="color:var(--node1)">오늘</span></div>
+          </div>
+          <div class="chart-legend">
+            <span class="chart-legend-item">2월 22일</span>
+            <span class="chart-peak">↑ 248 trends today</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Breakdown -->
+      <div class="panel-card" style="animation-delay:0.2s">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-icon">🗂</span>
+            카테고리별 비중
+          </div>
+          <span class="panel-subtitle">top 5</span>
+        </div>
+        <div class="categories-panel">
+          <div class="category-row">
+            <div class="cat-color-dot" style="background:#34d399"></div>
+            <span class="cat-row-name">건강/식품</span>
+            <div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:78%;background:#34d399"></div></div>
+            <span class="cat-row-pct">31%</span>
+          </div>
+          <div class="category-row">
+            <div class="cat-color-dot" style="background:#00e5ff"></div>
+            <span class="cat-row-name">홈/리빙</span>
+            <div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:62%;background:#00e5ff"></div></div>
+            <span class="cat-row-pct">24%</span>
+          </div>
+          <div class="category-row">
+            <div class="cat-color-dot" style="background:#ff6bca"></div>
+            <span class="cat-row-name">반려동물</span>
+            <div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:46%;background:#ff6bca"></div></div>
+            <span class="cat-row-pct">18%</span>
+          </div>
+          <div class="category-row">
+            <div class="cat-color-dot" style="background:#a78bfa"></div>
+            <span class="cat-row-name">주방용품</span>
+            <div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:36%;background:#a78bfa"></div></div>
+            <span class="cat-row-pct">14%</span>
+          </div>
+          <div class="category-row">
+            <div class="cat-color-dot" style="background:#f59e0b"></div>
+            <span class="cat-row-name">라이프스타일</span>
+            <div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:28%;background:#f59e0b"></div></div>
+            <span class="cat-row-pct">11%</span>
+          </div>
+          <div class="category-row">
+            <div class="cat-color-dot" style="background:#4a5568"></div>
+            <span class="cat-row-name">기타</span>
+            <div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:5%;background:#4a5568"></div></div>
+            <span class="cat-row-pct">2%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Panel -->
+      <div class="panel-card" style="animation-delay:0.25s">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-icon">🔔</span>
+            급등 알림
+          </div>
+          <span class="panel-subtitle" style="color:var(--warn)">3 new</span>
+        </div>
+        <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px;">
+          <div style="padding:10px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;">
+            <div style="font-size:12px;font-weight:700;color:var(--warn);margin-bottom:3px;">⚡ 급등 감지</div>
+            <div style="font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;">휴대용 칫솔 살균기</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;font-family:'JetBrains Mono',monospace;">+67.4% · 3분 전</div>
+          </div>
+          <div style="padding:10px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;">
+            <div style="font-size:12px;font-weight:700;color:var(--warn);margin-bottom:3px;">⚡ 급등 감지</div>
+            <div style="font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;">미니 선풍기</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;font-family:'JetBrains Mono',monospace;">+52.1% · 11분 전</div>
+          </div>
+          <div style="padding:10px 12px;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.12);border-radius:8px;">
+            <div style="font-size:12px;font-weight:700;color:var(--node1);margin-bottom:3px;">◈ 신규 진입</div>
+            <div style="font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif;">접이식 우산</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;font-family:'JetBrains Mono',monospace;">Top 10 진입 · 28분 전</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM STATS -->
+  <div class="bottom-stats">
+    <div class="stat-item">
+      <div class="stat-label">Crawled Sources</div>
+      <div class="stat-value">1,240</div>
+      <div class="stat-desc">네이버·쿠팡·소셜 통합</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Daily Trends Detected</div>
+      <div class="stat-value">248</div>
+      <div class="stat-desc">오늘 감지된 트렌드 수</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Average Score</div>
+      <div class="stat-value">81.4</div>
+      <div class="stat-desc">전체 기회 점수 평균</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Alert Count</div>
+      <div class="stat-value">3</div>
+      <div class="stat-desc">오늘 급등 알림 발생</div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="pricing-section">
+    <div>
+      <div class="pricing-label">구독 플랜</div>
+      <div class="pricing-tiers">
+        <div class="pricing-tier">
+          <div class="tier-name">Starter</div>
+          <div class="tier-price">₩99K</div>
+          <div class="tier-period">/ 월</div>
+        </div>
+        <div class="pricing-tier featured">
+          <div class="tier-name">Growth</div>
+          <div class="tier-price">₩390K</div>
+          <div class="tier-period">/ 월</div>
+        </div>
+        <div class="pricing-tier">
+          <div class="tier-name">Scale</div>
+          <div class="tier-price">₩990K</div>
+          <div class="tier-period">/ 월</div>
+        </div>
+      </div>
+    </div>
+    <div class="pricing-cta">
+      <button class="btn-secondary">데모 요청</button>
+      <button class="btn-primary">무료로 시작하기 →</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

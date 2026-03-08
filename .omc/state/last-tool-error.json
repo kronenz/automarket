@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"python3 -c \\\"\\ntext = open('/home/bsh/develop/automarket/docs/09-appendix.md').read()\\n# Count Korean characters only\\nkorean = sum(1 for c in text if '\\\\uAC00' <= c <= '\\\\uD7A3' or '\\\\u31...",
-  "error": "Exit code 2\n/bin/bash: eval: line 19: unexpected EOF while looking for matching ``'",
-  "timestamp": "2026-03-08T12:00:33.012Z",
-  "retry_count": 1
-}

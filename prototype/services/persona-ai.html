@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PersonaAI — AutoMarket Customer Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #06080d;
+  --bg-surface: #0c1018;
+  --bg-card: #111825;
+  --bg-card-hover: #162030;
+  --bg-elevated: #1a2438;
+  --node2: #ff6bca;
+  --node2-dim: #ff6bca22;
+  --node2-glow: #ff6bca44;
+  --node4: #34d399;
+  --node4-dim: #34d39922;
+  --accent-red: #f87171;
+  --accent-amber: #fbbf24;
+  --text-primary: #e8edf5;
+  --text-secondary: #8896ab;
+  --text-muted: #4a5568;
+  --border: #1e293b;
+  --border-light: #2d3b50;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; scroll-behavior: smooth; }
+body {
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255,107,202,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,107,202,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  right: -10%;
+  width: 50vw;
+  height: 50vh;
+  background: radial-gradient(ellipse, rgba(255,107,202,0.05), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 64px;
+  background: rgba(6,8,13,0.88);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--node2), #a855f7);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: #fff;
+  position: relative; overflow: hidden;
+}
+.logo-icon::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.25));
+}
+.logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.logo-text span { color: var(--node2); }
+.back-link {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-secondary); text-decoration: none;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.back-link:hover { color: var(--node2); border-color: var(--node2-glow); background: var(--node2-dim); }
+
+/* ── LAYOUT ── */
+.app { position: relative; z-index: 1; }
+.page-content { padding: 36px 32px 60px; max-width: 1600px; margin: 0 auto; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 36px;
+  animation: fadeUp 0.5s ease both;
+}
+.page-header-left { display: flex; align-items: center; gap: 20px; }
+.service-icon {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--node2-dim), rgba(168,85,247,0.15));
+  border: 1px solid var(--node2-glow);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.page-title { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+.page-title span { color: var(--node2); }
+.page-desc { color: var(--text-secondary); font-size: 14px; max-width: 480px; line-height: 1.6; }
+.phase-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  padding: 6px 14px; border-radius: 6px; letter-spacing: 1px;
+  background: rgba(167,139,250,0.12);
+  color: #a78bfa;
+  border: 1px solid rgba(167,139,250,0.25);
+}
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-bottom: 32px;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 24px;
+  position: relative; overflow: hidden;
+  transition: all 0.3s;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--node2), transparent);
+}
+.stat-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+.stat-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.stat-value { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: var(--node2); letter-spacing: -1px; margin-bottom: 6px; }
+.stat-sub { font-size: 12px; color: var(--text-secondary); }
+
+/* ── GRID LAYOUT ── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.5s ease 0.2s both;
+}
+.full-width { animation: fadeUp 0.5s ease 0.3s both; }
+
+/* ── SECTION ── */
+.section-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+.section-title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+.section-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 3px 10px; border-radius: 4px;
+  background: var(--node2-dim); color: var(--node2);
+  border: 1px solid var(--node2-glow);
+}
+
+/* ── PERSONA GRID ── */
+.persona-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px; }
+.persona-card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 18px;
+  cursor: pointer; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  position: relative; overflow: hidden;
+}
+.persona-card::after {
+  content: ''; position: absolute; inset: 0; border-radius: var(--radius-sm);
+  border: 1px solid transparent; transition: all 0.25s;
+}
+.persona-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(255,107,202,0.1); }
+.persona-card:hover::after { border-color: var(--node2-glow); }
+.persona-card.active { border-color: var(--node2); background: rgba(255,107,202,0.06); }
+
+.persona-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.persona-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; flex-shrink: 0;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.persona-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.persona-age { font-size: 11px; color: var(--text-secondary); }
+
+.persona-traits { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+.trait-tag {
+  font-size: 10px; padding: 2px 7px; border-radius: 4px;
+  background: var(--bg-card); color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.persona-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.p-stat { background: var(--bg-card); border-radius: 6px; padding: 8px 10px; }
+.p-stat-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.p-stat-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+
+.channel-icons { display: flex; gap: 6px; margin-top: 10px; }
+.ch-icon {
+  font-size: 12px; padding: 4px 8px; border-radius: 4px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+/* ── DETAIL PANEL ── */
+.detail-panel { padding: 20px; }
+.detail-persona-header {
+  display: flex; align-items: center; gap: 14px;
+  padding-bottom: 18px; border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+.detail-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px;
+  background: linear-gradient(135deg, #ff6bca, #a855f7);
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.detail-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.detail-sub { font-size: 12px; color: var(--text-secondary); }
+
+.detail-section-title {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.behavior-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.behavior-item { display: flex; align-items: center; gap: 10px; }
+.behavior-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--node2); flex-shrink: 0; }
+.behavior-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+.category-bars { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.cat-bar-row { display: flex; align-items: center; gap: 10px; }
+.cat-label { font-size: 11px; color: var(--text-secondary); width: 60px; flex-shrink: 0; }
+.cat-bar-track { flex: 1; height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden; }
+.cat-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--node2), #a855f7); }
+.cat-pct { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); width: 30px; text-align: right; }
+
+/* Hour chart */
+.hour-chart { display: flex; align-items: flex-end; gap: 3px; height: 60px; margin-bottom: 6px; }
+.hour-bar {
+  flex: 1; border-radius: 3px 3px 0 0;
+  background: var(--node2-dim); border: 1px solid var(--node2-glow);
+  transition: all 0.2s; cursor: pointer; position: relative;
+}
+.hour-bar:hover { background: var(--node2); }
+.hour-bar.peak { background: linear-gradient(180deg, var(--node2), rgba(255,107,202,0.5)); border-color: var(--node2); }
+.hour-labels { display: flex; justify-content: space-between; padding: 0 1px; }
+.hour-label { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--text-muted); }
+
+.device-row { display: flex; gap: 8px; margin-top: 16px; }
+.device-item {
+  flex: 1; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px; text-align: center;
+}
+.device-icon { font-size: 18px; margin-bottom: 4px; }
+.device-label { font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; }
+.device-pct { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--node2); }
+
+/* ── SEGMENT BAR ── */
+.segment-section { padding: 20px 24px; }
+.segment-bar-wrap { margin-bottom: 16px; }
+.segment-bar {
+  display: flex; height: 40px; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.seg-chunk {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+  transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden;
+}
+.seg-chunk:hover { filter: brightness(1.2); }
+.seg-chunk span { pointer-events: none; mix-blend-mode: screen; }
+
+.segment-legend { display: flex; flex-wrap: wrap; gap: 12px; }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+.legend-label { font-size: 11px; color: var(--text-secondary); }
+.legend-pct { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+
+/* ── DATA SOURCES ── */
+.sources-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 20px; }
+.source-card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 16px;
+  transition: all 0.2s;
+}
+.source-card:hover { border-color: var(--node2-glow); }
+.source-icon { font-size: 24px; margin-bottom: 10px; }
+.source-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.source-count { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--node2); margin-bottom: 6px; }
+.source-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+.source-bar-track { height: 3px; background: var(--bg-card); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.source-bar-fill { height: 100%; border-radius: 2px; background: var(--node2); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bottom-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  animation: fadeUp 0.5s ease 0.35s both;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="logo">
+    <div class="logo-icon">A</div>
+    <div class="logo-text">Auto<span>Market</span></div>
+  </div>
+  <a href="../index.html" class="back-link">← Dashboard</a>
+</nav>
+
+<div class="page-content">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="service-icon">🧬</div>
+      <div>
+        <div class="page-title">Persona<span>AI</span></div>
+        <div class="page-desc">AI 기반 고객 페르소나 자동 생성 및 세분화 엔진. 구매 패턴, 검색 행동, 리뷰 감성 분석을 통해 정밀한 고객 유형을 도출합니다.</div>
+      </div>
+    </div>
+    <div class="phase-badge">PHASE 3 · BETA</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Active Personas</div>
+      <div class="stat-value">24</div>
+      <div class="stat-sub">↑ 3 신규 페르소나 이번 주 생성</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Micro-segments</div>
+      <div class="stat-value">156</div>
+      <div class="stat-sub">세부 행동 기반 군집 수</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Prediction Accuracy</div>
+      <div class="stat-value">89%</div>
+      <div class="stat-sub">구매 행동 예측 정확도 (7일 기준)</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- PERSONA GRID -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">고객 페르소나 · Persona Gallery</div>
+        <div class="section-badge">24 ACTIVE</div>
+      </div>
+      <div class="persona-grid">
+
+        <!-- Persona 1 -->
+        <div class="persona-card active">
+          <div class="persona-header">
+            <div class="persona-avatar" style="background: linear-gradient(135deg,#ff6bca,#a855f7);">지영</div>
+            <div>
+              <div class="persona-name">트렌드세터 지영</div>
+              <div class="persona-age">24–32세 · 여성</div>
+            </div>
+          </div>
+          <div class="persona-traits">
+            <span class="trait-tag">얼리어답터</span>
+            <span class="trait-tag">SNS 활성</span>
+            <span class="trait-tag">인플루언서 팔로우</span>
+            <span class="trait-tag">충동구매</span>
+          </div>
+          <div class="persona-stats">
+            <div class="p-stat">
+              <div class="p-stat-label">월평균 지출</div>
+              <div class="p-stat-value" style="color:var(--node2);">₩312K</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-label">구매 빈도</div>
+              <div class="p-stat-value" style="color:var(--node2);">8.2회/월</div>
+            </div>
+          </div>
+          <div class="channel-icons">
+            <span class="ch-icon">📱</span>
+            <span class="ch-icon">📸</span>
+            <span class="ch-icon">▶️</span>
+          </div>
+        </div>
+
+        <!-- Persona 2 -->
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar" style="background: linear-gradient(135deg,#3b82f6,#06b6d4);">민수</div>
+            <div>
+              <div class="persona-name">가성비 추구 민수</div>
+              <div class="persona-age">28–42세 · 남성</div>
+            </div>
+          </div>
+          <div class="persona-traits">
+            <span class="trait-tag">비교쇼핑</span>
+            <span class="trait-tag">리뷰 중시</span>
+            <span class="trait-tag">할인 탐색</span>
+            <span class="trait-tag">계획구매</span>
+          </div>
+          <div class="persona-stats">
+            <div class="p-stat">
+              <div class="p-stat-label">월평균 지출</div>
+              <div class="p-stat-value" style="color:#3b82f6;">₩187K</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-label">구매 빈도</div>
+              <div class="p-stat-value" style="color:#3b82f6;">3.4회/월</div>
+            </div>
+          </div>
+          <div class="channel-icons">
+            <span class="ch-icon">💻</span>
+            <span class="ch-icon">📊</span>
+            <span class="ch-icon">🔍</span>
+          </div>
+        </div>
+
+        <!-- Persona 3 -->
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar" style="background: linear-gradient(135deg,#f59e0b,#ef4444);">은경</div>
+            <div>
+              <div class="persona-name">프리미엄 은경</div>
+              <div class="persona-age">35–50세 · 여성</div>
+            </div>
+          </div>
+          <div class="persona-traits">
+            <span class="trait-tag">브랜드 충성</span>
+            <span class="trait-tag">품질 우선</span>
+            <span class="trait-tag">럭셔리</span>
+            <span class="trait-tag">선물 구매</span>
+          </div>
+          <div class="persona-stats">
+            <div class="p-stat">
+              <div class="p-stat-label">월평균 지출</div>
+              <div class="p-stat-value" style="color:#f59e0b;">₩680K</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-label">구매 빈도</div>
+              <div class="p-stat-value" style="color:#f59e0b;">2.1회/월</div>
+            </div>
+          </div>
+          <div class="channel-icons">
+            <span class="ch-icon">💻</span>
+            <span class="ch-icon">📦</span>
+            <span class="ch-icon">🏷️</span>
+          </div>
+        </div>
+
+        <!-- Persona 4 -->
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar" style="background: linear-gradient(135deg,#34d399,#059669);">준혁</div>
+            <div>
+              <div class="persona-name">루틴 소비자 준혁</div>
+              <div class="persona-age">30–45세 · 남성</div>
+            </div>
+          </div>
+          <div class="persona-traits">
+            <span class="trait-tag">정기구매</span>
+            <span class="trait-tag">구독 선호</span>
+            <span class="trait-tag">생활용품</span>
+            <span class="trait-tag">자동결제</span>
+          </div>
+          <div class="persona-stats">
+            <div class="p-stat">
+              <div class="p-stat-label">월평균 지출</div>
+              <div class="p-stat-value" style="color:#34d399;">₩243K</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-label">구매 빈도</div>
+              <div class="p-stat-value" style="color:#34d399;">12.7회/월</div>
+            </div>
+          </div>
+          <div class="channel-icons">
+            <span class="ch-icon">📱</span>
+            <span class="ch-icon">🔔</span>
+            <span class="ch-icon">♻️</span>
+          </div>
+        </div>
+
+        <!-- Persona 5 -->
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar" style="background: linear-gradient(135deg,#a78bfa,#7c3aed);">수아</div>
+            <div>
+              <div class="persona-name">디지털 네이티브 수아</div>
+              <div class="persona-age">18–26세 · 여성</div>
+            </div>
+          </div>
+          <div class="persona-traits">
+            <span class="trait-tag">모바일 전용</span>
+            <span class="trait-tag">한정판</span>
+            <span class="trait-tag">공동구매</span>
+            <span class="trait-tag">해외직구</span>
+          </div>
+          <div class="persona-stats">
+            <div class="p-stat">
+              <div class="p-stat-label">월평균 지출</div>
+              <div class="p-stat-value" style="color:#a78bfa;">₩156K</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-label">구매 빈도</div>
+              <div class="p-stat-value" style="color:#a78bfa;">5.6회/월</div>
+            </div>
+          </div>
+          <div class="channel-icons">
+            <span class="ch-icon">📱</span>
+            <span class="ch-icon">🎮</span>
+            <span class="ch-icon">💬</span>
+          </div>
+        </div>
+
+        <!-- Persona 6 -->
+        <div class="persona-card">
+          <div class="persona-header">
+            <div class="persona-avatar" style="background: linear-gradient(135deg,#64748b,#374151);">형석</div>
+            <div>
+              <div class="persona-name">신중 구매자 형석</div>
+              <div class="persona-age">40–58세 · 남성</div>
+            </div>
+          </div>
+          <div class="persona-traits">
+            <span class="trait-tag">장기 리서치</span>
+            <span class="trait-tag">A/S 중시</span>
+            <span class="trait-tag">오프라인 병행</span>
+            <span class="trait-tag">고신뢰 브랜드</span>
+          </div>
+          <div class="persona-stats">
+            <div class="p-stat">
+              <div class="p-stat-label">월평균 지출</div>
+              <div class="p-stat-value" style="color:#94a3b8;">₩421K</div>
+            </div>
+            <div class="p-stat">
+              <div class="p-stat-label">구매 빈도</div>
+              <div class="p-stat-value" style="color:#94a3b8;">1.3회/월</div>
+            </div>
+          </div>
+          <div class="channel-icons">
+            <span class="ch-icon">💻</span>
+            <span class="ch-icon">📞</span>
+            <span class="ch-icon">📄</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">Persona Detail</div>
+        <div class="section-badge">SELECTED</div>
+      </div>
+      <div class="detail-panel">
+        <div class="detail-persona-header">
+          <div class="detail-avatar">지영</div>
+          <div>
+            <div class="detail-name">트렌드세터 지영</div>
+            <div class="detail-sub">24–32세 · 여성 · 고관여 · Segment #A-04</div>
+          </div>
+        </div>
+
+        <div class="detail-section-title">행동 패턴 · Behavior Patterns</div>
+        <div class="behavior-list">
+          <div class="behavior-item">
+            <div class="behavior-dot"></div>
+            <div class="behavior-text">SNS 광고 노출 후 평균 14분 이내 구매 전환</div>
+          </div>
+          <div class="behavior-item">
+            <div class="behavior-dot"></div>
+            <div class="behavior-text">제품 리뷰보다 인플루언서 추천에 의존도 높음 (73%)</div>
+          </div>
+          <div class="behavior-item">
+            <div class="behavior-dot"></div>
+            <div class="behavior-text">카트 이탈 후 리타겟팅 광고에 재전환율 44%</div>
+          </div>
+          <div class="behavior-item">
+            <div class="behavior-dot"></div>
+            <div class="behavior-text">주말 저녁 22–24시 집중 구매 (전체 구매의 38%)</div>
+          </div>
+        </div>
+
+        <div class="detail-section-title">선호 카테고리 · Preferred Categories</div>
+        <div class="category-bars">
+          <div class="cat-bar-row">
+            <div class="cat-label">뷰티/스킨</div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:78%;"></div></div>
+            <div class="cat-pct">78%</div>
+          </div>
+          <div class="cat-bar-row">
+            <div class="cat-label">패션</div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:65%;"></div></div>
+            <div class="cat-pct">65%</div>
+          </div>
+          <div class="cat-bar-row">
+            <div class="cat-label">라이프스타일</div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:42%;"></div></div>
+            <div class="cat-pct">42%</div>
+          </div>
+          <div class="cat-bar-row">
+            <div class="cat-label">디지털</div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:28%;"></div></div>
+            <div class="cat-pct">28%</div>
+          </div>
+          <div class="cat-bar-row">
+            <div class="cat-label">식품</div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:15%;"></div></div>
+            <div class="cat-pct">15%</div>
+          </div>
+        </div>
+
+        <div class="detail-section-title">시간대별 구매 패턴 · Hourly Purchase Pattern</div>
+        <div class="hour-chart">
+          <div class="hour-bar" style="height:12%;"></div>
+          <div class="hour-bar" style="height:8%;"></div>
+          <div class="hour-bar" style="height:6%;"></div>
+          <div class="hour-bar" style="height:5%;"></div>
+          <div class="hour-bar" style="height:5%;"></div>
+          <div class="hour-bar" style="height:7%;"></div>
+          <div class="hour-bar" style="height:18%;"></div>
+          <div class="hour-bar" style="height:28%;"></div>
+          <div class="hour-bar" style="height:35%;"></div>
+          <div class="hour-bar" style="height:42%;"></div>
+          <div class="hour-bar" style="height:38%;"></div>
+          <div class="hour-bar" style="height:30%;"></div>
+          <div class="hour-bar" style="height:25%;"></div>
+          <div class="hour-bar" style="height:22%;"></div>
+          <div class="hour-bar" style="height:20%;"></div>
+          <div class="hour-bar" style="height:24%;"></div>
+          <div class="hour-bar" style="height:30%;"></div>
+          <div class="hour-bar" style="height:40%;"></div>
+          <div class="hour-bar" style="height:55%;"></div>
+          <div class="hour-bar" style="height:70%;"></div>
+          <div class="hour-bar peak" style="height:92%;"></div>
+          <div class="hour-bar peak" style="height:100%;"></div>
+          <div class="hour-bar peak" style="height:88%;"></div>
+          <div class="hour-bar" style="height:45%;"></div>
+        </div>
+        <div class="hour-labels">
+          <span class="hour-label">0시</span>
+          <span class="hour-label">6시</span>
+          <span class="hour-label">12시</span>
+          <span class="hour-label">18시</span>
+          <span class="hour-label">23시</span>
+        </div>
+
+        <div class="device-row">
+          <div class="device-item">
+            <div class="device-icon">📱</div>
+            <div class="device-label">Mobile</div>
+            <div class="device-pct">74%</div>
+          </div>
+          <div class="device-item">
+            <div class="device-icon">💻</div>
+            <div class="device-label">Desktop</div>
+            <div class="device-pct">18%</div>
+          </div>
+          <div class="device-item">
+            <div class="device-icon">📲</div>
+            <div class="device-label">App</div>
+            <div class="device-pct">8%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="bottom-row">
+    <!-- SEGMENT OVERVIEW -->
+    <div class="section-card full-width">
+      <div class="section-head">
+        <div class="section-title">세그먼트 구성 비율 · Segment Overview</div>
+        <div class="section-badge">156 SEGMENTS</div>
+      </div>
+      <div class="segment-section">
+        <div class="segment-bar-wrap">
+          <div class="segment-bar">
+            <div class="seg-chunk" style="width:28%; background:linear-gradient(90deg,rgba(255,107,202,0.7),rgba(255,107,202,0.5));"><span>트렌드세터 28%</span></div>
+            <div class="seg-chunk" style="width:22%; background:linear-gradient(90deg,rgba(59,130,246,0.7),rgba(59,130,246,0.5));"><span>가성비 22%</span></div>
+            <div class="seg-chunk" style="width:18%; background:linear-gradient(90deg,rgba(245,158,11,0.7),rgba(245,158,11,0.5));"><span>프리미엄 18%</span></div>
+            <div class="seg-chunk" style="width:16%; background:linear-gradient(90deg,rgba(52,211,153,0.7),rgba(52,211,153,0.5));"><span>루틴 16%</span></div>
+            <div class="seg-chunk" style="width:10%; background:linear-gradient(90deg,rgba(167,139,250,0.7),rgba(167,139,250,0.5));"><span>MZ 10%</span></div>
+            <div class="seg-chunk" style="width:6%; background:linear-gradient(90deg,rgba(100,116,139,0.7),rgba(100,116,139,0.5));"><span>신중 6%</span></div>
+          </div>
+        </div>
+        <div class="segment-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#ff6bca;"></div><span class="legend-label">트렌드세터</span><span class="legend-pct">28%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div><span class="legend-label">가성비 추구</span><span class="legend-pct">22%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div><span class="legend-label">프리미엄</span><span class="legend-pct">18%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#34d399;"></div><span class="legend-label">루틴 소비자</span><span class="legend-pct">16%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#a78bfa;"></div><span class="legend-label">디지털 네이티브</span><span class="legend-pct">10%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#64748b;"></div><span class="legend-label">신중 구매자</span><span class="legend-pct">6%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATA SOURCES -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">데이터 소스 · Data Sources</div>
+        <div class="section-badge">LIVE SYNC</div>
+      </div>
+      <div class="sources-grid">
+        <div class="source-card">
+          <div class="source-icon">🧾</div>
+          <div class="source-name">구매 이력</div>
+          <div class="source-count">2.4M records</div>
+          <div class="source-desc">주문/결제 트랜잭션 전체 이력 분석</div>
+          <div class="source-bar-track"><div class="source-bar-fill" style="width:92%;"></div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-icon">🔍</div>
+          <div class="source-name">검색 패턴</div>
+          <div class="source-count">8.1M queries</div>
+          <div class="source-desc">키워드·카테고리 탐색 행동 시퀀스</div>
+          <div class="source-bar-track"><div class="source-bar-fill" style="width:88%;"></div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-icon">🖱️</div>
+          <div class="source-name">클릭 행동</div>
+          <div class="source-count">31M events</div>
+          <div class="source-desc">클릭스트림·히트맵·스크롤 깊이 분석</div>
+          <div class="source-bar-track"><div class="source-bar-fill" style="width:76%;"></div></div>
+        </div>
+        <div class="source-card">
+          <div class="source-icon">⭐</div>
+          <div class="source-name">리뷰 분석</div>
+          <div class="source-count">890K reviews</div>
+          <div class="source-desc">감성 분석·키워드 추출·불만 패턴</div>
+          <div class="source-bar-track"><div class="source-bar-fill" style="width:64%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-content -->
+</div><!-- /app -->
+
+<script>
+// Persona card click interactivity
+document.querySelectorAll('.persona-card').forEach(card => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.persona-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

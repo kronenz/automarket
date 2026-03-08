@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChurnGuard — AutoMarket Customer Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #06080d;
+  --bg-surface: #0c1018;
+  --bg-card: #111825;
+  --bg-card-hover: #162030;
+  --bg-elevated: #1a2438;
+  --node2: #ff6bca;
+  --node2-dim: #ff6bca22;
+  --node2-glow: #ff6bca44;
+  --node4: #34d399;
+  --risk-high: #f87171;
+  --risk-high-dim: rgba(248,113,113,0.12);
+  --risk-med: #fbbf24;
+  --risk-med-dim: rgba(251,191,36,0.12);
+  --risk-low: #34d399;
+  --risk-low-dim: rgba(52,211,153,0.12);
+  --text-primary: #e8edf5;
+  --text-secondary: #8896ab;
+  --text-muted: #4a5568;
+  --border: #1e293b;
+  --border-light: #2d3b50;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; scroll-behavior: smooth; }
+body {
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    linear-gradient(rgba(255,107,202,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,107,202,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; top: 30%; right: -15%;
+  width: 45vw; height: 45vh;
+  background: radial-gradient(ellipse, rgba(248,113,113,0.04), transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 64px;
+  background: rgba(6,8,13,0.88);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--node2), #a855f7);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: #fff;
+  position: relative; overflow: hidden;
+}
+.logo-icon::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.25));
+}
+.logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.logo-text span { color: var(--node2); }
+.back-link {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-secondary); text-decoration: none;
+  font-size: 13px; font-weight: 500;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); transition: all 0.2s;
+}
+.back-link:hover { color: var(--node2); border-color: var(--node2-glow); background: var(--node2-dim); }
+
+/* ── LAYOUT ── */
+.app { position: relative; z-index: 1; }
+.page-content { padding: 36px 32px 60px; max-width: 1600px; margin: 0 auto; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 36px;
+  animation: fadeUp 0.5s ease both;
+}
+.page-header-left { display: flex; align-items: center; gap: 20px; }
+.service-icon {
+  width: 64px; height: 64px; border-radius: 18px;
+  background: linear-gradient(135deg, rgba(248,113,113,0.15), rgba(251,191,36,0.1));
+  border: 1px solid rgba(248,113,113,0.3);
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+}
+.page-title { font-size: 30px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
+.page-title span { color: var(--node2); }
+.page-desc { color: var(--text-secondary); font-size: 14px; max-width: 500px; line-height: 1.6; }
+.phase-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+  padding: 6px 14px; border-radius: 6px; letter-spacing: 1px;
+  background: rgba(52,211,153,0.12); color: #34d399;
+  border: 1px solid rgba(52,211,153,0.25);
+}
+
+/* ── STATS ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-bottom: 32px;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px 24px;
+  position: relative; overflow: hidden; transition: all 0.3s;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--node2), transparent);
+}
+.stat-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+.stat-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.stat-value { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: var(--node2); letter-spacing: -1px; margin-bottom: 6px; }
+.stat-sub { font-size: 12px; color: var(--text-secondary); }
+
+/* ── SECTION ── */
+.section-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+.section-title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+.section-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  padding: 3px 10px; border-radius: 4px;
+  background: var(--node2-dim); color: var(--node2); border: 1px solid var(--node2-glow);
+}
+.section-badge.alert { background: rgba(248,113,113,0.12); color: #f87171; border-color: rgba(248,113,113,0.25); }
+
+/* ── TOP GRID ── */
+.top-grid {
+  display: grid; grid-template-columns: 320px 1fr; gap: 24px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.5s ease 0.2s both;
+}
+.mid-row {
+  margin-bottom: 24px;
+  animation: fadeUp 0.5s ease 0.3s both;
+}
+.bot-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  animation: fadeUp 0.5s ease 0.35s both;
+}
+
+/* ── GAUGE ── */
+.gauge-wrap { padding: 28px 24px; display: flex; flex-direction: column; align-items: center; }
+.gauge-container { position: relative; width: 220px; height: 130px; margin-bottom: 20px; }
+.gauge-svg { width: 100%; height: 100%; }
+
+.gauge-center-text { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); text-align: center; }
+.gauge-value { font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700; line-height: 1; }
+.gauge-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+.gauge-zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin-top: 8px; }
+.gauge-zone { background: var(--bg-surface); border-radius: var(--radius-sm); padding: 10px 12px; text-align: center; border: 1px solid var(--border); }
+.gauge-zone-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.gauge-zone-count { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; }
+
+.risk-meter { margin-top: 20px; width: 100%; }
+.risk-bar-labels { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.risk-bar-label { font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.risk-gradient-bar {
+  height: 8px; border-radius: 4px; width: 100%;
+  background: linear-gradient(90deg, #34d399 0%, #fbbf24 50%, #f87171 100%);
+  position: relative; margin-bottom: 4px;
+}
+.risk-needle {
+  position: absolute; top: -4px; width: 2px; height: 16px;
+  background: white; border-radius: 1px; transform: translateX(-50%);
+  left: 67%;
+  box-shadow: 0 0 6px rgba(255,255,255,0.5);
+}
+
+/* ── CUSTOMER TABLE ── */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead tr { border-bottom: 1px solid var(--border); }
+th {
+  padding: 12px 16px; text-align: left;
+  font-size: 10px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  font-family: 'JetBrains Mono', monospace; white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid rgba(30,41,59,0.6);
+  transition: background 0.15s; cursor: pointer;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,107,202,0.03); }
+td { padding: 12px 16px; font-size: 12px; vertical-align: middle; }
+td.mono { font-family: 'JetBrains Mono', monospace; }
+
+.risk-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 6px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap;
+}
+.risk-high { background: var(--risk-high-dim); color: var(--risk-high); border: 1px solid rgba(248,113,113,0.25); }
+.risk-med { background: var(--risk-med-dim); color: var(--risk-med); border: 1px solid rgba(251,191,36,0.25); }
+.risk-low { background: var(--risk-low-dim); color: var(--risk-low); border: 1px solid rgba(52,211,153,0.25); }
+
+.risk-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.risk-dot.h { background: var(--risk-high); animation: blink 1.5s infinite; }
+.risk-dot.m { background: var(--risk-med); }
+.risk-dot.l { background: var(--risk-low); }
+
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.action-badge {
+  font-size: 10px; padding: 3px 9px; border-radius: 4px;
+  border: 1px solid; white-space: nowrap; font-weight: 500;
+}
+.act-coupon { background: rgba(255,107,202,0.1); color: var(--node2); border-color: rgba(255,107,202,0.25); }
+.act-email { background: rgba(96,165,250,0.1); color: #60a5fa; border-color: rgba(96,165,250,0.25); }
+.act-sms { background: rgba(251,191,36,0.1); color: #fbbf24; border-color: rgba(251,191,36,0.25); }
+.act-vip { background: rgba(167,139,250,0.1); color: #a78bfa; border-color: rgba(167,139,250,0.25); }
+.act-push { background: rgba(52,211,153,0.1); color: #34d399; border-color: rgba(52,211,153,0.25); }
+
+.status-chip {
+  font-size: 10px; padding: 2px 8px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.st-sent { background: rgba(96,165,250,0.1); color: #60a5fa; }
+.st-pending { background: rgba(251,191,36,0.1); color: #fbbf24; }
+.st-converted { background: rgba(52,211,153,0.12); color: #34d399; }
+.st-watching { background: rgba(255,107,202,0.1); color: var(--node2); }
+
+/* ── RETENTION CAMPAIGNS ── */
+.campaign-list { display: flex; flex-direction: column; gap: 0; }
+.campaign-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 100px 90px 100px 110px;
+  align-items: center; gap: 16px;
+  padding: 14px 24px; border-bottom: 1px solid rgba(30,41,59,0.6);
+  transition: background 0.15s; cursor: pointer;
+}
+.campaign-row:last-child { border-bottom: none; }
+.campaign-row:hover { background: rgba(255,107,202,0.03); }
+.campaign-row.header {
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+  cursor: default; background: transparent;
+}
+.campaign-row.header:hover { background: transparent; }
+.camp-head-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-family: 'JetBrains Mono', monospace; }
+
+.campaign-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.campaign-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.campaign-seg { font-size: 11px; color: var(--text-secondary); }
+.conv-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.conv-bar { flex: 1; height: 4px; background: var(--bg-surface); border-radius: 2px; overflow: hidden; }
+.conv-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--node2), #a855f7); }
+.conv-pct { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--node2); white-space: nowrap; }
+.send-count { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-primary); }
+
+/* ── LTV COHORT ── */
+.cohort-container { padding: 20px 24px; }
+.cohort-chart { display: flex; align-items: flex-end; gap: 12px; height: 180px; margin-bottom: 12px; }
+.cohort-group { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.cohort-bars { display: flex; align-items: flex-end; gap: 3px; height: 160px; }
+.cohort-bar {
+  width: 18px; border-radius: 3px 3px 0 0;
+  transition: all 0.3s; cursor: pointer; position: relative;
+}
+.cohort-bar:hover { filter: brightness(1.3); }
+.cohort-bar.m1 { background: rgba(255,107,202,0.5); border: 1px solid rgba(255,107,202,0.6); }
+.cohort-bar.m3 { background: rgba(255,107,202,0.65); border: 1px solid rgba(255,107,202,0.75); }
+.cohort-bar.m6 { background: rgba(255,107,202,0.8); border: 1px solid var(--node2); }
+.cohort-bar.m12 { background: linear-gradient(180deg, #ff6bca, rgba(255,107,202,0.6)); border: 1px solid var(--node2); }
+.cohort-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-muted); }
+
+.cohort-legend { display: flex; gap: 16px; margin-top: 8px; }
+.coh-leg { display: flex; align-items: center; gap: 6px; }
+.coh-leg-dot { width: 10px; height: 6px; border-radius: 2px; }
+.coh-leg-label { font-size: 10px; color: var(--text-secondary); }
+
+/* ── ALERT FEED ── */
+.alert-feed { display: flex; flex-direction: column; }
+.alert-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 24px; border-bottom: 1px solid rgba(30,41,59,0.6);
+  transition: background 0.15s;
+}
+.alert-item:last-child { border-bottom: none; }
+.alert-item:hover { background: rgba(255,107,202,0.03); }
+.alert-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0; margin-top: 2px;
+}
+.alert-content { flex: 1; }
+.alert-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.alert-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+.alert-meta { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+.alert-time { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); }
+.alert-tag {
+  font-size: 9px; padding: 2px 7px; border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace; font-weight: 600;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Gauge arc animation */
+@keyframes arcDraw {
+  from { stroke-dashoffset: 440; }
+  to { stroke-dashoffset: var(--target-offset); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<nav class="topbar">
+  <div class="logo">
+    <div class="logo-icon">A</div>
+    <div class="logo-text">Auto<span>Market</span></div>
+  </div>
+  <a href="../index.html" class="back-link">← Dashboard</a>
+</nav>
+
+<div class="page-content">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="service-icon">🛡️</div>
+      <div>
+        <div class="page-title">Churn<span>Guard</span></div>
+        <div class="page-desc">AI 기반 고객 이탈 예측 및 선제적 리텐션 시스템. 이탈 위험 신호를 72시간 전에 포착하고 개인화된 재활성화 액션을 자동 실행합니다.</div>
+      </div>
+    </div>
+    <div class="phase-badge">PHASE 4 · LIVE</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Prevention Rate</div>
+      <div class="stat-value">73%</div>
+      <div class="stat-sub">이탈 예측 고객 중 재활성화 성공률</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">LTV Lift</div>
+      <div class="stat-value">+28%</div>
+      <div class="stat-sub">리텐션 개입 후 고객 생애가치 증가</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">At-Risk Saved</div>
+      <div class="stat-value">1,240</div>
+      <div class="stat-sub">이번 분기 이탈 방지 성공 고객 수</div>
+    </div>
+  </div>
+
+  <!-- TOP GRID: Gauge + Customer Table -->
+  <div class="top-grid">
+
+    <!-- GAUGE -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">이탈 위험도 · Risk Gauge</div>
+        <div class="section-badge alert">ELEVATED</div>
+      </div>
+      <div class="gauge-wrap">
+        <div class="gauge-container">
+          <svg class="gauge-svg" viewBox="0 0 220 130">
+            <defs>
+              <linearGradient id="gaugeBg" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#34d399;stop-opacity:1"/>
+                <stop offset="50%" style="stop-color:#fbbf24;stop-opacity:1"/>
+                <stop offset="100%" style="stop-color:#f87171;stop-opacity:1"/>
+              </linearGradient>
+              <linearGradient id="gaugeFg" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#34d399;stop-opacity:0.3"/>
+                <stop offset="50%" style="stop-color:#fbbf24;stop-opacity:0.5"/>
+                <stop offset="100%" style="stop-color:#f87171;stop-opacity:0.8"/>
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+
+            <!-- Background arc (full semicircle) -->
+            <path d="M 20 120 A 90 90 0 0 1 200 120"
+              fill="none" stroke="rgba(30,41,59,0.8)" stroke-width="16" stroke-linecap="round"/>
+
+            <!-- Colored background gradient arc -->
+            <path d="M 20 120 A 90 90 0 0 1 200 120"
+              fill="none" stroke="url(#gaugeBg)" stroke-width="16" stroke-linecap="round" opacity="0.25"/>
+
+            <!-- Risk fill arc (67% of semicircle → moderate-high) -->
+            <!-- Total arc length for r=90 semicircle ≈ 283. 67% ≈ 189 -->
+            <path d="M 20 120 A 90 90 0 0 1 200 120"
+              fill="none"
+              stroke="url(#gaugeBg)"
+              stroke-width="16" stroke-linecap="round"
+              stroke-dasharray="283" stroke-dashoffset="93"
+              style="animation: arcDraw 1.5s ease 0.5s both;"
+              filter="url(#glow)"/>
+
+            <!-- Needle -->
+            <!-- 67% of 180deg = 120.6deg from left. Center is (110,120). r=70 -->
+            <!-- angle from left: 0deg=left, 180deg=right. 67% → 120.6deg from left = 180-120.6=59.4 above right -->
+            <!-- needle tip: (110 - 70*cos(120.6°), 120 - 70*sin(120.6°)) -->
+            <!-- cos(120.6°) ≈ -0.508, sin(120.6°) ≈ 0.862 -->
+            <!-- x = 110 - 70*(-0.508) = 110 + 35.5 = 145.5, y = 120 - 70*0.862 = 59.7 -->
+            <line x1="110" y1="120" x2="144" y2="62"
+              stroke="white" stroke-width="2.5" stroke-linecap="round"
+              filter="url(#glow)"/>
+            <circle cx="110" cy="120" r="6" fill="var(--bg-card)" stroke="white" stroke-width="2"/>
+            <circle cx="110" cy="120" r="3" fill="white"/>
+
+            <!-- Scale labels -->
+            <text x="14" y="136" fill="#34d399" font-size="9" font-family="JetBrains Mono" font-weight="600">LOW</text>
+            <text x="87" y="22" fill="#fbbf24" font-size="9" font-family="JetBrains Mono" font-weight="600">MED</text>
+            <text x="189" y="136" fill="#f87171" font-size="9" font-family="JetBrains Mono" font-weight="600" text-anchor="end">HIGH</text>
+          </svg>
+
+          <div class="gauge-center-text">
+            <div class="gauge-value" style="color:#fbbf24;">67</div>
+            <div class="gauge-sub">위험지수 / Risk Index</div>
+          </div>
+        </div>
+
+        <div class="gauge-zones">
+          <div class="gauge-zone">
+            <div class="gauge-zone-label">안전 Safe</div>
+            <div class="gauge-zone-count" style="color:#34d399;">8,420</div>
+          </div>
+          <div class="gauge-zone">
+            <div class="gauge-zone-label">주의 Watch</div>
+            <div class="gauge-zone-count" style="color:#fbbf24;">2,187</div>
+          </div>
+          <div class="gauge-zone">
+            <div class="gauge-zone-label">위험 At-Risk</div>
+            <div class="gauge-zone-count" style="color:#f87171;">743</div>
+          </div>
+        </div>
+
+        <div class="risk-meter">
+          <div class="risk-bar-labels">
+            <span class="risk-bar-label">0</span>
+            <span class="risk-bar-label">25</span>
+            <span class="risk-bar-label">50</span>
+            <span class="risk-bar-label">75</span>
+            <span class="risk-bar-label">100</span>
+          </div>
+          <div class="risk-gradient-bar">
+            <div class="risk-needle"></div>
+          </div>
+          <div style="text-align:center;margin-top:6px;">
+            <span style="font-size:10px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">현재 종합 위험도 67 / 100</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER RISK TABLE -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">이탈 위험 고객 목록 · At-Risk Customer List</div>
+        <div class="section-badge alert">743 AT-RISK</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer ID</th>
+              <th>Risk Score</th>
+              <th>마지막 구매</th>
+              <th>Days Inactive</th>
+              <th>LTV</th>
+              <th>권장 액션</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-28419</td>
+              <td><span class="risk-pill risk-high"><span class="risk-dot h"></span>97</span></td>
+              <td class="mono">2025-11-24</td>
+              <td class="mono" style="color:#f87171;">104일</td>
+              <td class="mono" style="color:var(--text-primary);">₩2.4M</td>
+              <td><span class="action-badge act-vip">VIP 전담</span></td>
+              <td><span class="status-chip st-pending">대기중</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-71032</td>
+              <td><span class="risk-pill risk-high"><span class="risk-dot h"></span>94</span></td>
+              <td class="mono">2025-11-30</td>
+              <td class="mono" style="color:#f87171;">98일</td>
+              <td class="mono" style="color:var(--text-primary);">₩1.8M</td>
+              <td><span class="action-badge act-coupon">쿠폰 20%</span></td>
+              <td><span class="status-chip st-sent">발송완료</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-44205</td>
+              <td><span class="risk-pill risk-high"><span class="risk-dot h"></span>91</span></td>
+              <td class="mono">2025-12-08</td>
+              <td class="mono" style="color:#f87171;">90일</td>
+              <td class="mono" style="color:var(--text-primary);">₩3.1M</td>
+              <td><span class="action-badge act-email">이메일</span></td>
+              <td><span class="status-chip st-sent">발송완료</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-83917</td>
+              <td><span class="risk-pill risk-high"><span class="risk-dot h"></span>88</span></td>
+              <td class="mono">2025-12-15</td>
+              <td class="mono" style="color:#f87171;">83일</td>
+              <td class="mono" style="color:var(--text-primary);">₩890K</td>
+              <td><span class="action-badge act-sms">SMS 알림</span></td>
+              <td><span class="status-chip st-watching">모니터링</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-59144</td>
+              <td><span class="risk-pill risk-med"><span class="risk-dot m"></span>76</span></td>
+              <td class="mono">2025-12-22</td>
+              <td class="mono" style="color:#fbbf24;">76일</td>
+              <td class="mono" style="color:var(--text-primary);">₩1.2M</td>
+              <td><span class="action-badge act-push">앱 푸시</span></td>
+              <td><span class="status-chip st-sent">발송완료</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-12876</td>
+              <td><span class="risk-pill risk-med"><span class="risk-dot m"></span>72</span></td>
+              <td class="mono">2025-12-28</td>
+              <td class="mono" style="color:#fbbf24;">70일</td>
+              <td class="mono" style="color:var(--text-primary);">₩445K</td>
+              <td><span class="action-badge act-coupon">쿠폰 15%</span></td>
+              <td><span class="status-chip st-converted">전환성공</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-36500</td>
+              <td><span class="risk-pill risk-med"><span class="risk-dot m"></span>68</span></td>
+              <td class="mono">2026-01-04</td>
+              <td class="mono" style="color:#fbbf24;">63일</td>
+              <td class="mono" style="color:var(--text-primary);">₩2.0M</td>
+              <td><span class="action-badge act-email">이메일</span></td>
+              <td><span class="status-chip st-pending">대기중</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-90821</td>
+              <td><span class="risk-pill risk-med"><span class="risk-dot m"></span>61</span></td>
+              <td class="mono">2026-01-10</td>
+              <td class="mono" style="color:#fbbf24;">57일</td>
+              <td class="mono" style="color:var(--text-primary);">₩678K</td>
+              <td><span class="action-badge act-sms">SMS 알림</span></td>
+              <td><span class="status-chip st-watching">모니터링</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-47713</td>
+              <td><span class="risk-pill risk-low"><span class="risk-dot l"></span>44</span></td>
+              <td class="mono">2026-01-19</td>
+              <td class="mono" style="color:#34d399;">48일</td>
+              <td class="mono" style="color:var(--text-primary);">₩334K</td>
+              <td><span class="action-badge act-push">앱 푸시</span></td>
+              <td><span class="status-chip st-converted">전환성공</span></td>
+            </tr>
+            <tr>
+              <td class="mono" style="color:var(--text-secondary);">#CUS-65340</td>
+              <td><span class="risk-pill risk-low"><span class="risk-dot l"></span>38</span></td>
+              <td class="mono">2026-01-25</td>
+              <td class="mono" style="color:#34d399;">42일</td>
+              <td class="mono" style="color:var(--text-primary);">₩1.5M</td>
+              <td><span class="action-badge act-coupon">쿠폰 10%</span></td>
+              <td><span class="status-chip st-sent">발송완료</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RETENTION CAMPAIGNS -->
+  <div class="mid-row">
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">리텐션 캠페인 현황 · Retention Campaigns</div>
+        <div class="section-badge">8 ACTIVE</div>
+      </div>
+      <div class="campaign-list">
+        <div class="campaign-row header">
+          <div class="camp-head-label">#</div>
+          <div class="camp-head-label">캠페인명 / 타겟 세그먼트</div>
+          <div class="camp-head-label">발송 유형</div>
+          <div class="camp-head-label">발송 수</div>
+          <div class="camp-head-label">전환율</div>
+          <div class="camp-head-label">Status</div>
+        </div>
+
+        <div class="campaign-row">
+          <div class="campaign-num">01</div>
+          <div>
+            <div class="campaign-name">VIP 위험 고객 긴급 복귀 오퍼</div>
+            <div class="campaign-seg">LTV ₩1M+ · 90일 이상 미구매</div>
+          </div>
+          <div><span class="action-badge act-coupon">쿠폰 30%</span></div>
+          <div class="send-count">284명</div>
+          <div class="conv-bar-wrap">
+            <div class="conv-bar"><div class="conv-fill" style="width:68%;"></div></div>
+            <div class="conv-pct">68%</div>
+          </div>
+          <div><span class="status-chip st-converted" style="display:inline-block;">진행중</span></div>
+        </div>
+
+        <div class="campaign-row">
+          <div class="campaign-num">02</div>
+          <div>
+            <div class="campaign-name">장기 이탈 예측 이메일 넛지</div>
+            <div class="campaign-seg">위험도 70+ · 구매 이력 3회↑</div>
+          </div>
+          <div><span class="action-badge act-email">이메일</span></div>
+          <div class="send-count">1,204명</div>
+          <div class="conv-bar-wrap">
+            <div class="conv-bar"><div class="conv-fill" style="width:43%;"></div></div>
+            <div class="conv-pct">43%</div>
+          </div>
+          <div><span class="status-chip st-sent" style="display:inline-block;">진행중</span></div>
+        </div>
+
+        <div class="campaign-row">
+          <div class="campaign-num">03</div>
+          <div>
+            <div class="campaign-name">트렌드세터 세그먼트 신상 알림</div>
+            <div class="campaign-seg">페르소나 A · 60일 이상 미구매</div>
+          </div>
+          <div><span class="action-badge act-push">앱 푸시</span></div>
+          <div class="send-count">876명</div>
+          <div class="conv-bar-wrap">
+            <div class="conv-bar"><div class="conv-fill" style="width:55%;"></div></div>
+            <div class="conv-pct">55%</div>
+          </div>
+          <div><span class="status-chip st-sent" style="display:inline-block;">진행중</span></div>
+        </div>
+
+        <div class="campaign-row">
+          <div class="campaign-num">04</div>
+          <div>
+            <div class="campaign-name">가성비 세그먼트 타임세일 SMS</div>
+            <div class="campaign-seg">페르소나 B · 45일 이상 미구매</div>
+          </div>
+          <div><span class="action-badge act-sms">SMS</span></div>
+          <div class="send-count">2,341명</div>
+          <div class="conv-bar-wrap">
+            <div class="conv-bar"><div class="conv-fill" style="width:38%;"></div></div>
+            <div class="conv-pct">38%</div>
+          </div>
+          <div><span class="status-chip st-watching" style="display:inline-block;">모니터링</span></div>
+        </div>
+
+        <div class="campaign-row">
+          <div class="campaign-num">05</div>
+          <div>
+            <div class="campaign-name">프리미엄 고객 전담 매니저 배정</div>
+            <div class="campaign-seg">LTV ₩2M+ · 위험도 80+</div>
+          </div>
+          <div><span class="action-badge act-vip">VIP 전담</span></div>
+          <div class="send-count">47명</div>
+          <div class="conv-bar-wrap">
+            <div class="conv-bar"><div class="conv-fill" style="width:83%;"></div></div>
+            <div class="conv-pct">83%</div>
+          </div>
+          <div><span class="status-chip st-converted" style="display:inline-block;">성과우수</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM GRID: LTV Cohort + Alert Feed -->
+  <div class="bot-grid">
+
+    <!-- LTV COHORT CHART -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">LTV 코호트 분석 · Cohort LTV Analysis</div>
+        <div class="section-badge">6 COHORTS</div>
+      </div>
+      <div class="cohort-container">
+        <div style="display:flex;align-items:flex-end;gap:20px;height:180px;margin-bottom:16px;">
+
+          <!-- Cohort: 2025 Q1 -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <div style="display:flex;align-items:flex-end;gap:3px;height:160px;">
+              <div class="cohort-bar m1" style="height:35%;"></div>
+              <div class="cohort-bar m3" style="height:52%;"></div>
+              <div class="cohort-bar m6" style="height:68%;"></div>
+              <div class="cohort-bar m12" style="height:84%;"></div>
+            </div>
+            <div class="cohort-label">Q1 '25</div>
+          </div>
+
+          <!-- Cohort: 2025 Q2 -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <div style="display:flex;align-items:flex-end;gap:3px;height:160px;">
+              <div class="cohort-bar m1" style="height:40%;"></div>
+              <div class="cohort-bar m3" style="height:58%;"></div>
+              <div class="cohort-bar m6" style="height:74%;"></div>
+              <div class="cohort-bar m12" style="height:92%;"></div>
+            </div>
+            <div class="cohort-label">Q2 '25</div>
+          </div>
+
+          <!-- Cohort: 2025 Q3 -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <div style="display:flex;align-items:flex-end;gap:3px;height:160px;">
+              <div class="cohort-bar m1" style="height:38%;"></div>
+              <div class="cohort-bar m3" style="height:60%;"></div>
+              <div class="cohort-bar m6" style="height:80%;"></div>
+              <div class="cohort-bar m12" style="height:100%;"></div>
+            </div>
+            <div class="cohort-label">Q3 '25</div>
+          </div>
+
+          <!-- Cohort: 2025 Q4 -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <div style="display:flex;align-items:flex-end;gap:3px;height:160px;">
+              <div class="cohort-bar m1" style="height:45%;"></div>
+              <div class="cohort-bar m3" style="height:65%;"></div>
+              <div class="cohort-bar m6" style="height:85%;"></div>
+              <div class="cohort-bar m12" style="height:0%;opacity:0.3;border:1px dashed rgba(255,107,202,0.4);background:transparent;"></div>
+            </div>
+            <div class="cohort-label">Q4 '25</div>
+          </div>
+
+          <!-- Cohort: 2026 Q1 -->
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;">
+            <div style="display:flex;align-items:flex-end;gap:3px;height:160px;">
+              <div class="cohort-bar m1" style="height:48%;"></div>
+              <div class="cohort-bar m3" style="height:0%;opacity:0.3;border:1px dashed rgba(255,107,202,0.4);background:transparent;"></div>
+              <div class="cohort-bar m6" style="height:0%;opacity:0.3;border:1px dashed rgba(255,107,202,0.4);background:transparent;"></div>
+              <div class="cohort-bar m12" style="height:0%;opacity:0.3;border:1px dashed rgba(255,107,202,0.4);background:transparent;"></div>
+            </div>
+            <div class="cohort-label">Q1 '26</div>
+          </div>
+
+        </div>
+
+        <!-- LTV value labels -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+          <div style="background:var(--bg-surface);border-radius:6px;padding:10px 12px;text-align:center;">
+            <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">1개월</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:rgba(255,107,202,0.6);">₩42K</div>
+          </div>
+          <div style="background:var(--bg-surface);border-radius:6px;padding:10px 12px;text-align:center;">
+            <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">3개월</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:rgba(255,107,202,0.75);">₩118K</div>
+          </div>
+          <div style="background:var(--bg-surface);border-radius:6px;padding:10px 12px;text-align:center;">
+            <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">6개월</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:rgba(255,107,202,0.9);">₩267K</div>
+          </div>
+          <div style="background:var(--bg-surface);border-radius:6px;padding:10px 12px;text-align:center;">
+            <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">12개월</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--node2);">₩589K</div>
+          </div>
+        </div>
+
+        <div class="cohort-legend">
+          <div class="coh-leg"><div class="coh-leg-dot" style="background:rgba(255,107,202,0.5);"></div><span class="coh-leg-label">1개월 LTV</span></div>
+          <div class="coh-leg"><div class="coh-leg-dot" style="background:rgba(255,107,202,0.65);"></div><span class="coh-leg-label">3개월 LTV</span></div>
+          <div class="coh-leg"><div class="coh-leg-dot" style="background:rgba(255,107,202,0.8);"></div><span class="coh-leg-label">6개월 LTV</span></div>
+          <div class="coh-leg"><div class="coh-leg-dot" style="background:var(--node2);"></div><span class="coh-leg-label">12개월 LTV</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERT FEED -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-title">이탈 알림 피드 · Churn Alert Feed</div>
+        <div class="section-badge alert">LIVE · 12 NEW</div>
+      </div>
+      <div class="alert-feed">
+
+        <div class="alert-item">
+          <div class="alert-icon" style="background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.25);">🚨</div>
+          <div class="alert-content">
+            <div class="alert-title" style="color:#f87171;">#CUS-28419 — 위험도 급등 감지</div>
+            <div class="alert-desc">최근 7일간 세션 수 -82%, 장바구니 이탈 4회 연속. LTV ₩2.4M 고위험 고객. 즉시 VIP 개입 권장.</div>
+            <div class="alert-meta">
+              <span class="alert-time">5분 전</span>
+              <span class="alert-tag" style="background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.25);">CRITICAL</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-item">
+          <div class="alert-icon" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.2);">⚠️</div>
+          <div class="alert-content">
+            <div class="alert-title" style="color:#fbbf24;">트렌드세터 세그먼트 — 집단 이탈 패턴</div>
+            <div class="alert-desc">페르소나 A (트렌드세터) 그룹 내 34명이 동시 활동 감소. 경쟁사 신규 컬렉션 런칭과 연관 가능성 74%.</div>
+            <div class="alert-meta">
+              <span class="alert-time">23분 전</span>
+              <span class="alert-tag" style="background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2);">SEGMENT ALERT</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-item">
+          <div class="alert-icon" style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);">✅</div>
+          <div class="alert-content">
+            <div class="alert-title" style="color:#34d399;">#CUS-12876 — 쿠폰 캠페인 전환 성공</div>
+            <div class="alert-desc">15% 쿠폰 발송 후 48시간 내 재구매 완료. LTV ₩445K → ₩489K (+9.9%). 이탈 위험도 72 → 31 하락.</div>
+            <div class="alert-meta">
+              <span class="alert-time">1시간 전</span>
+              <span class="alert-tag" style="background:rgba(52,211,153,0.1);color:#34d399;border:1px solid rgba(52,211,153,0.2);">RECOVERED</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-item">
+          <div class="alert-icon" style="background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.2);">📉</div>
+          <div class="alert-content">
+            <div class="alert-title" style="color:#f87171;">#CUS-71032 — 이메일 미오픈 3회 연속</div>
+            <div class="alert-desc">리텐션 이메일 3회 발송 모두 미오픈. SMS 채널로 전환 필요. 대안 채널 자동 전환 승인 요청.</div>
+            <div class="alert-meta">
+              <span class="alert-time">2시간 전</span>
+              <span class="alert-tag" style="background:rgba(248,113,113,0.1);color:#f87171;border:1px solid rgba(248,113,113,0.2);">CHANNEL SWITCH</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-item">
+          <div class="alert-icon" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);">📊</div>
+          <div class="alert-content">
+            <div class="alert-title" style="color:#60a5fa;">주간 이탈 방지 리포트 생성 완료</div>
+            <div class="alert-desc">2026년 3월 1주차: 총 284명 개입, 207명 재활성화 (73% 성공). 절약된 LTV 추정 ₩186M.</div>
+            <div class="alert-meta">
+              <span class="alert-time">3시간 전</span>
+              <span class="alert-tag" style="background:rgba(96,165,250,0.1);color:#60a5fa;border:1px solid rgba(96,165,250,0.2);">WEEKLY REPORT</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-item">
+          <div class="alert-icon" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">🎯</div>
+          <div class="alert-content">
+            <div class="alert-title" style="color:#a78bfa;">VIP 캠페인 #05 — 역대 최고 전환율 갱신</div>
+            <div class="alert-desc">전담 매니저 배정 캠페인이 전환율 83% 달성. 이전 최고 기록 76% 대비 +7%p. 캠페인 대상 확대 권장.</div>
+            <div class="alert-meta">
+              <span class="alert-time">6시간 전</span>
+              <span class="alert-tag" style="background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.2);">MILESTONE</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /bot-grid -->
+
+</div><!-- /page-content -->
+</div><!-- /app -->
+
+<script>
+// Animate gauge arc on load
+const arc = document.querySelector('.gauge-svg path:nth-child(5)');
+if (arc) {
+  arc.style.transition = 'stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1) 0.5s';
+}
+
+// Table row hover highlight for risk pills
+document.querySelectorAll('tbody tr').forEach(row => {
+  row.addEventListener('click', () => {
+    document.querySelectorAll('tbody tr').forEach(r => r.style.background = '');
+    row.style.background = 'rgba(255,107,202,0.05)';
+  });
+});
+</script>
+</body>
+</html>

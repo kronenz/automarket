@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SourceMatch — 소싱 매칭 | AutoMarket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #06080d;
+  --bg-surface: #0c1018;
+  --bg-card: #111825;
+  --bg-card-hover: #162030;
+  --bg-elevated: #1a2438;
+  --node1: #00e5ff;
+  --node1-dim: #00e5ff22;
+  --node1-glow: #00e5ff55;
+  --node4: #34d399;
+  --node4-dim: #34d39922;
+  --warn: #f59e0b;
+  --warn-dim: #f59e0b22;
+  --danger: #f87171;
+  --danger-dim: #f8717122;
+  --node3: #a78bfa;
+  --node3-dim: #a78bfa22;
+  --text-primary: #e8edf5;
+  --text-secondary: #8896ab;
+  --text-muted: #4a5568;
+  --border: #1e293b;
+  --border-light: #2d3b50;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0,229,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  right: -10%;
+  width: 50vw;
+  height: 50vh;
+  background: radial-gradient(ellipse, rgba(0,229,255,0.03), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+.app { position: relative; z-index: 1; }
+
+/* ── TOP BAR ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  background: rgba(6,8,13,0.88);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--node1), var(--node3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--bg-deep);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3));
+}
+
+.logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--text-primary); }
+.logo-text span { color: var(--node1); }
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.back-link:hover { color: var(--node1); border-color: rgba(0,229,255,0.3); background: var(--node1-dim); }
+
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(167,139,250,0.08);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--node3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  padding: 40px 32px 32px;
+  border-bottom: 1px solid var(--border);
+  animation: fadeUp 0.5s ease both;
+}
+
+.page-header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.service-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: var(--node1-dim);
+  border: 1px solid rgba(0,229,255,0.25);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--node1);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.page-title {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+
+.page-title .accent { color: var(--node1); }
+
+.page-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.page-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.phase-badge {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: rgba(167,139,250,0.1);
+  border: 1px solid rgba(167,139,250,0.25);
+  color: var(--node3);
+}
+
+/* ── LAYOUT ── */
+.main-layout {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── FILTERS ── */
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.5s 0.1s ease both;
+}
+
+.filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.filter-select {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 32px 8px 12px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896ab' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color 0.2s;
+}
+
+.filter-select:focus { outline: none; border-color: var(--node1); }
+
+.region-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+
+.region-tab {
+  padding: 5px 14px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-muted);
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+.region-tab.active { background: var(--node1); color: var(--bg-deep); }
+.region-tab:not(.active):hover { color: var(--text-secondary); }
+
+/* ── MATCH TABLE ── */
+.section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.5s 0.15s ease both;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--node1-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  background: var(--bg-surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.match-table { width: 100%; border-collapse: collapse; }
+
+.match-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.match-table th:first-child { padding-left: 20px; }
+.match-table th:last-child { padding-right: 20px; text-align: center; }
+
+.match-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(30,41,59,0.5);
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.match-table td:first-child { padding-left: 20px; }
+.match-table td:last-child { padding-right: 20px; text-align: center; }
+.match-table tr:last-child td { border-bottom: none; }
+.match-table tr { transition: background 0.15s; cursor: pointer; }
+.match-table tr.selected td { background: rgba(0,229,255,0.04); }
+.match-table tr:not(.selected):hover td { background: rgba(0,229,255,0.02); }
+
+.product-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.product-name {
+  font-weight: 700;
+  font-size: 13px;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.product-sku {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.supplier-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.supplier-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.supplier-loc {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.loc-flag {
+  font-size: 13px;
+}
+
+.match-score-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.match-arc {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.match-arc svg {
+  transform: rotate(-90deg);
+}
+
+.match-arc-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.price-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.price-unit {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.moq-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.leadtime-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.lt-fast { background: rgba(52,211,153,0.12); color: var(--node4); border: 1px solid rgba(52,211,153,0.2); }
+.lt-mid  { background: rgba(245,158,11,0.10); color: var(--warn); border: 1px solid rgba(245,158,11,0.18); }
+.lt-slow { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.18); }
+
+.stars {
+  display: flex;
+  gap: 2px;
+  font-size: 12px;
+}
+
+.star-full { color: var(--warn); }
+.star-empty { color: var(--bg-elevated); }
+
+.detail-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--node1-dim);
+  background: var(--node1-dim);
+  color: var(--node1);
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.detail-btn:hover {
+  background: rgba(0,229,255,0.15);
+  border-color: rgba(0,229,255,0.4);
+}
+
+/* ── MATCH VISUALIZATION ── */
+.match-viz-section {
+  animation: fadeUp 0.5s 0.2s ease both;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.viz-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.viz-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.viz-title {
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── MATCH MAP ── */
+.match-map {
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-height: 220px;
+  position: relative;
+}
+
+.match-product-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+  width: 130px;
+}
+
+.match-node-product {
+  padding: 10px 12px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(0,229,255,0.25);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--node1);
+  font-family: 'Noto Sans KR', sans-serif;
+  position: relative;
+  text-align: center;
+}
+
+.match-node-product.active {
+  background: rgba(0,229,255,0.08);
+  box-shadow: 0 0 12px rgba(0,229,255,0.15);
+}
+
+.match-lines-col {
+  flex: 1;
+  position: relative;
+  height: 200px;
+  display: flex;
+  align-items: center;
+}
+
+.match-lines-svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.match-supplier-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 130px;
+}
+
+.match-node-supplier {
+  padding: 8px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.match-node-supplier.active {
+  border-color: rgba(52,211,153,0.3);
+  color: var(--node4);
+  background: rgba(52,211,153,0.06);
+}
+
+.match-node-supplier .s-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ── COMPARISON PANEL ── */
+.comparison-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.5s 0.25s ease both;
+}
+
+.comp-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr 1fr;
+  border-top: 1px solid var(--border);
+}
+
+.comp-cell {
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid rgba(30,41,59,0.5);
+  font-size: 13px;
+}
+
+.comp-cell:last-child { border-right: none; }
+
+.comp-row-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid rgba(30,41,59,0.5);
+  background: var(--bg-surface);
+  display: flex;
+  align-items: center;
+}
+
+.comp-header-cell {
+  padding: 16px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.comp-header-cell:last-child { border-right: none; }
+
+.comp-header-cell .supplier-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.best { background: rgba(52,211,153,0.15); color: var(--node4); }
+.good { background: rgba(0,229,255,0.1); color: var(--node1); }
+.alt  { background: rgba(245,158,11,0.1); color: var(--warn); }
+
+.comp-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.comp-val.highlight-green { color: var(--node4); }
+.comp-val.highlight-cyan  { color: var(--node1); }
+
+.comp-bar-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.comp-mini-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-elevated);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.comp-mini-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--node4);
+}
+
+/* ── BOTTOM STATS ── */
+.bottom-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+  animation: fadeUp 0.5s 0.35s ease both;
+}
+
+.stat-item {
+  background: var(--bg-surface);
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--node1);
+  letter-spacing: -0.5px;
+}
+
+.stat-desc { font-size: 12px; color: var(--text-muted); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── PRICING FOOTER ── */
+.pricing-footer {
+  margin: 0 32px 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  animation: fadeUp 0.5s 0.4s ease both;
+}
+
+.pricing-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.pricing-tiers { display: flex; gap: 12px; }
+
+.pricing-tier {
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  text-align: center;
+  min-width: 120px;
+  transition: all 0.2s;
+}
+
+.pricing-tier:hover { border-color: var(--border-light); }
+.pricing-tier.featured { border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.06); }
+
+.tier-name { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.tier-price { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.pricing-tier.featured .tier-price { color: var(--node1); }
+.tier-period { font-size: 11px; color: var(--text-muted); }
+
+.btn-primary {
+  padding: 12px 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--node1);
+  color: var(--bg-deep);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover { box-shadow: 0 0 24px rgba(0,229,255,0.3); transform: translateY(-1px); }
+
+.btn-secondary {
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover { border-color: var(--border-light); color: var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Auto<span>Market</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="status-badge">◈ P3 · Planning</div>
+      <a href="../index.html" class="back-link">← Dashboard</a>
+    </div>
+  </header>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-title-group">
+        <div class="service-tag">Node 1 · Opportunity Discovery</div>
+        <h1 class="page-title">Source<span class="accent">Match</span></h1>
+        <p class="page-subtitle">AI가 제품-공급사 최적 매칭을 자동 수행합니다. 8,200개 이상의 공급사 DB에서 가격·품질·리드타임을 종합 평가하여 최적 소싱 조합을 추천합니다.</p>
+      </div>
+      <div class="page-header-meta">
+        <span class="phase-badge">◈ P3 · Planning</span>
+        <div style="font-size:13px;color:var(--text-secondary);text-align:right;">
+          월 구독
+          <div style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--text-primary);">₩199K — ₩1.2M</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="main-layout">
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <span class="filter-label">필터</span>
+      <select class="filter-select">
+        <option>전체 카테고리</option>
+        <option>건강/식품</option>
+        <option>가전/전자</option>
+        <option>주방용품</option>
+      </select>
+      <select class="filter-select">
+        <option>단가 전체</option>
+        <option>₩1K 미만</option>
+        <option>₩1K-₩5K</option>
+        <option>₩5K-₩20K</option>
+        <option>₩20K 이상</option>
+      </select>
+      <select class="filter-select">
+        <option>리드타임 전체</option>
+        <option>7일 이내</option>
+        <option>14일 이내</option>
+        <option>30일 이내</option>
+      </select>
+      <div class="region-tabs">
+        <button class="region-tab active">전체</button>
+        <button class="region-tab">🇨🇳 중국</button>
+        <button class="region-tab">🇰🇷 한국</button>
+        <button class="region-tab">🇻🇳 베트남</button>
+      </div>
+    </div>
+
+    <!-- Supplier Matching Table -->
+    <div class="section-card">
+      <div class="card-header">
+        <div class="card-title">
+          <div class="card-icon">🔗</div>
+          공급사 매칭 결과
+        </div>
+        <div class="card-meta">
+          <span style="font-size:12px;color:var(--text-muted);">마지막 업데이트 <span style="font-family:'JetBrains Mono',monospace;color:var(--node1);">14:32 KST</span></span>
+          <span class="card-count">8 products</span>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="match-table">
+          <thead>
+            <tr>
+              <th>제품명</th>
+              <th>최적 공급사</th>
+              <th>매칭 점수</th>
+              <th>단가</th>
+              <th>MOQ</th>
+              <th>리드타임</th>
+              <th>품질 등급</th>
+              <th>상세</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td>
+                <div class="product-cell">
+                  <span class="product-name">미니 가습기</span>
+                  <span class="product-sku">SKU-0041</span>
+                </div>
+              </td>
+              <td>
+                <div class="supplier-cell">
+                  <span class="supplier-name">Guangzhou AirTech Co.</span>
+                  <span class="supplier-loc"><span class="loc-flag">🇨🇳</span> 광저우, 중국</span>
+                </div>
+              </td>
+              <td>
+                <div class="match-score-wrap">
+                  <div class="match-arc">
+                    <svg viewBox="0 0 40 40" width="40" height="40">
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#1e293b" stroke-width="4"/>
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#34d399" stroke-width="4"
+                        stroke-dasharray="100.5" stroke-dashoffset="9" stroke-linecap="round"/>
+                    </svg>
+                    <div class="match-arc-text" style="color:#34d399;">94%</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="price-cell">₩2,840<div class="price-unit">개당</div></div>
+              </td>
+              <td><span class="moq-cell">500</span></td>
+              <td><span class="leadtime-badge lt-fast">7일</span></td>
+              <td><div class="stars"><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span></div></td>
+              <td><button class="detail-btn">상세 보기</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="product-cell">
+                  <span class="product-name">LED 무드등</span>
+                  <span class="product-sku">SKU-0088</span>
+                </div>
+              </td>
+              <td>
+                <div class="supplier-cell">
+                  <span class="supplier-name">Shenzhen Luminos Ltd.</span>
+                  <span class="supplier-loc"><span class="loc-flag">🇨🇳</span> 선전, 중국</span>
+                </div>
+              </td>
+              <td>
+                <div class="match-score-wrap">
+                  <div class="match-arc">
+                    <svg viewBox="0 0 40 40" width="40" height="40">
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#1e293b" stroke-width="4"/>
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#00e5ff" stroke-width="4"
+                        stroke-dasharray="100.5" stroke-dashoffset="18" stroke-linecap="round"/>
+                    </svg>
+                    <div class="match-arc-text" style="color:#00e5ff;">82%</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="price-cell">₩3,200<div class="price-unit">개당</div></div></td>
+              <td><span class="moq-cell">300</span></td>
+              <td><span class="leadtime-badge lt-fast">10일</span></td>
+              <td><div class="stars"><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-empty">★</span></div></td>
+              <td><button class="detail-btn">상세 보기</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="product-cell">
+                  <span class="product-name">실리콘 주방용품</span>
+                  <span class="product-sku">SKU-0122</span>
+                </div>
+              </td>
+              <td>
+                <div class="supplier-cell">
+                  <span class="supplier-name">베트남 시리콘테크</span>
+                  <span class="supplier-loc"><span class="loc-flag">🇻🇳</span> 하노이, 베트남</span>
+                </div>
+              </td>
+              <td>
+                <div class="match-score-wrap">
+                  <div class="match-arc">
+                    <svg viewBox="0 0 40 40" width="40" height="40">
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#1e293b" stroke-width="4"/>
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#34d399" stroke-width="4"
+                        stroke-dasharray="100.5" stroke-dashoffset="12" stroke-linecap="round"/>
+                    </svg>
+                    <div class="match-arc-text" style="color:#34d399;">88%</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="price-cell">₩1,450<div class="price-unit">개당</div></div></td>
+              <td><span class="moq-cell">1,000</span></td>
+              <td><span class="leadtime-badge lt-mid">18일</span></td>
+              <td><div class="stars"><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-empty">★</span></div></td>
+              <td><button class="detail-btn">상세 보기</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="product-cell">
+                  <span class="product-name">반려동물 간식</span>
+                  <span class="product-sku">SKU-0207</span>
+                </div>
+              </td>
+              <td>
+                <div class="supplier-cell">
+                  <span class="supplier-name">자연애 펫푸드</span>
+                  <span class="supplier-loc"><span class="loc-flag">🇰🇷</span> 경기, 한국</span>
+                </div>
+              </td>
+              <td>
+                <div class="match-score-wrap">
+                  <div class="match-arc">
+                    <svg viewBox="0 0 40 40" width="40" height="40">
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#1e293b" stroke-width="4"/>
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#34d399" stroke-width="4"
+                        stroke-dasharray="100.5" stroke-dashoffset="5" stroke-linecap="round"/>
+                    </svg>
+                    <div class="match-arc-text" style="color:#34d399;">95%</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="price-cell">₩4,800<div class="price-unit">개당</div></div></td>
+              <td><span class="moq-cell">200</span></td>
+              <td><span class="leadtime-badge lt-fast">5일</span></td>
+              <td><div class="stars"><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span></div></td>
+              <td><button class="detail-btn">상세 보기</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="product-cell">
+                  <span class="product-name">휴대용 칫솔 살균기</span>
+                  <span class="product-sku">SKU-0318</span>
+                </div>
+              </td>
+              <td>
+                <div class="supplier-cell">
+                  <span class="supplier-name">SterileX Technology</span>
+                  <span class="supplier-loc"><span class="loc-flag">🇨🇳</span> 베이징, 중국</span>
+                </div>
+              </td>
+              <td>
+                <div class="match-score-wrap">
+                  <div class="match-arc">
+                    <svg viewBox="0 0 40 40" width="40" height="40">
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#1e293b" stroke-width="4"/>
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#f59e0b" stroke-width="4"
+                        stroke-dasharray="100.5" stroke-dashoffset="30" stroke-linecap="round"/>
+                    </svg>
+                    <div class="match-arc-text" style="color:#f59e0b;">70%</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="price-cell">₩6,200<div class="price-unit">개당</div></div></td>
+              <td><span class="moq-cell">100</span></td>
+              <td><span class="leadtime-badge lt-mid">14일</span></td>
+              <td><div class="stars"><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-empty">★</span><span class="star-empty">★</span></div></td>
+              <td><button class="detail-btn">상세 보기</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="product-cell">
+                  <span class="product-name">아로마 디퓨저</span>
+                  <span class="product-sku">SKU-0392</span>
+                </div>
+              </td>
+              <td>
+                <div class="supplier-cell">
+                  <span class="supplier-name">Hanoi Scent Co.</span>
+                  <span class="supplier-loc"><span class="loc-flag">🇻🇳</span> 호찌민, 베트남</span>
+                </div>
+              </td>
+              <td>
+                <div class="match-score-wrap">
+                  <div class="match-arc">
+                    <svg viewBox="0 0 40 40" width="40" height="40">
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#1e293b" stroke-width="4"/>
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#00e5ff" stroke-width="4"
+                        stroke-dasharray="100.5" stroke-dashoffset="20" stroke-linecap="round"/>
+                    </svg>
+                    <div class="match-arc-text" style="color:#00e5ff;">80%</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="price-cell">₩5,500<div class="price-unit">개당</div></div></td>
+              <td><span class="moq-cell">500</span></td>
+              <td><span class="leadtime-badge lt-mid">21일</span></td>
+              <td><div class="stars"><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-empty">★</span></div></td>
+              <td><button class="detail-btn">상세 보기</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="product-cell">
+                  <span class="product-name">스마트 체중계</span>
+                  <span class="product-sku">SKU-0445</span>
+                </div>
+              </td>
+              <td>
+                <div class="supplier-cell">
+                  <span class="supplier-name">WeightTech Electronics</span>
+                  <span class="supplier-loc"><span class="loc-flag">🇨🇳</span> 상하이, 중국</span>
+                </div>
+              </td>
+              <td>
+                <div class="match-score-wrap">
+                  <div class="match-arc">
+                    <svg viewBox="0 0 40 40" width="40" height="40">
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#1e293b" stroke-width="4"/>
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#34d399" stroke-width="4"
+                        stroke-dasharray="100.5" stroke-dashoffset="15" stroke-linecap="round"/>
+                    </svg>
+                    <div class="match-arc-text" style="color:#34d399;">85%</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="price-cell">₩9,800<div class="price-unit">개당</div></div></td>
+              <td><span class="moq-cell">50</span></td>
+              <td><span class="leadtime-badge lt-fast">12일</span></td>
+              <td><div class="stars"><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span></div></td>
+              <td><button class="detail-btn">상세 보기</button></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="product-cell">
+                  <span class="product-name">텀블러 파우치</span>
+                  <span class="product-sku">SKU-0512</span>
+                </div>
+              </td>
+              <td>
+                <div class="supplier-cell">
+                  <span class="supplier-name">서울 패브릭스</span>
+                  <span class="supplier-loc"><span class="loc-flag">🇰🇷</span> 서울, 한국</span>
+                </div>
+              </td>
+              <td>
+                <div class="match-score-wrap">
+                  <div class="match-arc">
+                    <svg viewBox="0 0 40 40" width="40" height="40">
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#1e293b" stroke-width="4"/>
+                      <circle cx="20" cy="20" r="16" fill="none" stroke="#f59e0b" stroke-width="4"
+                        stroke-dasharray="100.5" stroke-dashoffset="35" stroke-linecap="round"/>
+                    </svg>
+                    <div class="match-arc-text" style="color:#f59e0b;">65%</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="price-cell">₩2,100<div class="price-unit">개당</div></div></td>
+              <td><span class="moq-cell">2,000</span></td>
+              <td><span class="leadtime-badge lt-slow">30일</span></td>
+              <td><div class="stars"><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-full">★</span><span class="star-empty">★</span></div></td>
+              <td><button class="detail-btn">상세 보기</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Match Viz + Comparison side by side -->
+    <div class="two-col match-viz-section">
+
+      <!-- Match Visualization -->
+      <div class="viz-card">
+        <div class="viz-header">
+          <div class="viz-title">🔀 매칭 시각화 — 미니 가습기</div>
+          <span style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;">SKU-0041</span>
+        </div>
+        <div class="match-map">
+          <div class="match-product-col">
+            <div class="match-node-product active">미니 가습기<br><span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">SKU-0041</span></div>
+          </div>
+          <div class="match-lines-col">
+            <svg class="match-lines-svg" viewBox="0 0 200 220" preserveAspectRatio="none">
+              <!-- line from product to best supplier (top) -->
+              <path d="M0,110 C100,110 100,22 200,22" stroke="#34d399" stroke-width="2" fill="none" stroke-dasharray="4,3" opacity="0.9"/>
+              <path d="M0,110 C100,110 100,66 200,66" stroke="#00e5ff" stroke-width="1.5" fill="none" stroke-dasharray="4,3" opacity="0.5"/>
+              <path d="M0,110 C100,110 100,110 200,110" stroke="#00e5ff" stroke-width="1" fill="none" stroke-dasharray="4,3" opacity="0.3"/>
+              <path d="M0,110 C100,110 100,154 200,154" stroke="#4a5568" stroke-width="1" fill="none" stroke-dasharray="4,3" opacity="0.2"/>
+              <path d="M0,110 C100,110 100,198 200,198" stroke="#4a5568" stroke-width="1" fill="none" stroke-dasharray="4,3" opacity="0.15"/>
+            </svg>
+          </div>
+          <div class="match-supplier-col">
+            <div class="match-node-supplier active">
+              Guangzhou AirTech
+              <div class="s-score">94% match</div>
+            </div>
+            <div class="match-node-supplier" style="margin-top:4px;">
+              FogMaker HK
+              <div class="s-score">78% match</div>
+            </div>
+            <div class="match-node-supplier" style="margin-top:4px;">
+              AquaBreeze SZ
+              <div class="s-score">71% match</div>
+            </div>
+            <div class="match-node-supplier" style="margin-top:4px;">
+              VietMist Co.
+              <div class="s-score">58% match</div>
+            </div>
+            <div class="match-node-supplier" style="margin-top:4px;">
+              SeoulAir KR
+              <div class="s-score">42% match</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Panel -->
+      <div class="viz-card">
+        <div class="viz-header">
+          <div class="viz-title">⚖ 공급사 비교 — 미니 가습기</div>
+          <span style="font-size:11px;color:var(--node4);font-family:'JetBrains Mono',monospace;">TOP 3</span>
+        </div>
+        <div class="comp-grid">
+          <!-- headers -->
+          <div class="comp-header-cell" style="background:var(--bg-elevated);"></div>
+          <div class="comp-header-cell">
+            Guangzhou AirTech
+            <span class="supplier-badge best">최적</span>
+          </div>
+          <div class="comp-header-cell">
+            FogMaker HK
+            <span class="supplier-badge good">차선</span>
+          </div>
+          <div class="comp-header-cell">
+            AquaBreeze SZ
+            <span class="supplier-badge alt">대안</span>
+          </div>
+          <!-- rows -->
+          <div class="comp-row-label">단가</div>
+          <div class="comp-cell"><span class="comp-val highlight-green">₩2,840</span></div>
+          <div class="comp-cell"><span class="comp-val">₩3,100</span></div>
+          <div class="comp-cell"><span class="comp-val">₩3,380</span></div>
+
+          <div class="comp-row-label">MOQ</div>
+          <div class="comp-cell"><span class="comp-val">500</span></div>
+          <div class="comp-cell"><span class="comp-val highlight-green">300</span></div>
+          <div class="comp-cell"><span class="comp-val">800</span></div>
+
+          <div class="comp-row-label">리드타임</div>
+          <div class="comp-cell"><span class="comp-val highlight-green">7일</span></div>
+          <div class="comp-cell"><span class="comp-val">10일</span></div>
+          <div class="comp-cell"><span class="comp-val">12일</span></div>
+
+          <div class="comp-row-label">품질 점수</div>
+          <div class="comp-cell">
+            <div class="comp-bar-inline">
+              <div class="comp-mini-bar"><div class="comp-mini-bar-fill" style="width:96%"></div></div>
+              <span class="comp-val" style="font-size:12px;">96</span>
+            </div>
+          </div>
+          <div class="comp-cell">
+            <div class="comp-bar-inline">
+              <div class="comp-mini-bar"><div class="comp-mini-bar-fill" style="width:81%;background:#00e5ff"></div></div>
+              <span class="comp-val" style="font-size:12px;color:#00e5ff">81</span>
+            </div>
+          </div>
+          <div class="comp-cell">
+            <div class="comp-bar-inline">
+              <div class="comp-mini-bar"><div class="comp-mini-bar-fill" style="width:74%;background:#f59e0b"></div></div>
+              <span class="comp-val" style="font-size:12px;color:#f59e0b">74</span>
+            </div>
+          </div>
+
+          <div class="comp-row-label">신뢰도</div>
+          <div class="comp-cell"><span class="comp-val highlight-green">A+</span></div>
+          <div class="comp-cell"><span class="comp-val highlight-cyan">A</span></div>
+          <div class="comp-cell"><span class="comp-val" style="color:var(--warn)">B+</span></div>
+
+          <div class="comp-row-label">결제 조건</div>
+          <div class="comp-cell"><span class="comp-val" style="font-size:12px;">T/T 30%↑</span></div>
+          <div class="comp-cell"><span class="comp-val" style="font-size:12px;">T/T 50%↑</span></div>
+          <div class="comp-cell"><span class="comp-val" style="font-size:12px;color:var(--warn)">L/C만</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM STATS -->
+  <div class="bottom-stats">
+    <div class="stat-item">
+      <div class="stat-label">Total Suppliers</div>
+      <div class="stat-value">8,200+</div>
+      <div class="stat-desc">글로벌 공급사 데이터베이스</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Average Match Rate</div>
+      <div class="stat-value">76%</div>
+      <div class="stat-desc">평균 매칭 정확도</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Cost Savings Est.</div>
+      <div class="stat-value">23%</div>
+      <div class="stat-desc">기존 소싱 대비 평균 절감율</div>
+    </div>
+  </div>
+
+  <!-- PRICING FOOTER -->
+  <div class="pricing-footer">
+    <div>
+      <div class="pricing-label">구독 플랜</div>
+      <div class="pricing-tiers">
+        <div class="pricing-tier">
+          <div class="tier-name">Starter</div>
+          <div class="tier-price">₩199K</div>
+          <div class="tier-period">/ 월</div>
+        </div>
+        <div class="pricing-tier featured">
+          <div class="tier-name">Business</div>
+          <div class="tier-price">₩590K</div>
+          <div class="tier-period">/ 월</div>
+        </div>
+        <div class="pricing-tier">
+          <div class="tier-name">Enterprise</div>
+          <div class="tier-price">₩1.2M</div>
+          <div class="tier-period">/ 월</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-secondary">데모 요청</button>
+      <button class="btn-primary">무료로 시작하기 →</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
