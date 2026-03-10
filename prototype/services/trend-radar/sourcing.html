@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소싱 매칭 — TrendRadar | AutoMarket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/common.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a href="../../index.html" class="logo">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Auto<span>Market</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE · 갱신 2분 전
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY: SIDEBAR + MAIN -->
+  <div class="body-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-nav">
+
+        <div class="nav-section-label">트렌드</div>
+        <a href="index.html" class="nav-btn">
+          <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span>
+          Dashboard
+        </a>
+        <a href="feed.html" class="nav-btn">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></span>
+          트렌드 피드
+        </a>
+        <a href="categories.html" class="nav-btn">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+          카테고리 분석
+        </a>
+
+        <div class="nav-section-label">기회 분석</div>
+        <a href="strategy.html" class="nav-btn">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+          전략 설정
+        </a>
+        <a href="opportunity.html" class="nav-btn">
+          <span class="icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          기회 상세
+        </a>
+
+        <div class="nav-section-label">수익성 검증</div>
+        <a href="sourcing.html" class="nav-btn active">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
+          소싱 매칭
+        </a>
+        <a href="margin.html" class="nav-btn">
+          <span class="icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          마진 시뮬레이션
+        </a>
+
+        <div class="nav-section-label">운영</div>
+        <a href="alerts.html" class="nav-btn">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+          알림 센터
+          <span class="nav-badge">3</span>
+        </a>
+        <a href="report.html" class="nav-btn">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+          리포트
+        </a>
+
+      </div>
+      <div class="sidebar-bottom">
+        <a href="../../index.html" class="sidebar-back-link">
+          <span class="icon icon-sm"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></span>
+          AutoMarket Home
+        </a>
+      </div>
+    </nav>
+
+    <!-- MAIN AREA -->
+    <main class="main-area">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div class="page-header-inner">
+          <div class="page-title-group">
+            <div class="service-tag">
+              <div class="service-tag-dot"></div>
+              Node 1 · SourceMatch Integration
+            </div>
+            <h1 class="page-title">소싱 <span class="accent">매칭</span></h1>
+            <p class="page-subtitle">TrendRadar가 발견한 기회 상품의 최적 공급처를 자동으로 매칭합니다. MOQ, 리드타임, 단가를 비교하고 견적을 요청할 수 있습니다.</p>
+          </div>
+          <div class="page-header-meta">
+            <span class="phase-badge phase-mvp">
+              <span class="icon icon-sm"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+              MVP
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE CONTENT -->
+      <div class="page-content">
+
+        <!-- CURRENTLY ANALYZING PRODUCT -->
+        <div class="section-card" style="animation-delay:0s;">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              현재 분석 중인 상품
+            </div>
+            <span class="sev-badge sev-info">AI 분석 완료</span>
+          </div>
+          <div class="card-body">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:20px;">
+                <div style="width:52px; height:52px; border-radius:12px; background:var(--node1-dim); border:1px solid rgba(0,229,255,0.2); display:flex; align-items:center; justify-content:center; color:var(--node1); flex-shrink:0;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                </div>
+                <div>
+                  <div style="font-size:17px; font-weight:700; font-family:'Noto Sans KR',sans-serif; margin-bottom:6px;">휴대용 칫솔 살균기</div>
+                  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <span class="category-pill cat-health">건강/식품</span>
+                    <span style="font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">기회 점수</span>
+                    <span class="score-badge score-high">89</span>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; padding:12px 20px; background:rgba(52,211,153,0.06); border:1px solid rgba(52,211,153,0.2); border-radius:10px;">
+                <span style="color:var(--node4);">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <div>
+                  <div style="font-size:13px; font-weight:700; color:var(--node4);">AI 추천 공급처 3곳 발견</div>
+                  <div style="font-size:11px; color:var(--text-muted); margin-top:2px; font-family:'JetBrains Mono',monospace;">5곳 DB 조회 완료</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRID: MAIN + SIDEBAR -->
+        <div class="grid-sidebar">
+
+          <!-- MAIN COLUMN -->
+          <div style="display:flex; flex-direction:column; gap:20px;">
+
+            <!-- 공급처 비교 테이블 -->
+            <div class="section-card delay-1">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                  공급처 비교 테이블
+                </div>
+                <span class="card-count">5개 공급처</span>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>공급처</th>
+                    <th>지역</th>
+                    <th>MOQ</th>
+                    <th>단가</th>
+                    <th>리드타임</th>
+                    <th>평점</th>
+                    <th>견적</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; font-size:13px;">ShenZhen Tech Co.</div>
+                      <div style="font-size:11px; color:var(--text-muted); margin-top:2px; font-family:'JetBrains Mono',monospace;">sztech.cn</div>
+                    </td>
+                    <td><span style="font-size:12px; color:var(--text-secondary);">중국</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600;">100개</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--text-primary);">₩6,200</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-secondary);">14일</span></td>
+                    <td><span class="score-badge score-high">4.8</span></td>
+                    <td><button class="action-btn">견적 요청</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; font-size:13px;">Guangzhou Health</div>
+                      <div style="font-size:11px; color:var(--text-muted); margin-top:2px; font-family:'JetBrains Mono',monospace;">gz-health.com</div>
+                    </td>
+                    <td><span style="font-size:12px; color:var(--text-secondary);">중국</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600;">200개</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--text-primary);">₩5,800</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-secondary);">18일</span></td>
+                    <td><span class="score-badge score-mid">4.3</span></td>
+                    <td><button class="action-btn">견적 요청</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; font-size:13px;">Tokyo Hygiene Ltd</div>
+                      <div style="font-size:11px; color:var(--text-muted); margin-top:2px; font-family:'JetBrains Mono',monospace;">tokyohygiene.jp</div>
+                    </td>
+                    <td><span style="font-size:12px; color:var(--text-secondary);">일본</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600;">50개</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--text-primary);">₩9,400</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--node4);">7일</span></td>
+                    <td><span class="score-badge score-high">4.9</span></td>
+                    <td><button class="action-btn">견적 요청</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; font-size:13px;">Korea OEM Partners</div>
+                      <div style="font-size:11px; color:var(--text-muted); margin-top:2px; font-family:'JetBrains Mono',monospace;">koreaoempartners.kr</div>
+                    </td>
+                    <td><span style="font-size:12px; color:var(--text-secondary);">한국</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600;">300개</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--text-primary);">₩7,500</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--node4);">5일</span></td>
+                    <td><span class="score-badge score-mid">4.5</span></td>
+                    <td><button class="action-btn">견적 요청</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; font-size:13px;">Vietnam Manufacturing</div>
+                      <div style="font-size:11px; color:var(--text-muted); margin-top:2px; font-family:'JetBrains Mono',monospace;">vn-mfg.vn</div>
+                    </td>
+                    <td><span style="font-size:12px; color:var(--text-secondary);">베트남</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600;">500개</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--node4);">₩4,900</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-secondary);">21일</span></td>
+                    <td><span class="score-badge score-mid">4.1</span></td>
+                    <td><button class="action-btn">견적 요청</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- AI 소싱 추천 -->
+            <div class="section-card delay-2">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon"><svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7H3a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"/><path d="M3 14v6h4v-6"/><path d="M17 14v6h4v-6"/><path d="M7 20h10"/></svg></div>
+                  AI 소싱 추천
+                </div>
+                <span class="sev-badge sev-info">GPT-4o 분석</span>
+              </div>
+              <div class="card-body">
+                <div class="findings-list">
+                  <div class="finding-item">
+                    <div class="finding-bullet"></div>
+                    <div class="finding-text">ShenZhen Tech Co.가 최적 균형점: MOQ 100개, 단가 ₩6,200, 리드타임 14일로 초기 테스트에 적합합니다.</div>
+                  </div>
+                  <div class="finding-item">
+                    <div class="finding-bullet" style="background:var(--warn);"></div>
+                    <div class="finding-text">일본 Tokyo Hygiene Ltd는 단가가 높지만 품질·리드타임이 우수하여 프리미엄 포지셔닝에 적합합니다.</div>
+                  </div>
+                  <div class="finding-item">
+                    <div class="finding-bullet" style="background:var(--node4);"></div>
+                    <div class="finding-text">대량 주문 시 Vietnam Manufacturing (₩4,900)이 마진 극대화에 유리하나 MOQ 500개 주의.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 견적 요청 현황 -->
+            <div class="section-card delay-3">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                  견적 요청 현황
+                </div>
+                <span class="card-count">3건</span>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>공급처</th>
+                    <th>요청일</th>
+                    <th>상태</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; font-size:13px;">ShenZhen Tech Co.</div>
+                    </td>
+                    <td>
+                      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-muted);">03-05</span>
+                    </td>
+                    <td>
+                      <span class="sev-badge sev-warn">응답 대기 중</span>
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; font-size:13px;">Guangzhou Health</div>
+                    </td>
+                    <td>
+                      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-muted);">03-03</span>
+                    </td>
+                    <td>
+                      <span class="sev-badge sev-info">견적 수신</span>
+                    </td>
+                    <td><button class="action-btn">확인</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600; font-size:13px;">Korea OEM Partners</div>
+                    </td>
+                    <td>
+                      <span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-muted);">03-01</span>
+                    </td>
+                    <td>
+                      <span class="verdict-go">계약 진행 중</span>
+                    </td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div><!-- /main column -->
+
+          <!-- RIGHT COLUMN -->
+          <div style="display:flex; flex-direction:column; gap:20px;">
+
+            <!-- 소싱 필터 -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="icon">
+                    <svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                  </span>
+                  소싱 필터
+                </div>
+              </div>
+              <div style="padding:18px; display:flex; flex-direction:column; gap:16px;">
+
+                <div class="form-group">
+                  <label class="form-label">지역</label>
+                  <div class="chip-group">
+                    <span class="chip selected">전체</span>
+                    <span class="chip">중국</span>
+                    <span class="chip">일본</span>
+                    <span class="chip">한국</span>
+                    <span class="chip">베트남</span>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">최대 MOQ</label>
+                  <input type="text" class="form-input" placeholder="500">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">최대 단가</label>
+                  <input type="text" class="form-input" placeholder="₩10,000">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">최대 리드타임</label>
+                  <select class="filter-select" style="width:100%;">
+                    <option>7일</option>
+                    <option>14일</option>
+                    <option selected>21일</option>
+                    <option>30일</option>
+                  </select>
+                </div>
+
+                <button class="btn-primary" style="width:100%;">필터 적용</button>
+
+              </div>
+            </div>
+
+            <!-- 소싱 통계 -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="icon">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  </span>
+                  소싱 통계
+                </div>
+                <span class="panel-subtitle">전체 DB 기준</span>
+              </div>
+              <div>
+                <div class="metric-row">
+                  <span class="metric-name">등록 공급처</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr" style="color:var(--node1);">1,247</span>
+                  </div>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-name">평균 응답 시간</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr" style="color:var(--text-primary);">2.3일</span>
+                  </div>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-name">견적 성사율</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr" style="color:var(--node4);">34.2%</span>
+                  </div>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-name">평균 단가 절감</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr" style="color:var(--node4);">12.8%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /right column -->
+
+        </div><!-- /grid-sidebar -->
+
+      </div><!-- /page-content -->
+
+    </main>
+
+  </div><!-- /body-layout -->
+
+</div><!-- /app -->
+</body>
+</html>

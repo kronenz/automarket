@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrendRadar — 마진 시뮬레이션 | AutoMarket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/common.css">
+<style>
+/* ── Layout ── */
+.grid-sidebar-left {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .grid-sidebar-left { grid-template-columns: 1fr; }
+}
+.right-col { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Form ── */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--node1); }
+
+.form-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 18px 0;
+}
+
+/* ── Chip group ── */
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip.selected {
+  background: var(--node1);
+  border-color: var(--node1);
+  color: #000;
+  font-weight: 600;
+}
+.chip:hover:not(.selected) { border-color: var(--node1); color: var(--text-primary); }
+
+/* ── Buttons ── */
+.btn-block { display: block; width: 100%; margin-bottom: 8px; }
+
+/* ── Data table verdict ── */
+.verdict-go {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: rgba(0, 230, 118, 0.15);
+  color: var(--node4);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+.verdict-nogo {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: rgba(255, 61, 87, 0.15);
+  color: var(--danger);
+  border: 1px solid rgba(255, 61, 87, 0.3);
+}
+
+/* ── Margin bar chart ── */
+.margin-chart-wrap {
+  position: relative;
+  padding-bottom: 8px;
+}
+.margin-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.margin-bar-label {
+  width: 80px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  text-align: right;
+}
+.margin-bar-track {
+  flex: 1;
+  height: 22px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  overflow: visible;
+  position: relative;
+}
+.margin-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  position: relative;
+  transition: width 0.5s ease;
+}
+.margin-bar-val {
+  width: 44px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+/* Threshold line */
+.margin-chart-axis {
+  position: relative;
+  margin-left: 90px; /* label width + gap */
+  margin-bottom: 6px;
+  height: 0;
+}
+.threshold-line-wrap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* left is set inline as % of track width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+/* overlay threshold across all bar rows */
+.margin-bars-container {
+  position: relative;
+}
+.threshold-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* left set inline */
+  width: 2px;
+  background: var(--warn);
+  opacity: 0.8;
+  pointer-events: none;
+}
+.threshold-line-label {
+  position: absolute;
+  top: -20px;
+  left: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--warn);
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.threshold-tick-label {
+  position: absolute;
+  bottom: -18px;
+  left: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--warn);
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Findings list ── */
+.findings-list { display: flex; flex-direction: column; gap: 10px; }
+.finding-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  border-left: 3px solid var(--node1);
+}
+.finding-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--node1);
+  margin-top: 1px;
+}
+.finding-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* ── Fee DB panel ── */
+.fee-table { width: 100%; border-collapse: collapse; }
+.fee-table td {
+  padding: 7px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.fee-table tr:last-child td { border-bottom: none; }
+.fee-table td:first-child { font-weight: 600; color: var(--text-primary); }
+.fee-table td:last-child {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--node1);
+}
+.fee-update-label {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a class="logo" href="../../index.html">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Auto<span>Market</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE &middot; 갱신 2분 전
+      </div>
+    </div>
+  </header>
+
+  <div class="body-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+
+        <div class="nav-section-label">트렌드</div>
+        <a href="index.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </span>
+          Dashboard
+        </a>
+        <a href="feed.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+          </span>
+          트렌드 피드
+        </a>
+        <a href="categories.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </span>
+          카테고리 분석
+        </a>
+
+        <div class="nav-section-label">기회 분석</div>
+        <a href="strategy.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          </span>
+          전략 설정
+        </a>
+        <a href="opportunity.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
+          기회 상세
+        </a>
+
+        <div class="nav-section-label">수익성 검증</div>
+        <a href="sourcing.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </span>
+          소싱 매칭
+        </a>
+        <a href="margin.html" class="nav-btn active">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          마진 시뮬레이션
+        </a>
+
+        <div class="nav-section-label">운영</div>
+        <a href="alerts.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </span>
+          알림 센터
+          <span class="nav-badge">3</span>
+        </a>
+        <a href="report.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </span>
+          리포트
+        </a>
+
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="../../index.html" class="sidebar-back-link">
+          <span class="icon icon-sm">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </span>
+          AutoMarket Home
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <main class="main-area">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div class="page-header-inner">
+          <div class="page-title-group">
+            <div class="service-tag">
+              <span class="service-tag-dot"></span>
+              Node 1 &middot; Profitability Verification
+            </div>
+            <h1 class="page-title">마진 <span class="accent">시뮬레이션</span></h1>
+            <p class="page-subtitle">채널별 수수료, 물류비, 원가를 입력하면 실시간으로 마진을 계산합니다. Go/No-go 판단 기준선을 설정하세요.</p>
+          </div>
+          <div class="page-header-meta">
+            <span class="phase-badge phase-mvp">MVP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE CONTENT -->
+      <div class="page-content">
+
+        <div class="grid-sidebar-left">
+
+          <!-- LEFT: INPUT PANEL -->
+          <div class="section-card">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="card-title-icon">
+                  <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </div>
+                입력 패널
+              </div>
+            </div>
+            <div style="padding: 0 20px 20px;">
+
+              <div class="form-group">
+                <label class="form-label">상품명</label>
+                <input class="form-input" type="text" value="휴대용 칫솔 살균기">
+              </div>
+              <div class="form-group">
+                <label class="form-label">소싱 단가</label>
+                <input class="form-input" type="text" value="₩6,200">
+              </div>
+              <div class="form-group">
+                <label class="form-label">국제 배송비</label>
+                <input class="form-input" type="text" value="₩1,200">
+              </div>
+              <div class="form-group">
+                <label class="form-label">국내 물류비</label>
+                <input class="form-input" type="text" value="₩2,500">
+              </div>
+              <div class="form-group">
+                <label class="form-label">예상 판매가</label>
+                <input class="form-input" type="text" value="₩24,900">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Go/No-go 기준 마진율</label>
+                <input class="form-input" type="text" value="25%">
+              </div>
+
+              <div class="form-divider"></div>
+
+              <div class="form-group">
+                <label class="form-label">판매 채널</label>
+                <div class="chip-group">
+                  <span class="chip selected">쿠팡</span>
+                  <span class="chip selected">스마트스토어</span>
+                  <span class="chip">11번가</span>
+                  <span class="chip">위메프</span>
+                  <span class="chip">자사몰</span>
+                </div>
+              </div>
+
+              <button class="btn-primary btn-block" onclick="runSimulation()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-2px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                시뮬레이션 실행
+              </button>
+              <button class="btn-secondary btn-block" onclick="resetForm()">초기화</button>
+
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="right-col">
+
+            <!-- a. 채널별 마진 비교 -->
+            <div class="section-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  </div>
+                  채널별 마진 비교
+                </div>
+                <span class="card-count">5 채널</span>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="data-table" id="marginTable">
+                  <thead>
+                    <tr>
+                      <th>채널</th>
+                      <th>수수료율</th>
+                      <th>수수료</th>
+                      <th>물류비</th>
+                      <th>총 비용</th>
+                      <th>마진</th>
+                      <th>마진율</th>
+                      <th>판정</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>쿠팡</strong></td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">10.8%</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩2,689</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩2,500</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩12,589</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--node4);">₩12,311</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--node4);">49.4%</td>
+                      <td><span class="verdict-go">GO</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>스마트스토어</strong></td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">5.2%</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩1,295</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩2,500</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩11,195</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--node4);">₩13,705</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--node4);">55.0%</td>
+                      <td><span class="verdict-go">GO</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>11번가</strong></td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">12.0%</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩2,988</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩2,500</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩12,888</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--node4);">₩12,012</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--node4);">48.2%</td>
+                      <td><span class="verdict-go">GO</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>위메프</strong></td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">9.5%</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩2,366</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩2,500</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩12,266</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--node4);">₩12,634</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--node4);">50.7%</td>
+                      <td><span class="verdict-go">GO</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>자사몰</strong></td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">3.0%</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩747</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩2,500</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">₩10,647</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--node4);">₩14,253</td>
+                      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--node4);">57.2%</td>
+                      <td><span class="verdict-go">GO</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- b. 마진 시각화 -->
+            <div class="section-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  </div>
+                  마진 시각화
+                </div>
+                <span class="panel-subtitle" style="font-size:11px;color:var(--text-muted);">기준선 25% (Go/No-go)</span>
+              </div>
+              <div style="padding: 16px 20px 20px;">
+                <div class="margin-chart-wrap">
+                  <!-- threshold label above bars -->
+                  <div style="position:relative;margin-left:90px;height:20px;">
+                    <div style="position:absolute;left:calc(25% / 57.2% * 100% - 1px);top:0;">
+                      <span style="font-size:10px;font-weight:700;color:var(--warn);font-family:'JetBrains Mono',monospace;white-space:nowrap;">기준 25%</span>
+                    </div>
+                  </div>
+                  <!-- bars with overlay threshold line -->
+                  <div class="margin-bars-container" id="marginBarsContainer">
+                    <div class="margin-bar-row">
+                      <span class="margin-bar-label">쿠팡</span>
+                      <div class="margin-bar-track">
+                        <div class="margin-bar-fill" style="width:86.4%;background:var(--node4);"></div>
+                      </div>
+                      <span class="margin-bar-val">49.4%</span>
+                    </div>
+                    <div class="margin-bar-row">
+                      <span class="margin-bar-label">스마트스토어</span>
+                      <div class="margin-bar-track">
+                        <div class="margin-bar-fill" style="width:96.2%;background:var(--node4);"></div>
+                      </div>
+                      <span class="margin-bar-val">55.0%</span>
+                    </div>
+                    <div class="margin-bar-row">
+                      <span class="margin-bar-label">11번가</span>
+                      <div class="margin-bar-track">
+                        <div class="margin-bar-fill" style="width:84.3%;background:var(--node4);"></div>
+                      </div>
+                      <span class="margin-bar-val">48.2%</span>
+                    </div>
+                    <div class="margin-bar-row">
+                      <span class="margin-bar-label">위메프</span>
+                      <div class="margin-bar-track">
+                        <div class="margin-bar-fill" style="width:88.6%;background:var(--node4);"></div>
+                      </div>
+                      <span class="margin-bar-val">50.7%</span>
+                    </div>
+                    <div class="margin-bar-row">
+                      <span class="margin-bar-label">자사몰</span>
+                      <div class="margin-bar-track">
+                        <div class="margin-bar-fill" style="width:100%;background:var(--node1);"></div>
+                      </div>
+                      <span class="margin-bar-val">57.2%</span>
+                    </div>
+                    <!-- Threshold overlay line; left = (25/57.2) of track width -->
+                    <!-- positioned via JS after render -->
+                    <div class="threshold-overlay" id="thresholdLine"></div>
+                  </div>
+                  <!-- axis labels -->
+                  <div style="display:flex;justify-content:space-between;margin-left:90px;margin-top:6px;">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);">0%</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);">25%</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);">50%</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);">57%+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- c. AI 수익성 분석 -->
+            <div class="section-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+                  AI 수익성 분석
+                </div>
+                <span class="live-badge" style="font-size:10px;padding:3px 8px;">
+                  <span class="live-dot"></span>
+                  AI 분석
+                </span>
+              </div>
+              <div style="padding: 0 20px 20px;">
+                <div class="findings-list">
+                  <div class="finding-item">
+                    <div class="finding-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <p class="finding-text">모든 채널에서 Go/No-go 기준(25%)을 상회합니다. 스마트스토어가 55.0%로 마진 최고, 쿠팡이 49.4%로 노출·전환 대비 최적입니다.</p>
+                  </div>
+                  <div class="finding-item" style="border-left-color:var(--node4);">
+                    <div class="finding-icon" style="color:var(--node4);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <p class="finding-text">쿠팡 + 스마트스토어 동시 판매 시 예상 월 매출 <strong style="color:var(--text-primary);">₩4,980K</strong>, 순이익 <strong style="color:var(--node4);">₩2,556K</strong> (시뮬레이션 기준)</p>
+                  </div>
+                  <div class="finding-item" style="border-left-color:var(--warn);">
+                    <div class="finding-icon" style="color:var(--warn);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <p class="finding-text">초기 테스트는 쿠팡 단독으로 시작 후, 성과 확인 시 멀티채널 확장을 권장합니다.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- d. 채널 수수료 DB -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="icon icon-sm">
+                    <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                  </span>
+                  채널 수수료 DB
+                </div>
+                <span class="panel-subtitle">최신 기준</span>
+              </div>
+              <div class="panel-body">
+                <table class="fee-table">
+                  <tbody>
+                    <tr>
+                      <td>쿠팡</td>
+                      <td style="color:var(--text-muted);font-size:11px;">2026-03 기준</td>
+                      <td>10.8%</td>
+                    </tr>
+                    <tr>
+                      <td>스마트스토어</td>
+                      <td style="color:var(--text-muted);font-size:11px;"></td>
+                      <td>5.2%</td>
+                    </tr>
+                    <tr>
+                      <td>11번가</td>
+                      <td style="color:var(--text-muted);font-size:11px;"></td>
+                      <td>12.0%</td>
+                    </tr>
+                    <tr>
+                      <td>위메프</td>
+                      <td style="color:var(--text-muted);font-size:11px;"></td>
+                      <td>9.5%</td>
+                    </tr>
+                    <tr>
+                      <td>자사몰 (PG)</td>
+                      <td style="color:var(--text-muted);font-size:11px;"></td>
+                      <td>3.0%</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p class="fee-update-label">마지막 업데이트: 2026-03-01</p>
+              </div>
+            </div>
+
+          </div><!-- /right-col -->
+
+        </div><!-- /grid-sidebar-left -->
+
+      </div><!-- /page-content -->
+
+      <!-- BOTTOM STATS BAR -->
+      <div class="stat-bar">
+        <div class="stat-item">
+          <span class="stat-label">총 비용 (쿠팡)</span>
+          <span class="stat-value">₩12,589</span>
+          <span class="stat-desc">원가 + 수수료 + 물류</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">최고 마진 채널</span>
+          <span class="stat-value" style="color:var(--node4);">57.2%</span>
+          <span class="stat-desc">자사몰 (PG)</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">평균 마진율</span>
+          <span class="stat-value" style="color:var(--node1);">52.1%</span>
+          <span class="stat-desc">5개 채널 평균</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Go/No-go 판정</span>
+          <span class="stat-value" style="color:var(--node4);">5 / 5</span>
+          <span class="stat-desc">전 채널 GO 판정</span>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ── Chip toggle ──
+document.querySelectorAll('.chip').forEach(function(chip) {
+  chip.addEventListener('click', function() {
+    chip.classList.toggle('selected');
+  });
+});
+
+// ── Threshold line positioning ──
+// The max margin is 57.2%; threshold is 25%.
+// Bar track fills 100% of its container.
+// Threshold position = (25 / 57.2) * 100% of the track.
+function positionThreshold() {
+  var container = document.getElementById('marginBarsContainer');
+  var tracks = container.querySelectorAll('.margin-bar-track');
+  if (!tracks.length) return;
+  var track = tracks[0];
+  var trackRect = track.getBoundingClientRect();
+  var containerRect = container.getBoundingClientRect();
+  // left offset from container left = label width + gap + threshold fraction of track
+  var thresholdFraction = 25 / 57.2;
+  var leftFromContainer = (trackRect.left - containerRect.left) + trackRect.width * thresholdFraction;
+  var line = document.getElementById('thresholdLine');
+  line.style.left = leftFromContainer + 'px';
+}
+
+// Run after layout
+window.addEventListener('load', positionThreshold);
+window.addEventListener('resize', positionThreshold);
+
+// ── Simulation button (noop — data is static in prototype) ──
+function runSimulation() {
+  var btn = document.querySelector('.btn-primary.btn-block');
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:-2px;"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>계산 중...';
+  btn.disabled = true;
+  setTimeout(function() {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }, 900);
+}
+
+// ── Reset form ──
+function resetForm() {
+  var inputs = document.querySelectorAll('.form-input');
+  var defaults = ['휴대용 칫솔 살균기', '₩6,200', '₩1,200', '₩2,500', '₩24,900', '25%'];
+  inputs.forEach(function(input, i) {
+    if (defaults[i] !== undefined) input.value = defaults[i];
+  });
+  document.querySelectorAll('.chip').forEach(function(chip, i) {
+    chip.classList.toggle('selected', i < 2);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrendRadar — Dashboard | AutoMarket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/common.css">
+<style>
+.pricing-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 12px; border-radius: 6px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+}
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+.right-panels { display: flex; flex-direction: column; gap: 16px; }
+.panel-body { padding: 14px 16px; }
+@media (max-width: 1100px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a class="logo" href="../../index.html">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Auto<span>Market</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE &middot; 갱신 2분 전
+      </div>
+    </div>
+  </header>
+
+  <div class="body-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+
+        <div class="nav-section-label">트렌드</div>
+        <a href="index.html" class="nav-btn active">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </span>
+          Dashboard
+        </a>
+        <a href="feed.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+          </span>
+          트렌드 피드
+        </a>
+        <a href="categories.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </span>
+          카테고리 분석
+        </a>
+
+        <div class="nav-section-label">기회 분석</div>
+        <a href="strategy.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          </span>
+          전략 설정
+        </a>
+        <a href="opportunity.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
+          기회 상세
+        </a>
+
+        <div class="nav-section-label">수익성 검증</div>
+        <a href="sourcing.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </span>
+          소싱 매칭
+        </a>
+        <a href="margin.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          마진 시뮬레이션
+        </a>
+
+        <div class="nav-section-label">운영</div>
+        <a href="alerts.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </span>
+          알림 센터
+          <span class="nav-badge">3</span>
+        </a>
+        <a href="report.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </span>
+          리포트
+        </a>
+
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="../../index.html" class="sidebar-back-link">
+          <span class="icon icon-sm">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </span>
+          AutoMarket Home
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <main class="main-area">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div class="page-header-inner">
+          <div class="page-title-group">
+            <div class="service-tag">
+              <span class="service-tag-dot"></span>
+              Node 1 &middot; Opportunity Discovery
+            </div>
+            <h1 class="page-title">Trend<span class="accent">Radar</span></h1>
+            <p class="page-subtitle">실시간 커머스 트렌드를 AI가 감지하고 기회 점수를 산출합니다. 트렌드 발견 &rarr; 소싱 매칭 &rarr; 마진 검증까지 원스톱으로 처리합니다.</p>
+          </div>
+          <div class="page-header-meta">
+            <span class="phase-badge phase-mvp">MVP</span>
+            <span class="pricing-tag">월 구독 ₩99K — ₩990K</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE CONTENT -->
+      <div class="page-content">
+
+        <!-- FILTERS BAR -->
+        <div class="filters-bar">
+          <span class="filter-label">필터</span>
+          <select class="filter-select" id="filterCat">
+            <option value="">전체 카테고리</option>
+            <option>건강/식품</option>
+            <option>홈/리빙</option>
+            <option>반려동물</option>
+            <option>주방용품</option>
+            <option>라이프스타일</option>
+          </select>
+          <select class="filter-select" id="filterScore">
+            <option value="">전체 점수</option>
+            <option>90점 이상</option>
+            <option>80점 이상</option>
+            <option>70점 이상</option>
+          </select>
+          <select class="filter-select" id="filterPeriod">
+            <option>최근 7일</option>
+            <option>최근 14일</option>
+            <option>최근 30일</option>
+          </select>
+          <div class="filter-divider"></div>
+          <div class="source-tabs">
+            <button class="source-tab active" onclick="setSource(this)">전체</button>
+            <button class="source-tab" onclick="setSource(this)">네이버</button>
+            <button class="source-tab" onclick="setSource(this)">쿠팡</button>
+            <button class="source-tab" onclick="setSource(this)">소셜</button>
+          </div>
+          <div class="filter-divider"></div>
+          <button class="filter-btn" onclick="refreshTable()">
+            <span class="icon icon-sm">
+              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </span>
+            새로고침
+          </button>
+        </div>
+
+        <!-- TWO COLUMN LAYOUT -->
+        <div class="two-col">
+
+          <!-- LEFT: TABLE -->
+          <div class="section-card">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="card-title-icon">
+                  <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                실시간 트렌드 키워드
+              </div>
+              <span class="card-count" id="rowCount">12 건</span>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="data-table" id="trendTable">
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>키워드</th>
+                    <th>카테고리</th>
+                    <th>기회 점수</th>
+                    <th>검색량</th>
+                    <th>성장률</th>
+                    <th>경쟁 강도</th>
+                    <th>액션</th>
+                  </tr>
+                </thead>
+                <tbody id="trendTbody">
+                  <!-- Generated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- RIGHT PANELS -->
+          <div class="right-panels">
+
+            <!-- BAR CHART: 14일 볼륨 -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="icon icon-sm">
+                    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  </span>
+                  트렌드 볼륨
+                </div>
+                <span class="panel-subtitle">최근 14일</span>
+              </div>
+              <div class="panel-body">
+                <div class="chart-bars" id="volumeChart">
+                  <!-- Generated by JS -->
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);">14일 전</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);">오늘</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- HORIZONTAL BARS: 카테고리 비중 -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="icon icon-sm">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </span>
+                  카테고리별 비중
+                </div>
+                <span class="panel-subtitle">이번 주</span>
+              </div>
+              <div class="panel-body">
+                <div class="horiz-bar-row">
+                  <span class="horiz-bar-label">건강/식품</span>
+                  <div class="horiz-bar-track"><div class="horiz-bar-fill" style="width:31%;background:var(--node4);"></div></div>
+                  <span class="horiz-bar-val">31%</span>
+                </div>
+                <div class="horiz-bar-row">
+                  <span class="horiz-bar-label">홈/리빙</span>
+                  <div class="horiz-bar-track"><div class="horiz-bar-fill" style="width:24%;background:var(--node1);"></div></div>
+                  <span class="horiz-bar-val">24%</span>
+                </div>
+                <div class="horiz-bar-row">
+                  <span class="horiz-bar-label">반려동물</span>
+                  <div class="horiz-bar-track"><div class="horiz-bar-fill" style="width:18%;background:var(--pink);"></div></div>
+                  <span class="horiz-bar-val">18%</span>
+                </div>
+                <div class="horiz-bar-row">
+                  <span class="horiz-bar-label">주방용품</span>
+                  <div class="horiz-bar-track"><div class="horiz-bar-fill" style="width:14%;background:var(--purple);"></div></div>
+                  <span class="horiz-bar-val">14%</span>
+                </div>
+                <div class="horiz-bar-row">
+                  <span class="horiz-bar-label">라이프스타일</span>
+                  <div class="horiz-bar-track"><div class="horiz-bar-fill" style="width:11%;background:var(--warn);"></div></div>
+                  <span class="horiz-bar-val">11%</span>
+                </div>
+                <div class="horiz-bar-row">
+                  <span class="horiz-bar-label">기타</span>
+                  <div class="horiz-bar-track"><div class="horiz-bar-fill" style="width:2%;background:var(--text-muted);"></div></div>
+                  <span class="horiz-bar-val">2%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- SURGE ALERTS -->
+            <div class="panel-card">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="icon icon-sm" style="color:var(--warn);">
+                    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  </span>
+                  급등 알림
+                </div>
+                <span class="panel-subtitle">실시간</span>
+              </div>
+              <div class="panel-body">
+                <div class="surge-card surge-card-warn">
+                  <div class="surge-label" style="color:var(--warn);">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                    급상승 +340%
+                  </div>
+                  <div class="surge-keyword">강아지 관절 영양제</div>
+                  <div class="surge-meta">네이버 쇼핑 · 3시간 전 감지</div>
+                </div>
+                <div class="surge-card surge-card-warn">
+                  <div class="surge-label" style="color:var(--warn);">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                    급상승 +218%
+                  </div>
+                  <div class="surge-keyword">에어프라이어 전용 트레이</div>
+                  <div class="surge-meta">쿠팡 · 1시간 전 감지</div>
+                </div>
+                <div class="surge-card surge-card-info">
+                  <div class="surge-label" style="color:var(--node1);">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+                    신규 진입 +156%
+                  </div>
+                  <div class="surge-keyword">다이어트 프로틴 젤리</div>
+                  <div class="surge-meta">인스타그램 · 30분 전 감지</div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /right-panels -->
+        </div><!-- /two-col -->
+
+      </div><!-- /page-content -->
+
+      <!-- BOTTOM STATS BAR -->
+      <div class="stat-bar">
+        <div class="stat-item">
+          <span class="stat-label">Crawled Sources</span>
+          <span class="stat-value">1,240</span>
+          <span class="stat-desc">쇼핑몰 · SNS · 검색</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Daily Trends</span>
+          <span class="stat-value">248</span>
+          <span class="stat-desc">오늘 감지된 트렌드</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Average Score</span>
+          <span class="stat-value">81.4</span>
+          <span class="stat-desc">기회 점수 평균</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Alert Count</span>
+          <span class="stat-value" style="color:var(--warn);">3</span>
+          <span class="stat-desc">미확인 급등 알림</span>
+        </div>
+      </div>
+
+      <!-- PRICING SECTION -->
+      <div class="pricing-section">
+        <div>
+          <div class="pricing-label">요금제</div>
+          <div style="font-size:13px;color:var(--text-muted);max-width:260px;line-height:1.5;">TrendRadar + SourceMatch + MarginSim 통합 구독. 언제든 업그레이드 가능.</div>
+        </div>
+        <div class="pricing-tiers">
+          <div class="pricing-tier">
+            <div class="tier-name">Starter</div>
+            <div class="tier-price">₩99K</div>
+            <div class="tier-period">/ 월</div>
+          </div>
+          <div class="pricing-tier featured">
+            <div class="tier-name">Growth</div>
+            <div class="tier-price">₩390K</div>
+            <div class="tier-period">/ 월</div>
+          </div>
+          <div class="pricing-tier">
+            <div class="tier-name">Scale</div>
+            <div class="tier-price">₩990K</div>
+            <div class="tier-period">/ 월</div>
+          </div>
+        </div>
+        <button class="btn-primary">플랜 시작하기</button>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ── Source tab toggle ──
+function setSource(el) {
+  document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  refreshTable();
+}
+
+// ── Trend table data ──
+const TREND_DATA = [
+  { keyword: '강아지 관절 영양제', badge: 'HOT', cat: '반려동물', catClass: 'cat-pet', score: 94, vol: 82000, volPct: 92, growth: '+340%', growthDir: 'up', comp: 2 },
+  { keyword: '에어프라이어 전용 트레이', badge: 'NEW', cat: '주방용품', catClass: 'cat-kitchen', score: 91, vol: 61000, volPct: 75, growth: '+218%', growthDir: 'up', comp: 2 },
+  { keyword: '다이어트 프로틴 젤리', badge: 'NEW', cat: '건강/식품', catClass: 'cat-health', score: 89, vol: 54000, volPct: 68, growth: '+156%', growthDir: 'up', comp: 2 },
+  { keyword: '무드등 수면 보조', badge: null, cat: '홈/리빙', catClass: 'cat-home', score: 87, vol: 47000, volPct: 60, growth: '+98%', growthDir: 'up', comp: 3 },
+  { keyword: '고양이 자동 급수기', badge: 'HOT', cat: '반려동물', catClass: 'cat-pet', score: 85, vol: 43000, volPct: 55, growth: '+87%', growthDir: 'up', comp: 3 },
+  { keyword: '비건 단백질 쉐이크', badge: null, cat: '건강/식품', catClass: 'cat-health', score: 83, vol: 39000, volPct: 50, growth: '+72%', growthDir: 'up', comp: 3 },
+  { keyword: '캠핑용 접이식 테이블', badge: null, cat: '라이프스타일', catClass: 'cat-lifestyle', score: 81, vol: 36000, volPct: 46, growth: '+61%', growthDir: 'up', comp: 4 },
+  { keyword: '샤워 필터 헤드', badge: 'NEW', cat: '홈/리빙', catClass: 'cat-home', score: 79, vol: 32000, volPct: 42, growth: '+54%', growthDir: 'up', comp: 3 },
+  { keyword: '스마트 체중계', badge: null, cat: '건강/식품', catClass: 'cat-health', score: 76, vol: 28000, volPct: 37, growth: '+43%', growthDir: 'up', comp: 4 },
+  { keyword: '스탠딩 케이블 오거나이저', badge: null, cat: '홈/리빙', catClass: 'cat-home', score: 74, vol: 24000, volPct: 32, growth: '+38%', growthDir: 'up', comp: 3 },
+  { keyword: '착즙기 세척 브러시 세트', badge: null, cat: '주방용품', catClass: 'cat-kitchen', score: 71, vol: 19000, volPct: 26, growth: '+29%', growthDir: 'up', comp: 4 },
+  { keyword: '아로마 디퓨저 패드', badge: null, cat: '라이프스타일', catClass: 'cat-lifestyle', score: 68, vol: 14000, volPct: 20, growth: '-4%', growthDir: 'down', comp: 5 },
+];
+
+function compDots(level) {
+  // level 1-5: filled dots
+  const filled = level <= 2 ? level : level <= 3 ? 3 : level <= 4 ? 4 : 5;
+  let html = '<div class="comp-bar"><div class="comp-dots">';
+  for (let i = 1; i <= 5; i++) {
+    if (i <= level) {
+      const cls = level <= 2 ? 'filled' : level === 3 ? 'half' : 'filled';
+      const style = level <= 2 ? '' : level === 3 ? 'background:var(--warn);' : 'background:var(--danger);';
+      html += `<div class="comp-dot ${cls}" style="${style}"></div>`;
+    } else {
+      html += '<div class="comp-dot empty"></div>';
+    }
+  }
+  const labels = ['', '낮음', '낮음', '보통', '높음', '매우 높음'];
+  html += `</div><span class="comp-label">${labels[level]}</span></div>`;
+  return html;
+}
+
+function scoreClass(s) {
+  if (s >= 85) return 'score-high';
+  if (s >= 70) return 'score-mid';
+  return 'score-low';
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('trendTbody');
+  tbody.innerHTML = data.map((row, i) => {
+    const rank = i + 1;
+    const rankCls = rank <= 3 ? 'rank-num top3' : 'rank-num';
+    const badgeHtml = row.badge === 'HOT'
+      ? '<span class="hot-badge">HOT</span>'
+      : row.badge === 'NEW'
+      ? '<span class="new-badge">NEW</span>'
+      : '';
+    const growthCls = row.growthDir === 'up' ? 'growth-up' : 'growth-down';
+    const arrow = row.growthDir === 'up'
+      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>'
+      : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>';
+    return `<tr>
+      <td><span class="${rankCls}">${String(rank).padStart(2,'0')}</span></td>
+      <td>
+        <div class="keyword-cell">
+          <span class="keyword-text">${row.keyword}</span>
+          ${badgeHtml}
+        </div>
+      </td>
+      <td><span class="category-pill ${row.catClass}">${row.cat}</span></td>
+      <td><span class="score-badge ${scoreClass(row.score)}">${row.score}</span></td>
+      <td>
+        <div class="volume-bar-wrap">
+          <div class="volume-bar-track"><div class="volume-bar-fill" style="width:${row.volPct}%"></div></div>
+          <span class="volume-text">${(row.vol/1000).toFixed(0)}K</span>
+        </div>
+      </td>
+      <td><div class="growth-cell ${growthCls}">${arrow}${row.growth}</div></td>
+      <td>${compDots(row.comp)}</td>
+      <td><button class="action-btn">분석 →</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rowCount').textContent = data.length + ' 건';
+}
+
+function refreshTable() {
+  // Simulate slight reorder on refresh
+  const shuffled = [...TREND_DATA].sort(() => Math.random() * 0.3 - 0.1);
+  renderTable(shuffled.slice(0, 12));
+}
+
+// ── Volume bar chart ──
+function renderVolumeChart() {
+  const heights = [28, 35, 42, 38, 55, 61, 58, 70, 65, 72, 68, 80, 85, 90];
+  const labels = ['3/1','','','','3/5','','','','3/9','','','','','3/14'];
+  const container = document.getElementById('volumeChart');
+  container.innerHTML = heights.map((h, i) => {
+    const isToday = i === heights.length - 1;
+    return `<div class="chart-bar-wrap">
+      <div class="chart-bar${isToday ? ' today' : ''}" style="height:${h}%"></div>
+      <span class="chart-label">${labels[i]}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Init ──
+renderTable(TREND_DATA);
+renderVolumeChart();
+</script>
+</body>
+</html>

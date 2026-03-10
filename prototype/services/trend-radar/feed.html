@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>트렌드 피드 — TrendRadar | AutoMarket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/common.css">
+<style>
+/* ── PAGE-SPECIFIC STYLES ── */
+
+/* Sidebar uses <a> tags styled as nav-btn */
+.nav-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  border: none; background: transparent; color: var(--text-secondary);
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  font-size: 13.5px; font-weight: 500; cursor: pointer;
+  transition: all 0.18s; text-align: left; width: 100%;
+  position: relative; border-left: 2px solid transparent;
+  text-decoration: none;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+.nav-btn.active { background: rgba(0,229,255,0.08); color: var(--node1); border-left-color: var(--node1); font-weight: 600; }
+.nav-btn .icon { width: 20px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; background: rgba(248,113,113,0.15);
+  border: 1px solid rgba(248,113,113,0.25); color: var(--danger);
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 10px; font-family: 'JetBrains Mono', monospace;
+}
+
+/* Feed page layout */
+.feed-page { padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; flex: 1; }
+
+/* Page title */
+.page-title { font-size: 28px; font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
+.page-title .accent { color: var(--node1); }
+.page-subtitle { font-size: 13.5px; color: var(--text-secondary); margin-top: 6px; line-height: 1.6; }
+
+/* Toolbar */
+.feed-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  animation: fadeUp 0.4s 0.1s ease both;
+}
+.source-tabs {
+  display: flex; gap: 4px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 3px;
+}
+.source-tab {
+  padding: 5px 13px; border-radius: 5px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+  border: none; background: none; font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+}
+.source-tab.active { background: var(--node1); color: var(--bg-deep); }
+.source-tab:not(.active):hover { color: var(--text-secondary); background: rgba(255,255,255,0.04); }
+
+.toolbar-right { display: flex; align-items: center; gap: 12px; }
+
+.refresh-indicator {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+.refresh-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--node4); flex-shrink: 0;
+  animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 5px rgba(52,211,153,0); }
+}
+.countdown-num { color: var(--node4); font-weight: 700; }
+
+.refresh-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg-card);
+  color: var(--text-secondary); font-family: 'Outfit', sans-serif;
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s;
+}
+.refresh-btn:hover { border-color: var(--node1); color: var(--node1); background: var(--node1-dim); }
+.refresh-btn .icon { color: inherit; }
+
+/* Section card */
+.section-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  animation: fadeUp 0.45s 0.15s ease both;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+}
+.card-title {
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title-icon {
+  width: 26px; height: 26px; border-radius: 7px;
+  background: var(--node1-dim); display: flex; align-items: center; justify-content: center;
+  color: var(--node1); flex-shrink: 0;
+}
+.card-title-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.card-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--text-muted); padding: 3px 10px;
+  background: var(--bg-surface); border-radius: 20px; border: 1px solid var(--border);
+}
+
+/* Feed table */
+.feed-table { width: 100%; border-collapse: collapse; }
+.feed-table th {
+  padding: 11px 14px; text-align: left;
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1px;
+  background: var(--bg-surface); border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.feed-table th:first-child { padding-left: 20px; }
+.feed-table th:last-child { padding-right: 20px; text-align: right; }
+.feed-table td {
+  padding: 11px 14px; border-bottom: 1px solid rgba(30,41,59,0.5);
+  font-size: 13px; vertical-align: middle;
+}
+.feed-table td:first-child { padding-left: 20px; }
+.feed-table td:last-child { padding-right: 20px; text-align: right; }
+.feed-table tr:last-child td { border-bottom: none; }
+.feed-table tr { transition: background 0.15s; }
+.feed-table tr:hover td { background: rgba(0,229,255,0.025); }
+
+/* Time cell */
+.time-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Keyword cell */
+.kw-cell { display: flex; align-items: center; gap: 8px; }
+.kw-text { font-weight: 600; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; }
+.kw-badge {
+  font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+  text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
+}
+.badge-new { background: rgba(245,158,11,0.14); color: var(--warn); border: 1px solid rgba(245,158,11,0.25); }
+.badge-hot { background: rgba(248,113,113,0.13); color: var(--danger); border: 1px solid rgba(248,113,113,0.22); }
+.badge-rise { background: rgba(52,211,153,0.12); color: var(--node4); border: 1px solid rgba(52,211,153,0.22); }
+
+/* Source badge */
+.source-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+}
+.src-naver  { background: rgba(3,199,90,0.1);   color: #03c75a; border: 1px solid rgba(3,199,90,0.22); }
+.src-coupang { background: rgba(238,40,40,0.1);  color: #ee2828; border: 1px solid rgba(238,40,40,0.22); }
+.src-insta  { background: rgba(193,53,132,0.1);  color: #c13584; border: 1px solid rgba(193,53,132,0.22); }
+.src-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* Score badge */
+.score-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 38px; height: 24px; border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+}
+.score-high { background: rgba(52,211,153,0.14); color: var(--node4); border: 1px solid rgba(52,211,153,0.24); }
+.score-mid  { background: rgba(245,158,11,0.12);  color: var(--warn);  border: 1px solid rgba(245,158,11,0.22); }
+.score-low  { background: rgba(248,113,113,0.1);  color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
+
+/* Volume cell */
+.vol-cell { display: flex; align-items: center; gap: 7px; justify-content: flex-end; }
+.vol-bar-track { width: 60px; height: 4px; background: var(--bg-elevated); border-radius: 2px; overflow: hidden; }
+.vol-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--node1), rgba(0,229,255,0.45)); }
+.vol-text { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); min-width: 42px; text-align: right; }
+
+/* Change rate cell */
+.change-cell { display: flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; justify-content: flex-end; }
+.change-up   { color: var(--node4); }
+.change-down { color: var(--danger); }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a href="../../index.html" class="logo">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Auto<span>Market</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE · 실시간 수집 중
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY: SIDEBAR + MAIN -->
+  <div class="body-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-nav">
+
+        <div class="nav-section-label">트렌드</div>
+        <a href="index.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          </span>
+          Dashboard
+        </a>
+        <a href="feed.html" class="nav-btn active">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+          </span>
+          트렌드 피드
+        </a>
+        <a href="categories.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </span>
+          카테고리 분석
+        </a>
+
+        <div class="nav-section-label">기회 분석</div>
+        <a href="strategy.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </span>
+          전략 설정
+        </a>
+        <a href="opportunity.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          기회 상세
+        </a>
+
+        <div class="nav-section-label">수익성 검증</div>
+        <a href="sourcing.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </span>
+          소싱 매칭
+        </a>
+        <a href="margin.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          마진 시뮬레이션
+        </a>
+
+        <div class="nav-section-label">운영</div>
+        <a href="alerts.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </span>
+          알림 센터
+          <span class="nav-badge">3</span>
+        </a>
+        <a href="report.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </span>
+          리포트
+        </a>
+
+      </div>
+      <div class="sidebar-bottom">
+        <a href="../../index.html" class="sidebar-back-link">
+          <span class="icon icon-sm">
+            <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </span>
+          AutoMarket Home
+        </a>
+      </div>
+    </nav>
+
+    <!-- MAIN AREA -->
+    <main class="main-area">
+      <div class="feed-page">
+
+        <!-- Page heading -->
+        <div style="animation: fadeUp 0.4s ease both;">
+          <h1 class="page-title">트렌드 <span class="accent">피드</span></h1>
+          <p class="page-subtitle">실시간 수집된 트렌드 키워드 전체 피드 — 소스별 점수 및 변화율 포함</p>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="feed-toolbar">
+          <div class="source-tabs" id="sourceTabs">
+            <button class="source-tab active" data-src="all">전체</button>
+            <button class="source-tab" data-src="naver">네이버</button>
+            <button class="source-tab" data-src="coupang">쿠팡</button>
+            <button class="source-tab" data-src="insta">인스타</button>
+          </div>
+          <div class="toolbar-right">
+            <div class="refresh-indicator">
+              <div class="refresh-dot"></div>
+              자동 갱신 중 · 30초마다 &nbsp;(<span class="countdown-num" id="countdown">30</span>s)
+            </div>
+            <button class="refresh-btn" id="refreshBtn">
+              <span class="icon icon-sm">
+                <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              </span>
+              새로고침
+            </button>
+          </div>
+        </div>
+
+        <!-- Feed table card -->
+        <div class="section-card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+              </div>
+              실시간 트렌드 피드
+            </div>
+            <div class="card-count" id="cardCount">20 / 1,840 entries</div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="feed-table" id="feedTable">
+              <thead>
+                <tr>
+                  <th>시각</th>
+                  <th>키워드</th>
+                  <th>소스</th>
+                  <th>점수</th>
+                  <th style="text-align:right;">검색량</th>
+                  <th>변화율</th>
+                </tr>
+              </thead>
+              <tbody id="feedBody">
+                <!-- Rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div><!-- /body-layout -->
+</div><!-- /app -->
+
+<script>
+const feedData = [
+  { time: '14:32:07', keyword: '에어프라이어 9L', badge: 'hot',  src: 'coupang', score: 91, vol: 48200, volPct: 92, change: +34.2 },
+  { time: '14:31:55', keyword: '슬리핑 마스크팩',  badge: 'new',  src: 'naver',   score: 87, vol: 31500, volPct: 65, change: +22.8 },
+  { time: '14:31:40', keyword: '강아지 쿨매트',    badge: 'rise', src: 'insta',   score: 83, vol: 27800, volPct: 56, change: +18.4 },
+  { time: '14:31:18', keyword: '미니 선풍기 USB',  badge: null,   src: 'coupang', score: 79, vol: 42100, volPct: 84, change: +12.1 },
+  { time: '14:30:52', keyword: '캠핑 랜턴 LED',    badge: 'hot',  src: 'naver',   score: 76, vol: 19300, volPct: 38, change: +29.7 },
+  { time: '14:30:31', keyword: '텀블러 보온병',    badge: null,   src: 'naver',   score: 74, vol: 36400, volPct: 73, change: +8.5  },
+  { time: '14:30:10', keyword: '필라테스 소도구',  badge: 'new',  src: 'insta',   score: 71, vol: 14700, volPct: 30, change: +41.3 },
+  { time: '14:29:58', keyword: '스탠딩 책상 매트', badge: null,   src: 'coupang', score: 68, vol: 11200, volPct: 22, change: +15.6 },
+  { time: '14:29:44', keyword: '고양이 자동급식기',badge: 'rise', src: 'naver',   score: 65, vol: 22900, volPct: 46, change: +19.0 },
+  { time: '14:29:22', keyword: '보습 크림 대용량', badge: null,   src: 'insta',   score: 62, vol: 18500, volPct: 37, change: -4.2  },
+  { time: '14:29:01', keyword: '접이식 러닝머신',  badge: 'hot',  src: 'coupang', score: 88, vol: 9800,  volPct: 20, change: +55.1 },
+  { time: '14:28:47', keyword: '냉감 이불 여름',   badge: 'new',  src: 'naver',   score: 85, vol: 33600, volPct: 67, change: +38.7 },
+  { time: '14:28:30', keyword: '실내 자전거 스마트',badge: null,  src: 'coupang', score: 72, vol: 7400,  volPct: 15, change: +10.3 },
+  { time: '14:28:12', keyword: '해먹 캠핑용',      badge: 'rise', src: 'insta',   score: 58, vol: 6100,  volPct: 12, change: +24.5 },
+  { time: '14:27:55', keyword: '무선 키보드 무소음',badge: null,  src: 'naver',   score: 66, vol: 25300, volPct: 50, change: +7.8  },
+  { time: '14:27:39', keyword: '스킨케어 세럼 비타C',badge:'new', src: 'insta',   score: 80, vol: 17200, volPct: 34, change: +47.2 },
+  { time: '14:27:21', keyword: '반려동물 유모차',  badge: null,   src: 'coupang', score: 55, vol: 8900,  volPct: 18, change: -2.1  },
+  { time: '14:27:04', keyword: '다이어리 꾸미기',  badge: 'hot',  src: 'insta',   score: 77, vol: 12400, volPct: 25, change: +33.9 },
+  { time: '14:26:48', keyword: '공기청정기 필터',  badge: null,   src: 'naver',   score: 60, vol: 29700, volPct: 59, change: +5.4  },
+  { time: '14:26:30', keyword: '홈카페 드립포트',  badge: 'rise', src: 'coupang', score: 69, vol: 10600, volPct: 21, change: +16.8 },
+];
+
+function srcClass(src) {
+  if (src === 'naver')   return 'src-naver';
+  if (src === 'coupang') return 'src-coupang';
+  if (src === 'insta')   return 'src-insta';
+  return '';
+}
+function srcLabel(src) {
+  if (src === 'naver')   return '네이버';
+  if (src === 'coupang') return '쿠팡';
+  if (src === 'insta')   return '인스타';
+  return src;
+}
+function scoreClass(s) {
+  if (s >= 80) return 'score-high';
+  if (s >= 60) return 'score-mid';
+  return 'score-low';
+}
+function badgeHtml(b) {
+  if (!b) return '';
+  const map = { hot: 'badge-hot', new: 'badge-new', rise: 'badge-rise' };
+  const label = { hot: 'HOT', new: 'NEW', rise: 'RISE' };
+  return `<span class="kw-badge ${map[b]}">${label[b]}</span>`;
+}
+
+function renderRows(data) {
+  const tbody = document.getElementById('feedBody');
+  tbody.innerHTML = data.map(row => {
+    const changeDir = row.change >= 0 ? 'change-up' : 'change-down';
+    const arrowSvg = row.change >= 0
+      ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`
+      : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+    const volFormatted = row.vol >= 1000 ? (row.vol / 1000).toFixed(1) + 'K' : row.vol;
+    return `<tr>
+      <td><span class="time-cell">${row.time}</span></td>
+      <td>
+        <div class="kw-cell">
+          <span class="kw-text">${row.keyword}</span>
+          ${badgeHtml(row.badge)}
+        </div>
+      </td>
+      <td>
+        <span class="source-badge ${srcClass(row.src)}">
+          <span class="src-dot"></span>${srcLabel(row.src)}
+        </span>
+      </td>
+      <td><span class="score-badge ${scoreClass(row.score)}">${row.score}</span></td>
+      <td>
+        <div class="vol-cell">
+          <div class="vol-bar-track"><div class="vol-bar-fill" style="width:${row.volPct}%"></div></div>
+          <span class="vol-text">${volFormatted}</span>
+        </div>
+      </td>
+      <td>
+        <div class="change-cell ${changeDir}">
+          ${arrowSvg}
+          ${row.change >= 0 ? '+' : ''}${row.change.toFixed(1)}%
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// Source tab filter
+let activeSrc = 'all';
+document.getElementById('sourceTabs').addEventListener('click', e => {
+  const btn = e.target.closest('.source-tab');
+  if (!btn) return;
+  document.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  activeSrc = btn.dataset.src;
+  const filtered = activeSrc === 'all' ? feedData : feedData.filter(r => r.src === activeSrc);
+  renderRows(filtered);
+  document.getElementById('cardCount').textContent = filtered.length + ' / 1,840 entries';
+});
+
+// Countdown timer
+let seconds = 30;
+function tick() {
+  seconds--;
+  if (seconds <= 0) {
+    seconds = 30;
+    renderRows(activeSrc === 'all' ? feedData : feedData.filter(r => r.src === activeSrc));
+  }
+  document.getElementById('countdown').textContent = seconds;
+}
+setInterval(tick, 1000);
+
+// Manual refresh button
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  seconds = 30;
+  document.getElementById('countdown').textContent = seconds;
+  renderRows(activeSrc === 'all' ? feedData : feedData.filter(r => r.src === activeSrc));
+});
+
+// Initial render
+renderRows(feedData);
+</script>
+</body>
+</html>

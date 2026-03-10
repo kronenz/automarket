@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrendRadar — 트렌드 감지 엔진 | AutoMarket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ── CSS VARIABLES ── */
+:root {
+  --bg-deep: #06080d;
+  --bg-surface: #0c1018;
+  --bg-card: #111825;
+  --bg-card-hover: #162030;
+  --bg-elevated: #1a2438;
+  --node1: #00e5ff;
+  --node1-dim: #00e5ff22;
+  --node1-glow: #00e5ff55;
+  --node4: #34d399;
+  --node4-dim: #34d39922;
+  --warn: #f59e0b;
+  --warn-dim: #f59e0b22;
+  --danger: #f87171;
+  --danger-dim: #f8717122;
+  --text-primary: #e8edf5;
+  --text-secondary: #8896ab;
+  --text-muted: #4a5568;
+  --border: #1e293b;
+  --border-light: #2d3b50;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --sidebar-w: 240px;
+  --topbar-h: 64px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* grid overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(0,229,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* radial glow */
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 50vw;
+  height: 50vh;
+  background: radial-gradient(ellipse, rgba(0,229,255,0.04), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+.app { position: relative; z-index: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── LUCIDE SVG ICONS ── */
+.icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon-sm svg { width: 14px; height: 14px; }
+.icon-lg svg { width: 22px; height: 22px; }
+
+/* ── TOP BAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: var(--topbar-h);
+  background: rgba(6,8,13,0.92);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.logo-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--node1), #a78bfa);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px; color: var(--bg-deep);
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.logo-icon::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3)); }
+.logo-text { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: var(--text-primary); }
+.logo-text span { color: var(--node1); }
+
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.live-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 14px; background: rgba(0,229,255,0.08);
+  border: 1px solid rgba(0,229,255,0.2); border-radius: 20px;
+  font-size: 12px; font-weight: 600; color: var(--node1);
+  font-family: 'JetBrains Mono', monospace;
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--node1); animation: pulse-cyan 1.5s infinite; }
+
+@keyframes pulse-cyan {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,229,255,0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(0,229,255,0); }
+}
+
+/* ── BODY LAYOUT ── */
+.body-layout { display: flex; flex: 1; min-height: 0; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w); min-width: var(--sidebar-w);
+  background: var(--bg-surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: sticky; top: var(--topbar-h); height: calc(100vh - var(--topbar-h));
+  overflow-y: auto;
+}
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nav-section-label {
+  font-size: 10px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  padding: 8px 8px 6px; margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.nav-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  border: none; background: transparent; color: var(--text-secondary);
+  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  font-size: 13.5px; font-weight: 500; cursor: pointer;
+  transition: all 0.18s; text-align: left; width: 100%;
+  position: relative; border-left: 2px solid transparent;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+.nav-btn.active { background: rgba(0,229,255,0.08); color: var(--node1); border-left-color: var(--node1); font-weight: 600; }
+.nav-btn .icon { width: 20px; }
+.nav-badge {
+  margin-left: auto; background: rgba(248,113,113,0.15);
+  border: 1px solid rgba(248,113,113,0.25); color: var(--danger);
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 10px; font-family: 'JetBrains Mono', monospace;
+}
+.sidebar-bottom { padding: 16px 12px; border-top: 1px solid var(--border); }
+.sidebar-back-link {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-muted); text-decoration: none;
+  font-size: 12.5px; font-weight: 500;
+  padding: 9px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); transition: all 0.2s;
+}
+.sidebar-back-link:hover { color: var(--node1); border-color: var(--node1-dim); background: var(--node1-dim); }
+
+/* ── MAIN AREA ── */
+.main-area { flex: 1; min-width: 0; overflow-y: auto; display: flex; flex-direction: column; }
+.tab-section { display: none; flex-direction: column; flex: 1; }
+.tab-section.active { display: flex; }
+
+/* ── PAGE HEADER ── */
+.page-header { padding: 32px 32px 28px; border-bottom: 1px solid var(--border); animation: fadeUp 0.5s ease both; }
+.page-header-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.page-title-group { flex: 1; }
+.service-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 12px; background: var(--node1-dim);
+  border: 1px solid rgba(0,229,255,0.25); border-radius: 6px;
+  font-size: 11px; font-weight: 700; color: var(--node1);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: 16px; font-family: 'JetBrains Mono', monospace;
+}
+.service-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--node1); }
+.page-title { font-size: 32px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 10px; line-height: 1.1; }
+.page-title .accent { color: var(--node1); }
+.page-subtitle { font-size: 14px; color: var(--text-secondary); font-weight: 400; max-width: 520px; line-height: 1.6; }
+.page-header-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; flex-shrink: 0; }
+.phase-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+}
+.phase-mvp { background: rgba(0,229,255,0.12); border: 1px solid rgba(0,229,255,0.3); color: var(--node1); }
+.pricing-tag { font-size: 13px; color: var(--text-secondary); text-align: right; }
+.pricing-tag strong { display: block; font-size: 17px; font-weight: 700; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; letter-spacing: -0.5px; }
+
+/* ── DASHBOARD ── */
+.main-content { display: grid; grid-template-columns: 1fr 320px; gap: 0; flex: 1; }
+.content-left { padding: 28px 24px 28px 28px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 24px; }
+.content-right { padding: 28px 28px 28px 20px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── FILTERS ── */
+.filters-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; animation: fadeUp 0.5s 0.1s ease both; }
+.filter-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-right: 4px; }
+.filter-select {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text-primary); font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 500;
+  padding: 7px 28px 7px 11px; cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238896ab' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; transition: border-color 0.2s;
+}
+.filter-select:focus { outline: none; border-color: var(--node1); }
+.filter-select:hover { border-color: var(--border-light); }
+.filter-btn {
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--node1-dim); background: var(--node1-dim);
+  color: var(--node1); font-family: 'Outfit', sans-serif;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.filter-btn:hover { background: rgba(0,229,255,0.15); border-color: rgba(0,229,255,0.4); }
+.filter-divider { width: 1px; height: 24px; background: var(--border); }
+.source-tabs { display: flex; gap: 4px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px; }
+.source-tab {
+  padding: 5px 11px; border-radius: 5px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+  border: none; background: none; font-family: inherit;
+}
+.source-tab.active { background: var(--node1); color: var(--bg-deep); }
+.source-tab:not(.active):hover { color: var(--text-secondary); }
+
+/* ── CARDS ── */
+.section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; animation: fadeUp 0.5s 0.15s ease both; }
+.card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.card-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.card-title-icon {
+  width: 26px; height: 26px; border-radius: 7px;
+  background: var(--node1-dim); display: flex; align-items: center; justify-content: center;
+  color: var(--node1);
+}
+.card-title-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.card-count { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); padding: 3px 10px; background: var(--bg-surface); border-radius: 20px; border: 1px solid var(--border); }
+
+/* ── TREND TABLE ── */
+.trend-table { width: 100%; border-collapse: collapse; }
+.trend-table th {
+  padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;
+  background: var(--bg-surface); border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.trend-table th:first-child { padding-left: 18px; }
+.trend-table th:last-child { padding-right: 18px; text-align: center; }
+.trend-table td { padding: 12px 14px; border-bottom: 1px solid rgba(30,41,59,0.5); font-size: 13px; vertical-align: middle; }
+.trend-table td:first-child { padding-left: 18px; }
+.trend-table td:last-child { padding-right: 18px; text-align: center; }
+.trend-table tr:last-child td { border-bottom: none; }
+.trend-table tr { transition: background 0.15s; }
+.trend-table tr:hover td { background: rgba(0,229,255,0.03); }
+
+.rank-num { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--text-muted); }
+.rank-num.top3 { color: var(--node1); }
+.keyword-cell { display: flex; align-items: center; gap: 8px; }
+.keyword-text { font-weight: 600; font-size: 13px; font-family: 'Noto Sans KR', sans-serif; }
+.new-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(245,158,11,0.15); color: var(--warn); text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid rgba(245,158,11,0.25); }
+.hot-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(248,113,113,0.15); color: var(--danger); text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid rgba(248,113,113,0.25); }
+
+.category-pill { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.cat-health { background: rgba(52,211,153,0.12); color: var(--node4); border: 1px solid rgba(52,211,153,0.2); }
+.cat-home { background: rgba(0,229,255,0.1); color: var(--node1); border: 1px solid rgba(0,229,255,0.2); }
+.cat-kitchen { background: rgba(167,139,250,0.12); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
+.cat-lifestyle { background: rgba(245,158,11,0.12); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+.cat-pet { background: rgba(255,107,202,0.12); color: #ff6bca; border: 1px solid rgba(255,107,202,0.2); }
+.cat-electronics { background: rgba(0,229,255,0.1); color: var(--node1); border: 1px solid rgba(0,229,255,0.2); }
+.cat-fashion { background: rgba(167,139,250,0.12); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
+.cat-beauty { background: rgba(255,107,202,0.12); color: #ff6bca; border: 1px solid rgba(255,107,202,0.2); }
+
+.score-badge { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 26px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; }
+.score-high { background: rgba(52,211,153,0.15); color: var(--node4); border: 1px solid rgba(52,211,153,0.25); }
+.score-mid { background: rgba(245,158,11,0.12); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+.score-low { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
+
+.volume-bar-wrap { display: flex; align-items: center; gap: 7px; }
+.volume-bar-track { width: 64px; height: 5px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; }
+.volume-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--node1), rgba(0,229,255,0.5)); }
+.volume-text { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+
+.growth-cell { display: flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+.growth-up { color: var(--node4); }
+.growth-down { color: var(--danger); }
+
+.comp-bar { display: flex; align-items: center; gap: 7px; }
+.comp-dots { display: flex; gap: 3px; }
+.comp-dot { width: 7px; height: 7px; border-radius: 2px; }
+.comp-dot.filled { background: var(--danger); }
+.comp-dot.half { background: var(--warn); }
+.comp-dot.empty { background: var(--bg-elevated); border: 1px solid var(--border); }
+.comp-label { font-size: 11px; color: var(--text-muted); }
+
+.action-btn {
+  padding: 5px 12px; border-radius: 6px;
+  border: 1px solid var(--node1-dim); background: var(--node1-dim);
+  color: var(--node1); font-family: 'Outfit', sans-serif;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.action-btn:hover { background: rgba(0,229,255,0.15); border-color: rgba(0,229,255,0.4); box-shadow: 0 0 10px rgba(0,229,255,0.15); }
+
+/* ── PANEL CARDS ── */
+.panel-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; animation: fadeUp 0.5s ease both; }
+.panel-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.panel-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.panel-title .icon { color: var(--node1); }
+.panel-subtitle { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+/* ── VOLUME CHART ── */
+.volume-chart { padding: 18px 16px; }
+.chart-bars { display: flex; align-items: flex-end; gap: 5px; height: 90px; margin-bottom: 8px; }
+.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.chart-bar { width: 100%; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, var(--node1), rgba(0,229,255,0.3)); min-height: 4px; transition: opacity 0.2s; }
+.chart-bar.today { background: linear-gradient(180deg, var(--node1), var(--node1-glow)); box-shadow: 0 0 8px rgba(0,229,255,0.3); }
+.chart-bar-wrap:hover .chart-bar { opacity: 0.8; }
+.chart-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-muted); }
+.chart-legend { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.chart-legend-item { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.chart-peak { font-size: 12px; color: var(--node1); font-weight: 600; }
+
+/* ── CATEGORY BREAKDOWN ── */
+.categories-panel { padding: 16px; }
+.category-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.category-row:last-child { margin-bottom: 0; }
+.cat-color-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.cat-row-name { flex: 0 0 70px; font-size: 12px; font-weight: 500; font-family: 'Noto Sans KR', sans-serif; }
+.cat-row-bar { flex: 1; height: 4px; background: var(--bg-elevated); border-radius: 2px; overflow: hidden; }
+.cat-row-bar-fill { height: 100%; border-radius: 2px; }
+.cat-row-pct { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--text-secondary); min-width: 34px; text-align: right; }
+
+/* ── BOTTOM STATS ── */
+.bottom-stats {
+  padding: 20px 28px; border-top: 1px solid var(--border);
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border); animation: fadeUp 0.5s 0.3s ease both;
+}
+.stat-item { background: var(--bg-surface); padding: 18px 20px; display: flex; flex-direction: column; gap: 5px; }
+.stat-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.stat-value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--node1); letter-spacing: -0.5px; }
+.stat-desc { font-size: 11px; color: var(--text-muted); }
+
+/* ── PRICING ── */
+.pricing-section {
+  margin: 0 28px 28px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px 24px; display: flex; align-items: center;
+  justify-content: space-between; gap: 24px; animation: fadeUp 0.5s 0.35s ease both;
+}
+.pricing-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.pricing-tiers { display: flex; gap: 10px; flex-wrap: wrap; }
+.pricing-tier { padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-surface); text-align: center; min-width: 110px; transition: all 0.2s; }
+.pricing-tier:hover { border-color: var(--border-light); background: var(--bg-elevated); }
+.pricing-tier.featured { border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.06); }
+.tier-name { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.tier-price { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+.pricing-tier.featured .tier-price { color: var(--node1); }
+.tier-period { font-size: 11px; color: var(--text-muted); }
+.pricing-cta { display: flex; gap: 10px; }
+.btn-primary { padding: 11px 24px; border-radius: var(--radius-sm); border: none; background: var(--node1); color: var(--bg-deep); font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.btn-primary:hover { box-shadow: 0 0 22px rgba(0,229,255,0.3); transform: translateY(-1px); }
+.btn-secondary { padding: 11px 20px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.btn-secondary:hover { border-color: var(--border-light); color: var(--text-primary); }
+
+/* ── TAB CONTENT ── */
+.tab-content-wrap { padding: 28px; display: flex; flex-direction: column; gap: 24px; flex: 1; }
+.tab-page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.8px; }
+.tab-page-title .accent { color: var(--node1); }
+.tab-page-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+/* ── FEED TAB ── */
+.feed-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.refresh-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+.refresh-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--node4); animation: pulse-cyan 2s infinite; }
+
+/* ── CATEGORY ANALYSIS TAB ── */
+.cat-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.cat-analysis-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: all 0.2s; }
+.cat-analysis-card:hover { border-color: var(--border-light); background: var(--bg-card-hover); transform: translateY(-2px); }
+.cat-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cat-card-name { font-size: 15px; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; }
+.cat-card-icon { color: var(--node1); }
+.cat-card-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cat-card-stat { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.cat-card-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--node1); }
+.cat-card-stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
+.cat-card-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.cat-top-kw { font-size: 12px; font-family: 'Noto Sans KR', sans-serif; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+.cat-growth-chip { font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+.horiz-chart-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.horiz-chart-title { font-size: 14px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.horiz-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.horiz-bar-row:last-child { margin-bottom: 0; }
+.horiz-bar-label { font-size: 13px; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; min-width: 80px; }
+.horiz-bar-track { flex: 1; height: 8px; background: var(--bg-elevated); border-radius: 4px; overflow: hidden; }
+.horiz-bar-fill { height: 100%; border-radius: 4px; }
+.horiz-bar-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); min-width: 40px; text-align: right; }
+
+/* ── ALERT CENTER TAB ── */
+.alert-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
+.alert-settings-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.alert-settings-header { padding: 16px 18px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.alert-settings-header .icon { color: var(--text-muted); }
+.alert-setting-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid rgba(30,41,59,0.5); }
+.alert-setting-row:last-child { border-bottom: none; }
+.alert-setting-info { display: flex; flex-direction: column; gap: 3px; }
+.alert-setting-name { font-size: 13px; font-weight: 600; }
+.alert-setting-desc { font-size: 11px; color: var(--text-muted); }
+
+.toggle-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-slider { position: absolute; inset: 0; border-radius: 11px; background: var(--bg-elevated); border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+.toggle-slider::before { content: ''; position: absolute; left: 3px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 50%; background: var(--text-muted); transition: all 0.2s; }
+.toggle-switch input:checked + .toggle-slider { background: rgba(0,229,255,0.15); border-color: var(--node1); }
+.toggle-switch input:checked + .toggle-slider::before { left: 21px; background: var(--node1); }
+
+.alerts-list-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.alerts-list-header { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.alert-entry { display: flex; align-items: flex-start; gap: 12px; padding: 13px 18px; border-bottom: 1px solid rgba(30,41,59,0.4); transition: background 0.15s; }
+.alert-entry:last-child { border-bottom: none; }
+.alert-entry:hover { background: rgba(255,255,255,0.02); }
+.alert-sev { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+.sev-urgent { background: rgba(248,113,113,0.15); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
+.sev-warn { background: rgba(245,158,11,0.12); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+.sev-info { background: rgba(0,229,255,0.08); color: var(--node1); border: 1px solid rgba(0,229,255,0.18); }
+.alert-body { flex: 1; }
+.alert-msg { font-size: 13px; font-weight: 500; font-family: 'Noto Sans KR', sans-serif; line-height: 1.5; }
+.alert-time { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 3px; }
+
+/* ── REPORT TAB ── */
+.report-layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+.report-main { display: flex; flex-direction: column; gap: 20px; }
+.report-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.report-card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.report-date-range { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); padding: 4px 10px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 6px; }
+.report-card-body { padding: 20px; }
+.findings-list { display: flex; flex-direction: column; gap: 10px; }
+.finding-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: var(--bg-surface); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+.finding-bullet { width: 6px; height: 6px; border-radius: 50%; background: var(--node1); flex-shrink: 0; margin-top: 5px; }
+.finding-text { font-size: 13px; line-height: 1.55; font-family: 'Noto Sans KR', sans-serif; }
+
+.report-top5-table { width: 100%; border-collapse: collapse; }
+.report-top5-table th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; background: var(--bg-surface); border-bottom: 1px solid var(--border); }
+.report-top5-table td { padding: 12px 14px; border-bottom: 1px solid rgba(30,41,59,0.5); font-size: 13px; }
+.report-top5-table tr:last-child td { border-bottom: none; }
+.report-top5-table tr:hover td { background: rgba(0,229,255,0.02); }
+
+.report-side { display: flex; flex-direction: column; gap: 20px; }
+.metrics-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.metric-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid rgba(30,41,59,0.5); }
+.metric-row:last-child { border-bottom: none; }
+.metric-name { font-size: 13px; color: var(--text-secondary); }
+.metric-vals { display: flex; align-items: center; gap: 8px; }
+.metric-curr { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; }
+.metric-delta { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+.delta-up { color: var(--node4); }
+.delta-down { color: var(--danger); }
+
+.export-btn { width: 100%; padding: 13px; border-radius: var(--radius-sm); border: 1px solid rgba(0,229,255,0.25); background: rgba(0,229,255,0.06); color: var(--node1); font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.export-btn:hover { background: rgba(0,229,255,0.12); box-shadow: 0 0 16px rgba(0,229,255,0.12); }
+.export-btn-green { border-color: rgba(52,211,153,0.25); background: rgba(52,211,153,0.06); color: var(--node4); }
+.export-btn-green:hover { background: rgba(52,211,153,0.12); box-shadow: 0 0 16px rgba(52,211,153,0.12); }
+
+/* ── SURGE ALERT CARDS ── */
+.surge-card { padding: 10px 12px; border-radius: 8px; margin-bottom: 9px; }
+.surge-card:last-child { margin-bottom: 0; }
+.surge-card-warn { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); }
+.surge-card-info { background: rgba(0,229,255,0.04); border: 1px solid rgba(0,229,255,0.12); }
+.surge-label { font-size: 12px; font-weight: 700; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+.surge-keyword { font-size: 13px; font-weight: 600; font-family: 'Noto Sans KR', sans-serif; }
+.surge-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Auto<span>Market</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE · 갱신 2분 전
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY: SIDEBAR + MAIN -->
+  <div class="body-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-nav">
+        <div class="nav-section-label">메뉴</div>
+        <button class="nav-btn active" data-tab="dashboard">
+          <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span>
+          Dashboard
+        </button>
+        <button class="nav-btn" data-tab="feed">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></span>
+          트렌드 피드
+        </button>
+        <button class="nav-btn" data-tab="categories">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+          카테고리 분석
+        </button>
+        <button class="nav-btn" data-tab="alerts">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+          알림 센터
+          <span class="nav-badge">3</span>
+        </button>
+        <button class="nav-btn" data-tab="report">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+          리포트
+        </button>
+      </div>
+      <div class="sidebar-bottom">
+        <a href="../index.html" class="sidebar-back-link">
+          <span class="icon icon-sm"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></span>
+          Dashboard
+        </a>
+      </div>
+    </nav>
+
+    <!-- MAIN AREA -->
+    <main class="main-area">
+
+      <!-- ══════════════════ TAB: DASHBOARD ══════════════════ -->
+      <section class="tab-section active" id="tab-dashboard">
+        <div class="page-header">
+          <div class="page-header-inner">
+            <div class="page-title-group">
+              <div class="service-tag">
+                <div class="service-tag-dot"></div>
+                Node 1 · Opportunity Discovery
+              </div>
+              <h1 class="page-title">Trend<span class="accent">Radar</span></h1>
+              <p class="page-subtitle">실시간 커머스 트렌드를 AI가 감지하고 기회 점수를 산출합니다. 네이버·쿠팡·소셜 전채널 데이터를 통합 분석하여 급등 키워드와 경쟁 공백을 실시간으로 탐지합니다.</p>
+            </div>
+            <div class="page-header-meta">
+              <span class="phase-badge phase-mvp">
+                <span class="icon icon-sm"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                MVP
+              </span>
+              <div class="pricing-tag">
+                월 구독
+                <strong>₩99K — ₩990K</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <div class="content-left">
+            <div class="filters-bar">
+              <span class="filter-label">필터</span>
+              <select class="filter-select">
+                <option>전체 카테고리</option>
+                <option>건강/식품</option>
+                <option>가전/전자</option>
+                <option>주방용품</option>
+                <option>반려동물</option>
+                <option>라이프스타일</option>
+              </select>
+              <select class="filter-select">
+                <option>점수 전체</option>
+                <option>80점 이상</option>
+                <option>60-80점</option>
+                <option>60점 미만</option>
+              </select>
+              <select class="filter-select">
+                <option>최근 7일</option>
+                <option>최근 14일</option>
+                <option>최근 30일</option>
+                <option>오늘</option>
+              </select>
+              <div class="filter-divider"></div>
+              <div class="source-tabs">
+                <button class="source-tab active">전체</button>
+                <button class="source-tab">네이버</button>
+                <button class="source-tab">쿠팡</button>
+                <button class="source-tab">소셜</button>
+              </div>
+              <button class="filter-btn">
+                <span class="icon icon-sm"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>
+                새로고침
+              </button>
+            </div>
+
+            <div class="section-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon"><svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></div>
+                  실시간 트렌드 피드
+                </div>
+                <span class="card-count">12 / 248 items</span>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="trend-table">
+                  <thead>
+                    <tr>
+                      <th>Rank</th><th>키워드</th><th>카테고리</th><th>기회 점수</th>
+                      <th>검색량</th><th>성장률</th><th>경쟁 강도</th><th>액션</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-right">
+            <div class="panel-card" style="animation-delay:0.1s">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="icon" style="color:var(--node1)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+                  트렌드 볼륨 (최근 14일)
+                </div>
+                <span class="panel-subtitle">daily</span>
+              </div>
+              <div class="volume-chart">
+                <div class="chart-bars">
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:45%"></div><span class="chart-label">2/22</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:52%"></div><span class="chart-label">23</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:48%"></div><span class="chart-label">24</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:61%"></div><span class="chart-label">25</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:58%"></div><span class="chart-label">26</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:70%"></div><span class="chart-label">27</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:65%"></div><span class="chart-label">28</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:74%"></div><span class="chart-label">3/1</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:68%"></div><span class="chart-label">2</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:80%"></div><span class="chart-label">3</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:77%"></div><span class="chart-label">4</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:85%"></div><span class="chart-label">5</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar" style="height:90%"></div><span class="chart-label">6</span></div>
+                  <div class="chart-bar-wrap"><div class="chart-bar today" style="height:100%"></div><span class="chart-label" style="color:var(--node1)">오늘</span></div>
+                </div>
+                <div class="chart-legend">
+                  <span class="chart-legend-item">2월 22일</span>
+                  <span class="chart-peak">248 trends today</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-card" style="animation-delay:0.2s">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="icon" style="color:var(--node1)"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>
+                  카테고리별 비중
+                </div>
+                <span class="panel-subtitle">top 5</span>
+              </div>
+              <div class="categories-panel">
+                <div class="category-row"><div class="cat-color-dot" style="background:#34d399"></div><span class="cat-row-name">건강/식품</span><div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:78%;background:#34d399"></div></div><span class="cat-row-pct">31%</span></div>
+                <div class="category-row"><div class="cat-color-dot" style="background:#00e5ff"></div><span class="cat-row-name">홈/리빙</span><div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:62%;background:#00e5ff"></div></div><span class="cat-row-pct">24%</span></div>
+                <div class="category-row"><div class="cat-color-dot" style="background:#ff6bca"></div><span class="cat-row-name">반려동물</span><div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:46%;background:#ff6bca"></div></div><span class="cat-row-pct">18%</span></div>
+                <div class="category-row"><div class="cat-color-dot" style="background:#a78bfa"></div><span class="cat-row-name">주방용품</span><div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:36%;background:#a78bfa"></div></div><span class="cat-row-pct">14%</span></div>
+                <div class="category-row"><div class="cat-color-dot" style="background:#f59e0b"></div><span class="cat-row-name">라이프스타일</span><div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:28%;background:#f59e0b"></div></div><span class="cat-row-pct">11%</span></div>
+                <div class="category-row"><div class="cat-color-dot" style="background:#4a5568"></div><span class="cat-row-name">기타</span><div class="cat-row-bar"><div class="cat-row-bar-fill" style="width:5%;background:#4a5568"></div></div><span class="cat-row-pct">2%</span></div>
+              </div>
+            </div>
+
+            <div class="panel-card" style="animation-delay:0.25s">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="icon" style="color:var(--warn)"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                  급등 알림
+                </div>
+                <span class="panel-subtitle" style="color:var(--warn)">3 new</span>
+              </div>
+              <div style="padding:12px 16px;">
+                <div class="surge-card surge-card-warn">
+                  <div class="surge-label" style="color:var(--warn)">
+                    <span class="icon icon-sm"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                    급등 감지
+                  </div>
+                  <div class="surge-keyword">휴대용 칫솔 살균기</div>
+                  <div class="surge-meta">+67.4% · 3분 전</div>
+                </div>
+                <div class="surge-card surge-card-warn">
+                  <div class="surge-label" style="color:var(--warn)">
+                    <span class="icon icon-sm"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+                    급등 감지
+                  </div>
+                  <div class="surge-keyword">미니 선풍기</div>
+                  <div class="surge-meta">+52.1% · 11분 전</div>
+                </div>
+                <div class="surge-card surge-card-info">
+                  <div class="surge-label" style="color:var(--node1)">
+                    <span class="icon icon-sm"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                    신규 진입
+                  </div>
+                  <div class="surge-keyword">접이식 우산</div>
+                  <div class="surge-meta">Top 10 진입 · 28분 전</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottom-stats">
+          <div class="stat-item"><div class="stat-label">Crawled Sources</div><div class="stat-value">1,240</div><div class="stat-desc">네이버·쿠팡·소셜 통합</div></div>
+          <div class="stat-item"><div class="stat-label">Daily Trends Detected</div><div class="stat-value">248</div><div class="stat-desc">오늘 감지된 트렌드 수</div></div>
+          <div class="stat-item"><div class="stat-label">Average Score</div><div class="stat-value">81.4</div><div class="stat-desc">전체 기회 점수 평균</div></div>
+          <div class="stat-item"><div class="stat-label">Alert Count</div><div class="stat-value">3</div><div class="stat-desc">오늘 급등 알림 발생</div></div>
+        </div>
+
+        <div class="pricing-section">
+          <div>
+            <div class="pricing-label">구독 플랜</div>
+            <div class="pricing-tiers">
+              <div class="pricing-tier"><div class="tier-name">Starter</div><div class="tier-price">₩99K</div><div class="tier-period">/ 월</div></div>
+              <div class="pricing-tier featured"><div class="tier-name">Growth</div><div class="tier-price">₩390K</div><div class="tier-period">/ 월</div></div>
+              <div class="pricing-tier"><div class="tier-name">Scale</div><div class="tier-price">₩990K</div><div class="tier-period">/ 월</div></div>
+            </div>
+          </div>
+          <div class="pricing-cta">
+            <button class="btn-secondary">데모 요청</button>
+            <button class="btn-primary">무료로 시작하기</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ TAB: 트렌드 피드 ══════════════════ -->
+      <section class="tab-section" id="tab-feed">
+        <div class="tab-content-wrap">
+          <div>
+            <div class="tab-page-title">트렌드 <span class="accent">피드</span></div>
+            <div class="tab-page-sub">실시간 수집된 트렌드 키워드 전체 피드 — 소스별 점수 및 변화율 포함</div>
+          </div>
+          <div class="feed-toolbar">
+            <div class="source-tabs">
+              <button class="source-tab active">전체</button>
+              <button class="source-tab">네이버</button>
+              <button class="source-tab">쿠팡</button>
+              <button class="source-tab">인스타</button>
+            </div>
+            <div class="refresh-indicator">
+              <div class="refresh-dot"></div>
+              자동 갱신 중 · 30초마다
+              <span id="feed-timer" style="color:var(--node1);font-weight:700;">30s</span>
+            </div>
+            <button class="filter-btn">
+              <span class="icon icon-sm"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></span>
+              지금 새로고침
+            </button>
+          </div>
+          <div class="section-card">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="card-title-icon"><svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></div>
+                실시간 트렌드 피드
+              </div>
+              <span class="card-count">20 / 1,840 entries</span>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="trend-table">
+                <thead><tr><th>시각</th><th>키워드</th><th>소스</th><th>점수</th><th>검색량</th><th>변화율</th></tr></thead>
+                <tbody id="feed-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ TAB: 카테고리 분석 ══════════════════ -->
+      <section class="tab-section" id="tab-categories">
+        <div class="tab-content-wrap">
+          <div>
+            <div class="tab-page-title">카테고리 <span class="accent">분석</span></div>
+            <div class="tab-page-sub">6개 주요 카테고리별 트렌드 현황 및 평균 성과 비교</div>
+          </div>
+          <div class="cat-cards-grid" id="cat-cards-grid"></div>
+          <div class="horiz-chart-section">
+            <div class="horiz-chart-title">
+              <span class="icon" style="color:var(--node1)"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+              카테고리별 평균 기회 점수 비교
+            </div>
+            <div id="horiz-chart"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ TAB: 알림 센터 ══════════════════ -->
+      <section class="tab-section" id="tab-alerts">
+        <div class="tab-content-wrap">
+          <div>
+            <div class="tab-page-title">알림 <span class="accent">센터</span></div>
+            <div class="tab-page-sub">알림 유형별 설정 및 최근 발생 알림 목록</div>
+          </div>
+          <div class="alert-layout">
+            <div class="alert-settings-card">
+              <div class="alert-settings-header">
+                <span class="icon" style="color:var(--text-muted)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                알림 설정
+              </div>
+              <div class="alert-setting-row">
+                <div class="alert-setting-info"><div class="alert-setting-name">급등 감지 알림</div><div class="alert-setting-desc">성장률 50% 이상 키워드</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="alert-setting-row">
+                <div class="alert-setting-info"><div class="alert-setting-name">Top 10 진입 알림</div><div class="alert-setting-desc">신규 트렌드 상위 진입 시</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+              <div class="alert-setting-row">
+                <div class="alert-setting-info"><div class="alert-setting-name">경쟁사 변동 알림</div><div class="alert-setting-desc">주요 셀러 등락 감지</div></div>
+                <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+              </div>
+              <div class="alert-setting-row">
+                <div class="alert-setting-info"><div class="alert-setting-name">주간 리포트 알림</div><div class="alert-setting-desc">매주 월요일 09:00 발송</div></div>
+                <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+
+            <div class="alerts-list-card">
+              <div class="alerts-list-header">
+                <div class="panel-title">
+                  <span class="icon" style="color:var(--node1)"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+                  최근 알림
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--danger)">3 미확인</span>
+              </div>
+              <div id="alerts-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════ TAB: 리포트 ══════════════════ -->
+      <section class="tab-section" id="tab-report">
+        <div class="tab-content-wrap">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+            <div>
+              <div class="tab-page-title">주간 <span class="accent">리포트</span></div>
+              <div class="tab-page-sub">2026년 3월 1주차 — 2026.03.01 ~ 2026.03.07</div>
+            </div>
+            <button class="export-btn" style="width:auto;padding:10px 20px;">
+              <span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+              PDF 내보내기
+            </button>
+          </div>
+
+          <div class="report-layout">
+            <div class="report-main">
+              <div class="report-card">
+                <div class="report-card-header">
+                  <div class="card-title">
+                    <div class="card-title-icon"><svg viewBox="0 0 24 24"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg></div>
+                    핵심 인사이트
+                  </div>
+                  <span class="report-date-range">03.01 — 03.07</span>
+                </div>
+                <div class="report-card-body">
+                  <div class="findings-list">
+                    <div class="finding-item"><div class="finding-bullet"></div><div class="finding-text">건강/식품 카테고리가 이번 주 가장 높은 성장률을 기록했습니다. 특히 <strong>휴대용 위생용품</strong> 세그먼트에서 67%+ 급등이 감지되어 즉각적인 소싱 검토가 필요합니다.</div></div>
+                    <div class="finding-item"><div class="finding-bullet"></div><div class="finding-text">가전/전자 카테고리에서 <strong>미니 선풍기</strong>와 계절 소형 가전이 52% 이상 급등하며 봄철 수요 선점 기회가 생겼습니다.</div></div>
+                    <div class="finding-item"><div class="finding-bullet"></div><div class="finding-text">반려동물 카테고리는 평균 점수 86.1로 주간 2위를 유지하며 <strong>지속 성장</strong> 추세를 이어가고 있습니다. 경쟁 강도는 여전히 낮습니다.</div></div>
+                    <div class="finding-item"><div class="finding-bullet"></div><div class="finding-text">홈/리빙 분야에서 <strong>LED 무드등</strong>이 소셜 미디어 언급량 22% 증가와 함께 인스타그램 드리블 현상이 관측됩니다.</div></div>
+                    <div class="finding-item"><div class="finding-bullet"></div><div class="finding-text">스마트 체중계 등 일부 <strong>피트니스 가전</strong>은 계절적 수요 감소로 소폭 하락세에 접어들었습니다. 포트폴리오 재조정을 권장합니다.</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="report-card">
+                <div class="report-card-header">
+                  <div class="card-title">
+                    <div class="card-title-icon"><svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></div>
+                    이번 주 Top 5 트렌드
+                  </div>
+                  <span class="report-date-range">03.01 — 03.07</span>
+                </div>
+                <div>
+                  <table class="report-top5-table">
+                    <thead><tr><th>#</th><th>키워드</th><th>카테고리</th><th>점수</th><th>성장률</th></tr></thead>
+                    <tbody>
+                      <tr><td><span class="rank-num top3">#1</span></td><td><span class="keyword-text">휴대용 칫솔 살균기</span></td><td><span class="category-pill cat-health">건강/식품</span></td><td><span class="score-badge score-high">89</span></td><td><span class="growth-cell growth-up">▲ 67.4%</span></td></tr>
+                      <tr><td><span class="rank-num top3">#2</span></td><td><span class="keyword-text">미니 선풍기</span></td><td><span class="category-pill cat-electronics">가전</span></td><td><span class="score-badge score-high">83</span></td><td><span class="growth-cell growth-up">▲ 52.1%</span></td></tr>
+                      <tr><td><span class="rank-num top3">#3</span></td><td><span class="keyword-text">접이식 우산</span></td><td><span class="category-pill cat-lifestyle">라이프</span></td><td><span class="score-badge score-high">82</span></td><td><span class="growth-cell growth-up">▲ 41.6%</span></td></tr>
+                      <tr><td><span class="rank-num">#4</span></td><td><span class="keyword-text">건강 간식</span></td><td><span class="category-pill cat-health">건강/식품</span></td><td><span class="score-badge score-high">94</span></td><td><span class="growth-cell growth-up">▲ 38.2%</span></td></tr>
+                      <tr><td><span class="rank-num">#5</span></td><td><span class="keyword-text">반려동물 간식</span></td><td><span class="category-pill cat-pet">반려동물</span></td><td><span class="score-badge score-high">87</span></td><td><span class="growth-cell growth-up">▲ 33.8%</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="report-side">
+              <div class="metrics-card">
+                <div class="panel-header">
+                  <div class="panel-title">
+                    <span class="icon" style="color:var(--node1)"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                    전주 대비 지표
+                  </div>
+                </div>
+                <div class="metric-row"><span class="metric-name">감지된 트렌드</span><div class="metric-vals"><span class="metric-curr" style="color:var(--node1)">248</span><span class="metric-delta delta-up">▲ 12.7%</span></div></div>
+                <div class="metric-row"><span class="metric-name">평균 기회 점수</span><div class="metric-vals"><span class="metric-curr" style="color:var(--node4)">81.4</span><span class="metric-delta delta-up">▲ 3.2</span></div></div>
+                <div class="metric-row"><span class="metric-name">급등 알림 수</span><div class="metric-vals"><span class="metric-curr" style="color:var(--warn)">3</span><span class="metric-delta delta-up">▲ 1건</span></div></div>
+                <div class="metric-row"><span class="metric-name">수집 소스 수</span><div class="metric-vals"><span class="metric-curr">1,240</span><span class="metric-delta delta-up">▲ 40</span></div></div>
+                <div class="metric-row"><span class="metric-name">최고 성장률</span><div class="metric-vals"><span class="metric-curr" style="color:var(--node4)">67.4%</span><span class="metric-delta delta-up">▲ 14.3p</span></div></div>
+                <div class="metric-row"><span class="metric-name">평균 경쟁 지수</span><div class="metric-vals"><span class="metric-curr">2.1</span><span class="metric-delta delta-down">▼ 0.3</span></div></div>
+              </div>
+              <button class="export-btn">
+                <span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+                전체 리포트 PDF 내보내기
+              </button>
+              <button class="export-btn export-btn-green">
+                <span class="icon icon-sm"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                Excel 데이터 내보내기
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ── TAB SWITCHING ──
+const navBtns = document.querySelectorAll('.nav-btn[data-tab]');
+const tabSections = document.querySelectorAll('.tab-section');
+
+navBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    navBtns.forEach(b => b.classList.remove('active'));
+    tabSections.forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + target).classList.add('active');
+  });
+});
+
+// ── SOURCE TABS ──
+document.querySelectorAll('.source-tabs').forEach(group => {
+  group.querySelectorAll('.source-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      group.querySelectorAll('.source-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+});
+
+// ── DASHBOARD TABLE DATA ──
+const dashboardData = [
+  { rank: 1, keyword: '건강 간식', badge: 'hot', cat: 'cat-health', catName: '건강/식품', score: 94, vol: '184K', volPct: 92, growth: 38.2, up: true, comp: [0,1,1,0,0], compLabel: '낮음' },
+  { rank: 2, keyword: '미니 가습기', badge: 'new', cat: 'cat-home', catName: '홈/리빙', score: 91, vol: '162K', volPct: 85, growth: 29.7, up: true, comp: [0,1,0,0,0], compLabel: '매우 낮음' },
+  { rank: 3, keyword: 'LED 무드등', badge: '', cat: 'cat-home', catName: '홈/리빙', score: 88, vol: '141K', volPct: 78, growth: 22.1, up: true, comp: [2,1,0,0,0], compLabel: '중간' },
+  { rank: 4, keyword: '실리콘 주방용품', badge: '', cat: 'cat-kitchen', catName: '주방', score: 85, vol: '128K', volPct: 72, growth: 18.4, up: true, comp: [2,2,0,0,0], compLabel: '중간' },
+  { rank: 5, keyword: '접이식 우산', badge: 'new', cat: 'cat-lifestyle', catName: '라이프', score: 82, vol: '115K', volPct: 66, growth: 41.6, up: true, comp: [0,1,0,0,0], compLabel: '낮음' },
+  { rank: 6, keyword: '무선 이어폰 케이스', badge: '', cat: 'cat-electronics', catName: '전자기기', score: 76, vol: '97K', volPct: 60, growth: 14.3, up: true, comp: [2,2,2,0,0], compLabel: '높음' },
+  { rank: 7, keyword: '반려동물 간식', badge: 'hot', cat: 'cat-pet', catName: '반려동물', score: 87, vol: '137K', volPct: 76, growth: 33.8, up: true, comp: [0,1,1,0,0], compLabel: '낮음' },
+  { rank: 8, keyword: '텀블러 파우치', badge: '', cat: 'cat-lifestyle', catName: '라이프', score: 71, vol: '82K', volPct: 52, growth: 9.2, up: true, comp: [2,2,1,0,0], compLabel: '높음' },
+  { rank: 9, keyword: '미니 선풍기', badge: 'new', cat: 'cat-electronics', catName: '전자기기', score: 83, vol: '109K', volPct: 63, growth: 52.1, up: true, comp: [0,1,0,0,0], compLabel: '낮음' },
+  { rank: 10, keyword: '아로마 디퓨저', badge: '', cat: 'cat-home', catName: '홈/리빙', score: 68, vol: '73K', volPct: 47, growth: 7.5, up: true, comp: [2,2,2,1,0], compLabel: '매우 높음' },
+  { rank: 11, keyword: '휴대용 칫솔 살균기', badge: 'new', cat: 'cat-health', catName: '건강/식품', score: 89, vol: '88K', volPct: 55, growth: 67.4, up: true, comp: [0,1,0,0,0], compLabel: '낮음' },
+  { rank: 12, keyword: '스마트 체중계', badge: '', cat: 'cat-health', catName: '건강/식품', score: 74, vol: '66K', volPct: 44, growth: 3.1, up: false, comp: [2,2,2,0,0], compLabel: '높음' },
+];
+
+function buildDashboardTable() {
+  const tbody = document.getElementById('dashboard-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = dashboardData.map(d => {
+    const scoreClass = d.score >= 85 ? 'score-high' : d.score >= 70 ? 'score-mid' : 'score-low';
+    const growthClass = d.up ? 'growth-up' : 'growth-down';
+    const arrow = d.up ? '▲' : '▼';
+    const rankClass = d.rank <= 3 ? 'top3' : '';
+    let badgeHtml = '';
+    if (d.badge === 'hot') badgeHtml = '<span class="hot-badge">HOT</span>';
+    else if (d.badge === 'new') badgeHtml = '<span class="new-badge">NEW</span>';
+    // comp dots: 0=empty, 1=half(warn), 2=filled(danger)
+    const dots = d.comp.map(v => v === 2 ? '<div class="comp-dot filled"></div>' : v === 1 ? '<div class="comp-dot half"></div>' : '<div class="comp-dot empty"></div>').join('');
+    return `<tr>
+      <td><span class="rank-num ${rankClass}">#${d.rank}</span></td>
+      <td><div class="keyword-cell"><span class="keyword-text">${d.keyword}</span>${badgeHtml}</div></td>
+      <td><span class="category-pill ${d.cat}">${d.catName}</span></td>
+      <td><span class="score-badge ${scoreClass}">${d.score}</span></td>
+      <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:${d.volPct}%"></div></div><span class="volume-text">${d.vol}</span></div></td>
+      <td><span class="growth-cell ${growthClass}">${arrow} ${d.growth}%</span></td>
+      <td><div class="comp-bar"><div class="comp-dots">${dots}</div><span class="comp-label">${d.compLabel}</span></div></td>
+      <td><button class="action-btn">분석</button></td>
+    </tr>`;
+  }).join('');
+}
+buildDashboardTable();
+
+// ── FEED TABLE DATA ──
+const feedData = [
+  { time: '14:32', keyword: '건강 간식', source: '네이버', score: 94, vol: '184K', volPct: 92, change: 38.2, up: true },
+  { time: '14:31', keyword: '미니 가습기', source: '쿠팡', score: 91, vol: '162K', volPct: 85, change: 29.7, up: true },
+  { time: '14:29', keyword: '글로우 세럼', source: '인스타', score: 88, vol: '141K', volPct: 78, change: 45.1, up: true },
+  { time: '14:28', keyword: 'LED 무드등', source: '인스타', score: 88, vol: '138K', volPct: 76, change: 22.1, up: true },
+  { time: '14:27', keyword: '실리콘 주방용품', source: '쿠팡', score: 85, vol: '128K', volPct: 72, change: 18.4, up: true },
+  { time: '14:25', keyword: '접이식 우산', source: '네이버', score: 82, vol: '115K', volPct: 66, change: 41.6, up: true },
+  { time: '14:24', keyword: '반려동물 간식', source: '쿠팡', score: 87, vol: '137K', volPct: 76, change: 33.8, up: true },
+  { time: '14:22', keyword: '오버사이즈 코트', source: '인스타', score: 79, vol: '104K', volPct: 63, change: 24.1, up: true },
+  { time: '14:21', keyword: '미니 선풍기', source: '네이버', score: 83, vol: '109K', volPct: 63, change: 52.1, up: true },
+  { time: '14:19', keyword: '아로마 디퓨저', source: '쿠팡', score: 68, vol: '73K', volPct: 47, change: 7.5, up: true },
+  { time: '14:17', keyword: '휴대용 칫솔 살균기', source: '네이버', score: 89, vol: '88K', volPct: 55, change: 67.4, up: true },
+  { time: '14:15', keyword: '무선 이어폰 케이스', source: '쿠팡', score: 76, vol: '97K', volPct: 60, change: 14.3, up: true },
+  { time: '14:13', keyword: '텀블러 파우치', source: '네이버', score: 71, vol: '82K', volPct: 52, change: 9.2, up: true },
+  { time: '14:11', keyword: '스마트 체중계', source: '쿠팡', score: 74, vol: '66K', volPct: 44, change: 3.1, up: false },
+  { time: '14:09', keyword: '강아지 하네스', source: '인스타', score: 86, vol: '94K', volPct: 58, change: 28.4, up: true },
+  { time: '14:07', keyword: '탄산수 메이커', source: '네이버', score: 77, vol: '88K', volPct: 54, change: 19.6, up: true },
+  { time: '14:05', keyword: '에어프라이어 트레이', source: '쿠팡', score: 81, vol: '112K', volPct: 68, change: 35.7, up: true },
+  { time: '14:03', keyword: '냉감 침구 세트', source: '네이버', score: 85, vol: '121K', volPct: 72, change: 43.2, up: true },
+  { time: '14:01', keyword: '휴대용 블렌더', source: '인스타', score: 78, vol: '89K', volPct: 55, change: 21.8, up: true },
+  { time: '13:59', keyword: '고양이 스크래처', source: '쿠팡', score: 84, vol: '98K', volPct: 60, change: 30.5, up: true },
+];
+
+const sourceBadgeColor = { '네이버': '#03c75a', '쿠팡': '#ee2828', '인스타': '#c13584' };
+const sourceBgColor = { '네이버': 'rgba(3,199,90,0.1)', '쿠팡': 'rgba(238,40,40,0.1)', '인스타': 'rgba(193,53,132,0.1)' };
+
+function buildFeedTable() {
+  const tbody = document.getElementById('feed-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = feedData.map(d => {
+    const scoreClass = d.score >= 85 ? 'score-high' : d.score >= 70 ? 'score-mid' : 'score-low';
+    const growthClass = d.up ? 'growth-up' : 'growth-down';
+    const arrow = d.up ? '▲' : '▼';
+    const src = d.source;
+    return `<tr>
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-muted)">${d.time}</span></td>
+      <td><span class="keyword-text">${d.keyword}</span></td>
+      <td><span style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:${sourceBgColor[src]};color:${sourceBadgeColor[src]};border:1px solid ${sourceBadgeColor[src]}33">${src}</span></td>
+      <td><span class="score-badge ${scoreClass}">${d.score}</span></td>
+      <td><div class="volume-bar-wrap"><div class="volume-bar-track"><div class="volume-bar-fill" style="width:${d.volPct}%"></div></div><span class="volume-text">${d.vol}</span></div></td>
+      <td><span class="growth-cell ${growthClass}">${arrow} ${d.change}%</span></td>
+    </tr>`;
+  }).join('');
+}
+buildFeedTable();
+
+// ── FEED COUNTDOWN ──
+let countdown = 30;
+const timerEl = document.getElementById('feed-timer');
+setInterval(() => {
+  countdown--;
+  if (countdown <= 0) countdown = 30;
+  if (timerEl) timerEl.textContent = countdown + 's';
+}, 1000);
+
+// ── CATEGORY ANALYSIS ──
+const catData = [
+  { name: '패션', icon: '<svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2l-4 6-4-6L3.62 3.46a2 2 0 0 0-.74 2.15L5 14h14l2.12-8.39a2 2 0 0 0-.74-2.15z"/><path d="M5 14l-1 8h16l-1-8"/></svg>', color: '#a78bfa', trends: 142, avgScore: 72.3, topKw: '오버사이즈 코트', growth: 24.1 },
+  { name: '뷰티', icon: '<svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2z"/></svg>', color: '#ff6bca', trends: 208, avgScore: 84.7, topKw: '글로우 세럼', growth: 31.8 },
+  { name: '식품', icon: '<svg viewBox="0 0 24 24"><path d="M17 8c0-5-5-5-5-5s-5 0-5 5"/><path d="M3 18h18"/><path d="M3 14h18"/><path d="M3 18c0 2 2 4 4 4h10c2 0 4-2 4-4"/><path d="M3 14c0-2 1.5-3 3-3h12c1.5 0 3 1 3 3"/></svg>', color: '#34d399', trends: 317, avgScore: 88.2, topKw: '건강 간식', growth: 38.2 },
+  { name: '가전', icon: '<svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>', color: '#00e5ff', trends: 189, avgScore: 77.9, topKw: '미니 선풍기', growth: 52.1 },
+  { name: '생활용품', icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', color: '#f59e0b', trends: 256, avgScore: 81.4, topKw: '미니 가습기', growth: 29.7 },
+  { name: '반려동물', icon: '<svg viewBox="0 0 24 24"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg>', color: '#ff6bca', trends: 174, avgScore: 86.1, topKw: '반려동물 간식', growth: 33.8 },
+];
+
+function buildCatCards() {
+  const grid = document.getElementById('cat-cards-grid');
+  if (!grid) return;
+  grid.innerHTML = catData.map(c => {
+    const scoreColor = c.avgScore >= 85 ? 'var(--node4)' : c.avgScore >= 75 ? 'var(--warn)' : 'var(--text-secondary)';
+    return `<div class="cat-analysis-card">
+      <div class="cat-card-header">
+        <span class="cat-card-name">${c.name}</span>
+        <span class="cat-card-icon" style="color:${c.color}">${c.icon}</span>
+      </div>
+      <div class="cat-card-stat">
+        <div class="cat-card-stat-val">${c.trends}</div>
+        <div class="cat-card-stat-label">감지된 트렌드</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);">
+        <span>평균 점수</span>
+        <span style="font-family:'JetBrains Mono',monospace;color:${scoreColor};font-weight:700;">${c.avgScore}</span>
+      </div>
+      <div class="cat-card-meta">
+        <span class="cat-top-kw">
+          <svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          ${c.topKw}
+        </span>
+        <span class="cat-growth-chip growth-up">▲ ${c.growth}%</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+buildCatCards();
+
+function buildHorizChart() {
+  const container = document.getElementById('horiz-chart');
+  if (!container) return;
+  const sorted = [...catData].sort((a, b) => b.avgScore - a.avgScore);
+  container.innerHTML = sorted.map(c => {
+    return `<div class="horiz-bar-row">
+      <span class="horiz-bar-label">${c.name}</span>
+      <div class="horiz-bar-track"><div class="horiz-bar-fill" style="width:${c.avgScore}%;background:${c.color}"></div></div>
+      <span class="horiz-bar-val" style="color:${c.color}">${c.avgScore}</span>
+    </div>`;
+  }).join('');
+}
+buildHorizChart();
+
+// ── ALERTS LIST ──
+const alertsData = [
+  { sev: 'urgent', sevLabel: '긴급', msg: '휴대용 칫솔 살균기 — 67.4% 급등, 즉시 소싱 검토 권장', time: '3분 전 · 건강/식품' },
+  { sev: 'urgent', sevLabel: '긴급', msg: '미니 선풍기 — 52.1% 급등 감지, 계절 수요 선점 기회', time: '11분 전 · 가전' },
+  { sev: 'info', sevLabel: '정보', msg: '접이식 우산 — Top 10 신규 진입, 경쟁 낮음', time: '28분 전 · 라이프스타일' },
+  { sev: 'warn', sevLabel: '주의', msg: '반려동물 간식 — 경쟁사 2곳 신규 진입 감지', time: '1시간 전 · 반려동물' },
+  { sev: 'info', sevLabel: '정보', msg: '건강 간식 — 주간 볼륨 연속 5일 상승세 유지', time: '2시간 전 · 건강/식품' },
+  { sev: 'warn', sevLabel: '주의', msg: '아로마 디퓨저 — 점수 하락 추세, 모니터링 권장', time: '3시간 전 · 홈/리빙' },
+  { sev: 'info', sevLabel: '정보', msg: '뷰티 카테고리 전반 평균 점수 84.7 — 이번 주 최고치', time: '5시간 전 · 뷰티' },
+  { sev: 'warn', sevLabel: '주의', msg: '스마트 체중계 — 3.1% 하락, 계절적 수요 감소 가능성', time: '6시간 전 · 건강/식품' },
+  { sev: 'info', sevLabel: '정보', msg: 'LED 무드등 — 인스타그램 언급 22% 증가, 소셜 드리블 중', time: '8시간 전 · 홈/리빙' },
+  { sev: 'info', sevLabel: '정보', msg: '주간 리포트 생성 완료 — 2026년 3월 1주차', time: '어제 09:00 · 시스템' },
+];
+
+function buildAlertsList() {
+  const container = document.getElementById('alerts-list');
+  if (!container) return;
+  container.innerHTML = alertsData.map(a => {
+    return `<div class="alert-entry">
+      <span class="alert-sev sev-${a.sev}">${a.sevLabel}</span>
+      <div class="alert-body">
+        <div class="alert-msg">${a.msg}</div>
+        <div class="alert-time">${a.time}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+buildAlertsList();
+</script>
+</body>
+</html>

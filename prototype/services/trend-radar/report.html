@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>리포트 — TrendRadar | AutoMarket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/common.css">
+<style>
+/* ── Report title row ── */
+.report-title-row {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+}
+.report-title-row .page-content-title { line-height: 1.1; }
+
+/* ── Right side panel stack ── */
+.right-col { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Metric panel card ── */
+.metric-panel-header {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; gap: 8px;
+}
+.metric-panel-icon {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: var(--node1-dim); color: var(--node1);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.metric-panel-icon svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Table score badge override (wider) ── */
+.report-table .score-badge { width: auto; min-width: 40px; padding: 0 8px; }
+
+/* ── Export buttons container ── */
+.export-stack { display: flex; flex-direction: column; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <a class="logo" href="../../index.html">
+      <div class="logo-icon">A</div>
+      <span class="logo-text">Auto<span>Market</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE &middot; 갱신 2분 전
+      </div>
+    </div>
+  </header>
+
+  <div class="body-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+
+        <div class="nav-section-label">트렌드</div>
+        <a href="index.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </span>
+          Dashboard
+        </a>
+        <a href="feed.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+          </span>
+          트렌드 피드
+        </a>
+        <a href="categories.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </span>
+          카테고리 분석
+        </a>
+
+        <div class="nav-section-label">기회 분석</div>
+        <a href="strategy.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          </span>
+          전략 설정
+        </a>
+        <a href="opportunity.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </span>
+          기회 상세
+        </a>
+
+        <div class="nav-section-label">수익성 검증</div>
+        <a href="sourcing.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </span>
+          소싱 매칭
+        </a>
+        <a href="margin.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          마진 시뮬레이션
+        </a>
+
+        <div class="nav-section-label">운영</div>
+        <a href="alerts.html" class="nav-btn">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </span>
+          알림 센터
+          <span class="nav-badge">3</span>
+        </a>
+        <a href="report.html" class="nav-btn active">
+          <span class="icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </span>
+          리포트
+        </a>
+
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="../../index.html" class="sidebar-back-link">
+          <span class="icon icon-sm">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </span>
+          AutoMarket Home
+        </a>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <main class="main-area">
+      <div class="page-content">
+
+        <!-- Page heading -->
+        <div style="animation: fadeUp 0.4s ease both;">
+          <div class="report-title-row">
+            <div>
+              <h1 class="page-content-title">주간 <span class="accent">리포트</span></h1>
+              <p class="page-content-sub">2026년 3월 1주차 &mdash; 2026.03.01 ~ 2026.03.07</p>
+            </div>
+            <button class="btn-primary" style="display:inline-flex;align-items:center;gap:8px;margin-top:4px;">
+              <span class="icon icon-sm">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </span>
+              PDF 내보내기
+            </button>
+          </div>
+        </div>
+
+        <!-- Main grid: content + side panel -->
+        <div class="grid-sidebar">
+
+          <!-- LEFT: Main column -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+
+            <!-- Insights -->
+            <div class="section-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  </div>
+                  핵심 인사이트
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="findings-list">
+                  <div class="finding-item">
+                    <div class="finding-bullet"></div>
+                    <div class="finding-text">건강/식품 카테고리 기회 점수 88.2로 전주 대비 4.1 상승, 8개 카테고리 중 최고치 기록. 주요 드라이버는 웰니스 트렌드 확산 및 SNS 식품 콘텐츠 급증.</div>
+                  </div>
+                  <div class="finding-item">
+                    <div class="finding-bullet"></div>
+                    <div class="finding-text">가전 카테고리 미니 선풍기 성장률 52.1% 급등, 계절적 수요 선진입 기회 존재. 3월 초순 기온 상승 예보 반영된 검색 선행 지표 확인.</div>
+                  </div>
+                  <div class="finding-item">
+                    <div class="finding-bullet"></div>
+                    <div class="finding-text">반려동물 간식 경쟁사 2곳 신규 진입에도 불구, 기회 점수 87로 상위권 유지. 시장 성장 속도가 경쟁 강도 증가를 상쇄하는 구조.</div>
+                  </div>
+                  <div class="finding-item">
+                    <div class="finding-bullet"></div>
+                    <div class="finding-text">이번 주 총 248개 트렌드 신규 감지, 전주(220건) 대비 12.7% 증가. 소셜 채널 수집 비중이 전주 대비 18%p 상승하며 SNS 발 트렌드 비중 확대.</div>
+                  </div>
+                  <div class="finding-item">
+                    <div class="finding-bullet"></div>
+                    <div class="finding-text">뷰티 글로우 세럼 성장률 31.8% 지속, 소싱 매칭 완료 시 마진 시뮬레이션 기준 예상 순이익률 38~44% 추정. 즉시 소싱 액션 권장.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top 5 table -->
+            <div class="section-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="card-title-icon">
+                    <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  </div>
+                  이번 주 Top 5 트렌드
+                </div>
+                <span class="card-count">2026.03.01 ~ 03.07</span>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="data-table report-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>키워드</th>
+                      <th>카테고리</th>
+                      <th>점수</th>
+                      <th>성장률</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="rank-num top3">01</span></td>
+                      <td><span class="keyword-text">건강 간식</span></td>
+                      <td><span class="category-pill cat-health">건강/식품</span></td>
+                      <td><span class="score-badge score-high">94</span></td>
+                      <td><div class="growth-cell growth-up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>+38.2%</div></td>
+                    </tr>
+                    <tr>
+                      <td><span class="rank-num top3">02</span></td>
+                      <td><span class="keyword-text">반려동물 간식</span></td>
+                      <td><span class="category-pill cat-pet">반려동물</span></td>
+                      <td><span class="score-badge score-high">87</span></td>
+                      <td><div class="growth-cell growth-up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>+33.8%</div></td>
+                    </tr>
+                    <tr>
+                      <td><span class="rank-num top3">03</span></td>
+                      <td><span class="keyword-text">휴대용 칫솔 살균기</span></td>
+                      <td><span class="category-pill cat-health">건강/식품</span></td>
+                      <td><span class="score-badge score-high">89</span></td>
+                      <td><div class="growth-cell growth-up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>+67.4%</div></td>
+                    </tr>
+                    <tr>
+                      <td><span class="rank-num">04</span></td>
+                      <td><span class="keyword-text">미니 선풍기</span></td>
+                      <td><span class="category-pill cat-electronics">가전</span></td>
+                      <td><span class="score-badge score-high">83</span></td>
+                      <td><div class="growth-cell growth-up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>+52.1%</div></td>
+                    </tr>
+                    <tr>
+                      <td><span class="rank-num">05</span></td>
+                      <td><span class="keyword-text">접이식 우산</span></td>
+                      <td><span class="category-pill cat-lifestyle">라이프스타일</span></td>
+                      <td><span class="score-badge score-mid">82</span></td>
+                      <td><div class="growth-cell growth-up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>+27.6%</div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div><!-- /left col -->
+
+          <!-- RIGHT: Side panel -->
+          <div class="right-col">
+
+            <!-- Metrics vs prior week -->
+            <div class="panel-card">
+              <div class="metric-panel-header">
+                <div class="metric-panel-icon">
+                  <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </div>
+                전주 대비 지표
+              </div>
+              <div>
+                <div class="metric-row">
+                  <span class="metric-name">감지된 트렌드</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr">248</span>
+                    <span class="metric-delta delta-up">&#9650; 12.7%</span>
+                  </div>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-name">평균 기회 점수</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr">81.4</span>
+                    <span class="metric-delta delta-up">&#9650; 3.2</span>
+                  </div>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-name">급등 알림 수</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr">3</span>
+                    <span class="metric-delta delta-up">&#9650; 1건</span>
+                  </div>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-name">수집 소스 수</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr">1,240</span>
+                    <span class="metric-delta delta-up">&#9650; 40</span>
+                  </div>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-name">최고 성장률</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr" style="color:var(--node4);">67.4%</span>
+                    <span class="metric-delta delta-up">&#9650; 14.3p</span>
+                  </div>
+                </div>
+                <div class="metric-row">
+                  <span class="metric-name">평균 경쟁 지수</span>
+                  <div class="metric-vals">
+                    <span class="metric-curr">2.1</span>
+                    <span class="metric-delta delta-down">&#9660; 0.3</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Export buttons -->
+            <div class="export-stack">
+              <button class="export-btn">
+                <span class="icon icon-sm">
+                  <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </span>
+                전체 리포트 PDF 내보내기
+              </button>
+              <button class="export-btn export-btn-green">
+                <span class="icon icon-sm">
+                  <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </span>
+                Excel 데이터 내보내기
+              </button>
+            </div>
+
+          </div><!-- /right col -->
+
+        </div><!-- /grid-sidebar -->
+
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>
